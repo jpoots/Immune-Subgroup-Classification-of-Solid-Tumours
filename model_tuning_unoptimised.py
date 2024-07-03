@@ -11,7 +11,7 @@ from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE, ADASYN
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import ConfusionMatrixDisplay, f1_score, balanced_accuracy_score, roc_auc_score,recall_score, precision_score, accuracy_score
+from sklearn.metrics import ConfusionMatrixDisplay, f1_score, balanced_accuracy_score, roc_auc_score,recall_score, precision_score, accuracy_score, make_scorer
 from imblearn.pipeline import Pipeline as ImbPipeline
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,66 +23,62 @@ import datetime
 RANDOM_STATE = 42
 np.random.seed(RANDOM_STATE)
 
+"""
+excluded from inital tests due to necessary compute
+'model__min_samples_split': [3, 6, 9, None], 
+'model__min_samples_leaf': [3, 6, 9, None],
+"""
+
 models = [
-    {
-        "model": RandomForestClassifier(),
-        "params": { # needs looked at again
-            'model__n_estimators': [10, 100, 500, 1000], 
-            'model__max_features': ['sqrt', 'log2', None], 
-            'model__max_depth': [3, 6, 9, None], # not included
-            'model__max_leaf_nodes': [3, 6, 9, None], # not included
-        }
-    },
-    {
-    "model": HistGradientBoostingClassifier(early_stopping=True),
-    "params": {
-        "model__max_iter": [10, 100, 1000],
-        "model__max_leaf_nodes": [2, 5, 10, 20, 50, 100],
-        "model__learning_rate": [0.001, 0.01, 0.1, 1],
-        "model__max_depth": [10, 20, 30, None],
-    }
-    },
-    {
+    # donzo
+        {
         "model": SVC(),
         "params": {
             "model__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-            "model__kernel": ["rbf", "poly","sigmoid", "linear"],
+            "model__kernel": ["rbf", "poly","sigmoid"],
             "model__gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1, 10, 100],
             "model__degree": [2, 3, 4, 5],
         },
     },
-]
-
-
-""""
-
-    "model": MLPClassifier(random_state=42),
-    "params": {
-
-    }
-},
-{
-    "model": KNeighborsClassifier(),
-    "params": { #done
-        "model__n_neighbors" : range(1, 21, 2),
-        "model__weights" : ['uniform','distance'],
-        "metric" : ['minkowski','euclidean','manhattan']
-    }
-},
-{
-    "model": LogisticRegression(random_state=42),
-    "params": {
-        
-    }
-},
     {
-    "model": GaussianNB(),
+        # donzo
+        "model": RandomForestClassifier(n_jobs=-1),
+        "params": { # top two are the most important
+            'model__n_estimators': [100, 500, 1000, 2000], 
+            'model__max_features': ['sqrt', 'log2', None, 100, 220], 
+            'model__max_depth': [10, 20, 50, 100, None]
+        }
+    },
+    # donzo
+    {
+    "model": HistGradientBoostingClassifier(early_stopping=True),
     "params": {
-        
+        "model__max_iter": [10, 100, 500, 1000],
+        "model__learning_rate": [0.001, 0.01, 0.1, 1],
+        "model__max_depth": [25, 50, 75, None],
     }
-}
-"""
+    },
 
+    #donzo
+    {
+    "model": LogisticRegression(n_jobs=-1, max_iter=1000),
+    "params": {
+        "model__C": np.logspace(-4, 4, 20),
+        'model__solver': ['lbfgs','newton-cg','liblinear','sag','saga'],
+        "model__penalty": ['l1', 'l2', 'elasticnet', 'none'],
+    }
+    },
+    {
+    "model": MLPClassifier(max_iter=1000),
+    "params": {
+        'model__hidden_layer_sizes': [(300,), (300, 200), (300,200,100)],
+        'model__activation': ['tanh', 'relu'],
+        'model__solver': ['sgd', 'adam'],
+        'model__alpha': [0.0001, 0.001, 0.01, 0.1],
+        'model__learning_rate': ['constant','adaptive'],
+    }
+    }
+]
 
 # import data using util
 data = get_data()
@@ -94,34 +90,25 @@ scaler = MinMaxScaler()
 # get rid of test data
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size = 0.20, stratify=y)
 
-# define sample strategy
-under_sample = {
-    0: 1000,
-    1: 1000,
-    2: 1000,
-}
-
-over_sample = {
-    3: 1000,
-    4: 1000,
-    5: 1000, 
-}
-
-# set up samplers and fit
-rus = RandomUnderSampler(sampling_strategy=under_sample)
-smt = SMOTE(sampling_strategy=over_sample)
-
 total_start = time.time()
-scoring = ["accuracy", "f1_macro", "precision_macro", "recall_macro", "balanced_accuracy", "roc_auc_ovr"]
-for model, ax in models:
+
+
+scoring = {"accuracy" : "accuracy",
+           "balanced_accuracy": "balanced_accuracy",
+            "f1": make_scorer(f1_score, average="macro", zero_division=np.nan), 
+            "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
+            "recall": make_scorer(recall_score, average="macro", zero_division=np.nan), 
+        } # ROC_AUC is not included due to the computational cost
+
+for model in models:
     start = time.time()
+
     # try except to prevent long training runs failing because of an issue
     try:
         clf = model["model"]
         params = model["params"]
         
-        pipe = ImbPipeline(steps=[("SMOTE", smt), ("RUS", rus), 
-                                ("scaler", scaler), ("model", clf)])
+        pipe = Pipeline(steps=[("scaler", scaler), ("model", clf)])
         
         # grid search to return results for a range of metrics and refit on accuracy
         grid_search = GridSearchCV(pipe, params, n_jobs=-1, scoring=scoring, refit="accuracy", cv=10)
@@ -137,15 +124,14 @@ for model, ax in models:
 
         # model scoring on accuracy
         print("CROSS VALIDATION ON BEST MODEL")
-        print(f"Model Name: {clf.__class__.__name__}")
+        print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
         print(f"Tuning time: {duration}")
         print(f"Best Params: {grid_search.best_params_}")
-        print(f"Accuracy: {grid_search.best_score_}")
-        print(f"F1: {results["mean_test_f1_macro"][best_index]}")
-        print(f"Precision: {results["mean_test_f1_precision_macro"][best_index]}")
-        print(f"Recall: {results["mean_test_f1_recall_macro"][best_index]}")
-        print(f"Balanced accuracy: {results["mean_test_balanced_accuracy"][best_index]}")
-        print(f"ROC AUC: {results["mean_test_roc_auc_ovr"][best_index]}" )
+        print(f"Accuracy: {results['mean_test_accuracy'][best_index]}")
+        print(f"F1: {results['mean_test_f1'][best_index]}")
+        print(f"Precision: {results['mean_test_precision'][best_index]}")
+        print(f"Recall: {results['mean_test_recall'][best_index]}")
+        print(f"Balanced accuracy: {results['mean_test_balanced_accuracy'][best_index]}")
         print()
 
     except Exception as e:

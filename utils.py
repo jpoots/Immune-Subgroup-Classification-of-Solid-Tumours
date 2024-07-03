@@ -18,4 +18,3 @@ def split_data(data):
     classification = np.array([int(sample[-1]) - 1 for sample in data.index.values])
     features = data.to_numpy()
     return idx, features, classification, genes
-
