@@ -1,0 +1,13 @@
+{% import 'macros.html' as macros %}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    {{ macros.head() }}
+<body>
+    {{ macros.navbar() }}
+    <div class="container">
+        {{ fig | safe }}
+    </div>
+
+</body>
+</html>

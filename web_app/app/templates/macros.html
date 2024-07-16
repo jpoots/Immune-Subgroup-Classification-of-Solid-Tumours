@@ -1,0 +1,75 @@
+{% macro navbar() %}
+<nav class="navbar queens-branding">
+    <div class="container">
+        <div class="navbar-brand">
+            <a href="/" class="navbar-item">
+                <img src="{{url_for('static', filename='img/logo2.png')}}">
+            </a>
+        </div>
+
+        <div class="navbar-start">
+            <a href="/" class="navbar-item">
+                Upload
+            </a>
+
+            <a href="/geneexpression" class="navbar-item">
+                Gene Expression Data
+            </a>
+
+            <a href="/report" class="navbar-item">
+                Report
+            </a>
+
+            <a href="/confidence" class="navbar-item">
+                Confidence
+            </a>
+
+            <a href="/probability" class="navbar-item">
+                Probability
+            </a>
+            
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a href="/pca?dim=2" class="navbar-link">
+                    PCA
+                </a>
+                
+                <div class="navbar-dropdown">
+                    <a href="/pca?dim=2" class="navbar-item">
+                        2D
+                    </a>
+                    <a href="/pca?dim=3" class="navbar-item">
+                        3D
+                    </a>
+                </div>
+            </div>
+
+
+
+            <div class="navbar-item has-dropdown is-hoverable">
+                <a href="" class="navbar-link">
+                    t-SNE
+                </a>
+
+                <div class="navbar-dropdown">
+                    <a href="/tsne?dim=2" class="navbar-item">
+                        2D
+                    </a>
+                    <a href="/tsne?dim=3" class="navbar-item">
+                        3D
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endmacro %}
+
+{% macro head() %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/styles.css')}}">
+    <title>Document</title>
+</head>
+{% endmacro %}

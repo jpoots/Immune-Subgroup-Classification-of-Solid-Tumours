@@ -1,0 +1,36 @@
+{% import 'macros.html' as macros %}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    {{ macros.head() }}
+<body>
+    {{ macros.navbar() }}
+    <div class="container">
+        <div class="table-container">
+            <table class="table is-bordered">
+                <tbody>
+                    <tr>
+                        <th>
+
+                        </th>
+                        {% for gene in genes %}
+                        <th>{{gene}}</th>
+                        {% endfor %}
+                    </tr>
+
+                    {% for feature_list in feature_lists %}
+                    <tr>
+                        <th>{{ ids[loop.index0] }}</th>
+                        {% for feature in feature_list %}
+                        <td>{{feature}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</body>
+</html>

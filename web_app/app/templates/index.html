@@ -1,0 +1,19 @@
+{% import 'macros.html' as macros %}
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+    {{ macros.head() }}
+<body>
+    {{ macros.navbar() }}
+
+    <div class="container">
+
+        Predict
+        <form action="/upload" method="POST" enctype=multipart/form-data>
+            <input type="file" name="genedata">
+            <input type="submit">
+        </form>
+    </div>
+
+</body>
+</html>
