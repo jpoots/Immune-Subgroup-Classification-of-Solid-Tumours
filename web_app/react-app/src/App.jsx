@@ -14,7 +14,6 @@ function App() {
   const [predictions, setPredictions] = useState([]);
   const [file, setFile] = useState();
   const [genes, setGenes] = useState();
-  const [probs, setProbs] = useState();
   const [pca, setPca] = useState();
   const [tsne, setTsne] = useState();
   const [confidence, setConfidence] = useState();
@@ -31,7 +30,6 @@ function App() {
               setPredictions={setPredictions}
               setDataFile={setFile}
               setGenes={setGenes}
-              setProbs={setProbs}
               setPca={setPca}
               setTsne={setTsne}
               setConfidence={setConfidence}
@@ -46,7 +44,6 @@ function App() {
               setPredictions={setPredictions}
               setDataFile={setFile}
               setGenes={setGenes}
-              setProbs={setProbs}
               setPca={setPca}
               setTsne={setTsne}
               setConfidence={setConfidence}
@@ -58,7 +55,10 @@ function App() {
           element={<GeneExpression samples={genes} />}
         />
         <Route path="/report" element={<Report predictions={predictions} />} />
-        <Route path="/probability" element={<Probability samples={probs} />} />
+        <Route
+          path="/probability"
+          element={<Probability samples={predictions} />}
+        />
         <Route
           path="/pca2d"
           element={<Visualisation data={pca} twoD={true} isPca={true} />}

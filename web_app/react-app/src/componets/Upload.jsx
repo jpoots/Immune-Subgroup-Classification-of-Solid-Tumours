@@ -6,7 +6,6 @@ const Upload = ({
   setPredictions,
   setDataFile,
   setGenes,
-  setProbs,
   setPca,
   setTsne,
   setConfidence,
@@ -18,18 +17,7 @@ const Upload = ({
     setFile(event.target.files[0]);
   };
 
-  const makeAPICall = async (endpoint, formData) => {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await response.json();
-    const results = data.results;
-
-    return results;
-  };
-
-  const handlePredict = async (event) => {
+  const handlePredict = async () => {
     // set the file for the whole project
     setDataFile(file);
 
@@ -37,23 +25,26 @@ const Upload = ({
     const formData = new FormData();
     formData.append("samples", file);
 
-    let predResponse = await fetch("http://127.0.0.1:3000/predict", {
-      method: "POST",
-      body: formData,
-    });
-    predResponse = await predResponse.json();
-
     let geneResponse = await fetch("http://127.0.0.1:3000/extractgenes", {
       method: "POST",
       body: formData,
     });
     geneResponse = await geneResponse.json();
+    geneResponse = geneResponse.results;
 
-    let probResponse = await fetch("http://127.0.0.1:3000/probability", {
+    console.log(geneResponse);
+
+    let predResponse = await fetch("http://127.0.0.1:3000/predict", {
       method: "POST",
-      body: formData,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(geneResponse),
     });
-    probResponse = await probResponse.json();
+    predResponse = await predResponse.json();
+
+    console.log(predResponse.results);
 
     let pcaResponse = await fetch("http://127.0.0.1:3000/pca", {
       method: "POST",
@@ -92,7 +83,6 @@ const Upload = ({
     // set predictions and reroute
     setPredictions(predResponse.results);
     setGenes(geneResponse.results);
-    setProbs(probResponse.results);
     setPca(pca);
     setTsne(tsne);
     setConfidence(conf);

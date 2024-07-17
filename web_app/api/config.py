@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect
 from flask_session import Session
 import joblib
 from flask_cors import CORS
-
+from middleware import read_data, validate_data
 
 app = Flask(__name__)
 app.secret_key = "SECRET"
@@ -16,3 +16,6 @@ Session(app)
 CORS(app)
 model = joblib.load("model.pkl")
 bootstrap_models = joblib.load("bootstrap_models.pkl")
+
+#app.before_request(validate_data)
+#app.before_request(read_data)

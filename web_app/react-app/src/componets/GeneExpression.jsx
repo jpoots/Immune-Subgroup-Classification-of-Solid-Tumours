@@ -4,6 +4,7 @@ const GeneExpression = ({ samples }) => {
   let firstSample = samples[0];
   let geneNameList = Object.keys(firstSample.genes);
 
+  console.log(samples);
   return (
     <div className="container">
       <div className="table-container">

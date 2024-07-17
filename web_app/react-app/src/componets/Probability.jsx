@@ -20,8 +20,8 @@ const Proability = ({ samples }) => {
             {samples.map((sample) => (
               <tr>
                 <th>{sample["sampleID"]}</th>
-                {sample.prediction.map((pred) => (
-                  <td>{parseFloat(pred).toFixed(5)}</td>
+                {sample.probs.map((prob) => (
+                  <td>{parseFloat(prob).toFixed(5)}</td>
                 ))}
               </tr>
             ))}
