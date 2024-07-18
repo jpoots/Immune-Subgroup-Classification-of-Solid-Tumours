@@ -1,7 +1,11 @@
 from sklearn import svm
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier, GradientBoostingClassifier
+from sklearn.ensemble import (
+    HistGradientBoostingClassifier,
+    RandomForestClassifier,
+    GradientBoostingClassifier,
+)
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
@@ -14,7 +18,16 @@ from sklearn.preprocessing import StandardScaler
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import f1_score, balanced_accuracy_score, roc_auc_score,recall_score, precision_score, accuracy_score, classification_report, make_scorer
+from sklearn.metrics import (
+    f1_score,
+    balanced_accuracy_score,
+    roc_auc_score,
+    recall_score,
+    precision_score,
+    accuracy_score,
+    classification_report,
+    make_scorer,
+)
 from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE
 from collections import Counter
@@ -36,9 +49,7 @@ knn = KNeighborsClassifier()
 nb = GaussianNB()
 lr = LogisticRegression(class_weight="balanced")
 
-models = [
-    mlp, gb, svc, rfc, knn, nb, lr
-]
+models = [mlp, gb, svc, rfc, knn, nb, lr]
 
 # import data using util
 data = get_data()
@@ -60,7 +71,7 @@ under_sample = {
 }
 
 over_sample = {
-    5: 250, 
+    5: 250,
 }
 
 # set up samplers and fit
@@ -72,7 +83,9 @@ x_train, y_train = rus.fit_resample(x_train, y_train)
 y[y < 5] = 0
 y[y == 5] = 1
 
-x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(x_train, y_train, test_size=0.20, stratify=y_train)
+x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
+    x_train, y_train, test_size=0.20, stratify=y_train
+)
 
 y_train[y_train < 5] = 0
 y_train[y_train == 5] = 1
@@ -90,8 +103,7 @@ scoring = {
 }
 
 for model, ax in zip(models, axs.flatten()):
-    pipe = ImbPipeline(steps=[
-                              ("scaler", scaler), ("model", model)])
+    pipe = ImbPipeline(steps=[("scaler", scaler), ("model", model)])
 
     # run cv and evaluate
     cv = cross_validate(pipe, x_train, y_train, cv=10, n_jobs=-1, scoring=scoring)
@@ -119,29 +131,29 @@ for model, ax in zip(models, axs.flatten()):
     y_test_copy = y_test
 
     # fit and predict
-    #pipe.fit(x_train_val, y_train_val)
-    #predictions = pipe.predict(x_test)
-    #prediction_probs = pipe.predict_proba(x_test)
-    
-    #to_remove = []
-    #for i, prob in enumerate(prediction_probs):
-     #   if (prob.max() < 0.72):
-      #      to_remove.append(i)
+    # pipe.fit(x_train_val, y_train_val)
+    # predictions = pipe.predict(x_test)
+    # prediction_probs = pipe.predict_proba(x_test)
 
-   # print("Removed: " + str(len(to_remove)))
-    
-    #predictions = np.delete(predictions, to_remove, axis=0)
-    #y_test_copy = np.delete(y_test_copy, to_remove)
-    #disp = ConfusionMatrixDisplay.from_predictions(
-       # y_test_copy, predictions, ax=ax
-    #)
+    # to_remove = []
+    # for i, prob in enumerate(prediction_probs):
+    #   if (prob.max() < 0.72):
+    #      to_remove.append(i)
 
-    #ax.set_title(model.__class__.__name__)
-    #disp = ConfusionMatrixDisplay.from_predictions(y_test_copy, predictions,  ax=ax)
-    #ax.set_title(model.__class__.__name__)
-    #print("Accuracy on test set: " + str(accuracy_score(y_test_copy, predictions)))
-    #print()
+# print("Removed: " + str(len(to_remove)))
+
+# predictions = np.delete(predictions, to_remove, axis=0)
+# y_test_copy = np.delete(y_test_copy, to_remove)
+# disp = ConfusionMatrixDisplay.from_predictions(
+# y_test_copy, predictions, ax=ax
+# )
+
+# ax.set_title(model.__class__.__name__)
+# disp = ConfusionMatrixDisplay.from_predictions(y_test_copy, predictions,  ax=ax)
+# ax.set_title(model.__class__.__name__)
+# print("Accuracy on test set: " + str(accuracy_score(y_test_copy, predictions)))
+# print()
 
 
-#plt.tight_layout()
-#plt.show()
+# plt.tight_layout()
+# plt.show()

@@ -1,5 +1,9 @@
 from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier, GradientBoostingClassifier
+from sklearn.ensemble import (
+    RandomForestClassifier,
+    HistGradientBoostingClassifier,
+    GradientBoostingClassifier,
+)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
@@ -11,7 +15,16 @@ from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE, ADASYN
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import ConfusionMatrixDisplay, f1_score, balanced_accuracy_score, roc_auc_score,recall_score, precision_score, accuracy_score, make_scorer
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    f1_score,
+    balanced_accuracy_score,
+    roc_auc_score,
+    recall_score,
+    precision_score,
+    accuracy_score,
+    make_scorer,
+)
 from imblearn.pipeline import Pipeline as ImbPipeline
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +47,7 @@ under_sample = {
 over_sample = {
     3: 1000,
     4: 1000,
-    5: 1000, 
+    5: 1000,
 }
 
 # set up samplers and fit
@@ -48,26 +61,33 @@ scaler = MinMaxScaler()
 excluded from inital tests due to necessary compute
 
 """
-# extra experiments - a proper hist run, a balanced no sampling gb and rf run
-models = [    
+# extra experiments - a proper hist run, a balanced no sampling gb and rf run
+models = [
     # donzo
     {
-    # getting rid of the max iter in favour of early stopping
-    "model": ImbPipeline(steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", HistGradientBoostingClassifier())]) ,
-    "params": {
-        "model__learning_rate": [0.05, 0.1, 0.3, 0.5],
-        "model__max_depth": [65, 75, 80, 100],
-        'model__max_leaf_nodes': [36, 41, 45],
-        'model__min_samples_leaf': [15, 20, 25],
-        "model__max_iter": [750, 1000, 1250, 1500],
-        "model__early_stopping": [True, False]
-        }
+        # getting rid of the max iter in favour of early stopping
+        "model": ImbPipeline(
+            steps=[
+                ("rus", rus),
+                ("smt", smt),
+                ("scaler", scaler),
+                ("model", HistGradientBoostingClassifier()),
+            ]
+        ),
+        "params": {
+            "model__learning_rate": [0.05, 0.1, 0.3, 0.5],
+            "model__max_depth": [65, 75, 80, 100],
+            "model__max_leaf_nodes": [36, 41, 45],
+            "model__min_samples_leaf": [15, 20, 25],
+            "model__max_iter": [750, 1000, 1250, 1500],
+            "model__early_stopping": [True, False],
+        },
     },
 ]
 
 # import data using util
 data = get_data()
-idx, x, y, genes = split_data(data) 
+idx, x, y, genes = split_data(data)
 
 # get rid of test data
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
@@ -75,12 +95,13 @@ x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, strati
 total_start = time.time()
 
 
-scoring = {"accuracy" : "accuracy",
-           "balanced_accuracy": "balanced_accuracy",
-            "f1": make_scorer(f1_score, average="macro", zero_division=np.nan), 
-            "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
-            "recall": make_scorer(recall_score, average="macro", zero_division=np.nan), 
-        } # ROC_AUC is not included due to the computational cost
+scoring = {
+    "accuracy": "accuracy",
+    "balanced_accuracy": "balanced_accuracy",
+    "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
+    "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
+    "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
+}  # ROC_AUC is not included due to the computational cost
 
 for model in models:
     start = time.time()
@@ -89,9 +110,11 @@ for model in models:
     try:
         pipe = model["model"]
         params = model["params"]
-                
+
         # grid search to return results for a range of metrics and refit on accuracy
-        grid_search = GridSearchCV(pipe, params, n_jobs=-1, scoring=scoring, refit="accuracy", cv=10)
+        grid_search = GridSearchCV(
+            pipe, params, n_jobs=-1, scoring=scoring, refit="accuracy", cv=10
+        )
         grid_search.fit(x_train, y_train)
 
         # model tuning time
@@ -111,13 +134,14 @@ for model in models:
         print(f"F1: {results['mean_test_f1'][best_index]}")
         print(f"Precision: {results['mean_test_precision'][best_index]}")
         print(f"Recall: {results['mean_test_recall'][best_index]}")
-        print(f"Balanced accuracy: {results['mean_test_balanced_accuracy'][best_index]}")
+        print(
+            f"Balanced accuracy: {results['mean_test_balanced_accuracy'][best_index]}"
+        )
         print()
-
 
     except Exception as e:
         print(e)
-try: 
+try:
     total_end = time.time()
     duration_seconds_total = total_end - total_start
     duration_total = datetime.timedelta(seconds=duration_seconds_total)

@@ -14,7 +14,14 @@ from sklearn.pipeline import Pipeline
 from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, f1_score, precision_score, recall_score, balanced_accuracy_score
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    balanced_accuracy_score,
+)
 from scipy.stats import beta
 from sklearn.utils import resample
 
@@ -43,7 +50,7 @@ under_sample = {
 over_sample = {
     3: 1000,
     4: 1000,
-    5: 1000, 
+    5: 1000,
 }
 
 # set up samplers and fit
@@ -57,24 +64,32 @@ predictions = np.empty((n_bootstraps, n_samples[0]))
 
 models = []
 for i in range(n_bootstraps):
-    model = HistGradientBoostingClassifier(max_iter=1000, learning_rate=0.1, max_depth=75, max_leaf_nodes=41, min_samples_leaf=20)
-    pipe = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)])
+    model = HistGradientBoostingClassifier(
+        max_iter=1000,
+        learning_rate=0.1,
+        max_depth=75,
+        max_leaf_nodes=41,
+        min_samples_leaf=20,
+    )
+    pipe = ImbPipeline(
+        steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]
+    )
 
     invalid_sample = True
-    while (invalid_sample):
+    while invalid_sample:
         try:
             x_boot, y_boot = resample(x_train, y_train, stratify=y_train)
             pipe.fit(x_boot, y_boot)
             invalid_sample = False
         except:
-            print("INVALID SAMPLE CONTINUING") 
+            print("INVALID SAMPLE CONTINUING")
             continue
 
     print(f"FIT {i + 1} COMPLETE")
     models.append(pipe)
 
 
-print("TRAINING COMPLETE SAVING")    
+print("TRAINING COMPLETE SAVING")
 joblib.dump(models, FILE_NAME)
 
 # saving and testing save successful

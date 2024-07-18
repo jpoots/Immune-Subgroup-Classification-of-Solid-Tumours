@@ -14,7 +14,14 @@ from sklearn.pipeline import Pipeline
 from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE, BorderlineSMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, f1_score, precision_score, recall_score, balanced_accuracy_score
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+    balanced_accuracy_score,
+)
 from scipy.stats import beta
 
 FILE_NAME = "model.pkl"
@@ -23,7 +30,13 @@ RANDOM_STATE = 42
 np.random.seed(RANDOM_STATE)
 
 # define model to train
-model = HistGradientBoostingClassifier(max_iter=1500, learning_rate=0.05, max_depth=100, max_leaf_nodes=41, min_samples_leaf=20)
+model = HistGradientBoostingClassifier(
+    max_iter=1500,
+    learning_rate=0.05,
+    max_depth=100,
+    max_leaf_nodes=41,
+    min_samples_leaf=20,
+)
 
 # import data using util
 data = get_data()
@@ -46,7 +59,7 @@ under_sample = {
 over_sample = {
     3: 1000,
     4: 1000,
-    5: 1000, 
+    5: 1000,
 }
 
 # set up samplers and fit
@@ -54,7 +67,9 @@ rus = RandomUnderSampler(sampling_strategy=under_sample)
 smt = SMOTE(sampling_strategy=over_sample)
 
 # set up pipeline and fit
-pipe = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)])
+pipe = ImbPipeline(
+    steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]
+)
 pipe.fit(x_train, y_train)
 
 prediction_probs = pipe.predict_proba(x_test)
@@ -86,7 +101,9 @@ print("SAVE SUCCESSFUL")
 
 # sanity check the save
 loaded_model = joblib.load(FILE_NAME)
-assert isinstance(loaded_model, Pipeline) # tell VS code that this is an instance of the classifier for developer convenience
+assert isinstance(
+    loaded_model, Pipeline
+)  # tell VS code that this is an instance of the classifier for developer convenience
 print(loaded_model.predict(x_train))
 
 print(f"Removed: {len(nc_indicies)}")
@@ -96,8 +113,12 @@ print(f"Recall: {recall_score(filtered_true, predictions, average="macro")}")
 print(f"Precision: {precision_score(filtered_true, predictions, average="macro")}")
 print(f"F1: {f1_score(filtered_true, predictions, average="macro")}")
 print(f"Balanced Accuracy: {balanced_accuracy_score(filtered_true, predictions)}")
-print(f"Class 6 F1: {f1_score(filtered_true, predictions, labels=[5], average="macro")}")
-print(f"Class 6 Recall: {recall_score(filtered_true, predictions, labels=[5], average="macro")}")
+print(
+    f"Class 6 F1: {f1_score(filtered_true, predictions, labels=[5], average="macro")}"
+)
+print(
+    f"Class 6 Recall: {recall_score(filtered_true, predictions, labels=[5], average="macro")}"
+)
 
 # show the generated confusion matrix
 plt.show()

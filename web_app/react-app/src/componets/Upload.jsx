@@ -30,7 +30,7 @@ const Upload = ({
       body: formData,
     });
     geneResponse = await geneResponse.json();
-    geneResponse = geneResponse.results;
+    geneResponse = geneResponse.data;
 
     console.log(geneResponse);
 
@@ -44,34 +44,45 @@ const Upload = ({
     });
     predResponse = await predResponse.json();
 
-    console.log(predResponse.results);
+    console.log(predResponse.data);
 
     let pcaResponse = await fetch("http://127.0.0.1:3000/pca", {
       method: "POST",
-      body: formData,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(geneResponse),
     });
     pcaResponse = await pcaResponse.json();
 
-    let pca = predResponse.results;
-
+    let pca = predResponse.data;
     pca.forEach((sample, index) => {
       sample["pca"] = pcaResponse.results[index];
     });
 
     let tsneResponse = await fetch("http://127.0.0.1:3000/tsne", {
       method: "POST",
-      body: formData,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(geneResponse),
     });
     tsneResponse = await tsneResponse.json();
 
-    let tsne = predResponse.results;
+    let tsne = predResponse.data;
     tsne.forEach((sample, index) => {
-      sample["tsne"] = tsneResponse.results[index];
+      sample["tsne"] = tsneResponse.data[index];
     });
 
     let confResponse = await fetch("http://127.0.0.1:3000/confidence", {
       method: "POST",
-      body: formData,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(geneResponse),
     });
     confResponse = await confResponse.json();
 
@@ -80,9 +91,11 @@ const Upload = ({
       sample["confidence"] = confResponse.results[index]["confidence"];
     });
 
+    console.log(conf);
+
     // set predictions and reroute
     setPredictions(predResponse.results);
-    setGenes(geneResponse.results);
+    setGenes(geneResponse);
     setPca(pca);
     setTsne(tsne);
     setConfidence(conf);

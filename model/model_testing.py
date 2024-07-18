@@ -10,7 +10,17 @@ from sklearn.preprocessing import MinMaxScaler
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-from sklearn.metrics import f1_score, balanced_accuracy_score, roc_auc_score,recall_score, precision_score, accuracy_score, ConfusionMatrixDisplay, classification_report, make_scorer
+from sklearn.metrics import (
+    f1_score,
+    balanced_accuracy_score,
+    roc_auc_score,
+    recall_score,
+    precision_score,
+    accuracy_score,
+    ConfusionMatrixDisplay,
+    classification_report,
+    make_scorer,
+)
 from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE, BorderlineSMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -29,7 +39,9 @@ scaler = MinMaxScaler()
 
 # split train test
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
-x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(x, y, test_size=0.20, stratify=y)
+x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
+    x, y, test_size=0.20, stratify=y
+)
 
 
 # define sample strategy
@@ -42,7 +54,7 @@ under_sample = {
 over_sample = {
     3: 1000,
     4: 1000,
-    5: 1000, 
+    5: 1000,
 }
 
 # set up data balancing
@@ -52,16 +64,95 @@ bsmt = BorderlineSMOTE(sampling_strategy=over_sample)
 
 
 # define candidate models wiht best hyperparams
-gb_ac = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=1000, learning_rate=0.1, max_depth=None))])
-gb_ac_fine = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=1000, learning_rate=0.1, max_depth=75, max_leaf_nodes=41, min_samples_leaf=20))])
-gb_f1_fine = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=1500, learning_rate=0.05, max_depth=100, max_leaf_nodes=41, min_samples_leaf=20))])
+gb_ac = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=1000, learning_rate=0.1, max_depth=None
+            ),
+        ),
+    ]
+)
+gb_ac_fine = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=1000,
+                learning_rate=0.1,
+                max_depth=75,
+                max_leaf_nodes=41,
+                min_samples_leaf=20,
+            ),
+        ),
+    ]
+)
+gb_f1_fine = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=1500,
+                learning_rate=0.05,
+                max_depth=100,
+                max_leaf_nodes=41,
+                min_samples_leaf=20,
+            ),
+        ),
+    ]
+)
 
-gb_ba = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=1000, learning_rate=0.1, max_depth=75))])
-gb_ba_fine = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=2000, learning_rate=0.1, max_depth=50, max_leaf_nodes=31, min_samples_leaf=30))])
-gb_f1 = ImbPipeline(steps=[("rus", rus), ("smt", smt), ("model", HistGradientBoostingClassifier(max_iter=1000, learning_rate=0.1, max_depth=50))])
+gb_ba = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=1000, learning_rate=0.1, max_depth=75
+            ),
+        ),
+    ]
+)
+gb_ba_fine = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=2000,
+                learning_rate=0.1,
+                max_depth=50,
+                max_leaf_nodes=31,
+                min_samples_leaf=30,
+            ),
+        ),
+    ]
+)
+gb_f1 = ImbPipeline(
+    steps=[
+        ("rus", rus),
+        ("smt", smt),
+        (
+            "model",
+            HistGradientBoostingClassifier(
+                max_iter=1000, learning_rate=0.1, max_depth=50
+            ),
+        ),
+    ]
+)
 
 models = [
-gb_ac_fine, gb_f1_fine # gb_ba, gb_ba_fine, gb_f1  #svc_bal, rfc_bal #svc_bal#knn, nb, mlp, lr, 
+    gb_ac_fine,
+    gb_f1_fine,  # gb_ba, gb_ba_fine, gb_f1  #svc_bal, rfc_bal #svc_bal#knn, nb, mlp, lr,
 ]
 
 # set up figures
@@ -100,9 +191,9 @@ for pipe, ax_test, ax_train in zip(models, axs_test.flatten(), axs_train.flatten
     probaility_train = pipe.predict_proba(x_train_val)
 
     max_prob = np.amax(probaility_train, axis=1)
-        # Fit the beta distribution to the predicted probabilities
-    
-    #max_prob = np.clip(max_prob, 1e-10, 1 - 1e-10)
+    # Fit the beta distribution to the predicted probabilities
+
+    # max_prob = np.clip(max_prob, 1e-10, 1 - 1e-10)
     a, b, loc, scale = beta.fit(max_prob, floc=0, fscale=1)
 
     # Create a function for the fitted beta distribution
@@ -117,12 +208,14 @@ for pipe, ax_test, ax_train in zip(models, axs_test.flatten(), axs_train.flatten
     y_test_val_copy = y_test_val
     x_test_val_copy = x_test_val
 
-    prediction_probs = pipe.predict_proba(x_test_val)    
-    to_remove = [i for i, prob in enumerate(prediction_probs) if prob.max() < qc_threshold]
+    prediction_probs = pipe.predict_proba(x_test_val)
+    to_remove = [
+        i for i, prob in enumerate(prediction_probs) if prob.max() < qc_threshold
+    ]
 
     print("Removed: " + str(len(to_remove)))
-    #y_test_val_copy = np.delete(y_test_val_copy, to_remove)
-    #x_test_val_copy = np.delete(x_test_val_copy, to_remove, axis=0)
+    # y_test_val_copy = np.delete(y_test_val_copy, to_remove)
+    # x_test_val_copy = np.delete(x_test_val_copy, to_remove, axis=0)
 
     predictions_test = pipe.predict(x_test_val_copy)
 
@@ -130,12 +223,12 @@ for pipe, ax_test, ax_train in zip(models, axs_test.flatten(), axs_train.flatten
     cf_test = ConfusionMatrixDisplay.from_predictions(
         y_test_val_copy, predictions_test, ax=ax_test
     )
-    ax_test.set_title(pipe.named_steps['model'].__class__.__name__)
+    ax_test.set_title(pipe.named_steps["model"].__class__.__name__)
 
     cf_train = ConfusionMatrixDisplay.from_predictions(
-        y_train_val, predictions_train,  ax=ax_train
+        y_train_val, predictions_train, ax=ax_train
     )
-    ax_train.set_title(pipe.named_steps['model'].__class__.__name__)
+    ax_train.set_title(pipe.named_steps["model"].__class__.__name__)
 
     # pulling out my test metrics
     accuracy_test = accuracy_score(y_test_val_copy, predictions_test)
@@ -143,7 +236,6 @@ for pipe, ax_test, ax_train in zip(models, axs_test.flatten(), axs_train.flatten
     precision_test = precision_score(y_test_val_copy, predictions_test, average="macro")
     recall_test = recall_score(y_test_val_copy, predictions_test, average="macro")
     bal_accuracy_test = balanced_accuracy_score(y_test_val_copy, predictions_test)
-    
 
     # pulling out my training metrics
     accuracy_train = accuracy_score(y_train_val, predictions_train)
