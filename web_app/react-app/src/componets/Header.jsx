@@ -16,12 +16,12 @@ const Header = () => {
             Upload
           </Link>
 
-          <Link to="/geneexpression" className="navbar-item">
-            Gene Expression
-          </Link>
-
           <Link to="/report" className="navbar-item">
             Report
+          </Link>
+
+          <Link to="/geneexpression" className="navbar-item">
+            Gene Expression
           </Link>
 
           <Link to="/confidence" className="navbar-item">

@@ -5,9 +5,8 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import numpy as np
 import pandas as pd
-from sklearn.experimental import enable_iterative_imputer
-from sklearn.impute import IterativeImputer
-from .middleware import parse_json
+
+from .middleware import parse_json, parse_csv
 from werkzeug import exceptions
 from .ml_models.predictions import predict, confidence_intervals, probability
 
@@ -19,33 +18,10 @@ TSNE_PIPE = Pipeline(
 
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
 
+# all data validation should occur at the middleware level. Unexpected failure at this level handled as a generic error
 
-def gene_preprocessing(full_analysis, request):
-    try:
-        # is file in request and is it a valid CSV
-        file = request.files["samples"]
-        data = pd.read_csv(file, index_col=0)
-        data = data.T
-    except Exception as e:
-        raise exceptions.BadRequest("NO/INVALID FILE GIV")
 
-    # drop empty rows
-    data.dropna(how="all", inplace=True)
-    # drop rows with more than 2 empty genes, calculate diff
-    original_size = data.shape[0]
-    data.dropna(thresh=438, inplace=True)
-    invalid = original_size - data.shape[0]
-
-    # is data of valid shape
-    n_col, n_row = data.shape[0], data.shape[1]
-    if n_row != 440 or n_row == 0:
-        raise exceptions.BadRequest("INVALID GENE OR SAMPLE NUMBER")
-
-    # impute missing values - note, imputation could've been done in pipeline but seperation allows us to keep the gene expression values
-    features = data.values
-    imp = IterativeImputer().set_output(transform="pandas")
-    features = imp.fit_transform(data)
-
+def gene_preprocessing(full_analysis, features):
     # if being sent back in JSON or if part of full analysis
     if not full_analysis:
         features = features.T.to_dict()
@@ -54,22 +30,23 @@ def gene_preprocessing(full_analysis, request):
             returnData.append({"sampleID": sample, "genes": features[sample]})
     else:
         # split data for further processing
-        idx = [sample_id for sample_id in data.index]
-        genes = [gene for gene in data.columns.values]
-        features = data.values.tolist()
+        idx = [sample_id for sample_id in features.index]
+        genes = [gene for gene in features.columns.values]
+        features = features.values.tolist()
 
         returnData = {
             "ids": idx,
             "gene_names": genes,
             "features": features,
         }
-    return (returnData, invalid)
+    return returnData
 
 
 @views.route("/extractgenes", methods=["POST"])
+@parse_csv
 def extract_genes():
-    returnData, invalid = gene_preprocessing(full_analysis=False, request=request)
-    return (jsonify({"data": {"samples": returnData, "invalid": invalid}}), 200)
+    returnData = gene_preprocessing(full_analysis=False, features=request.features)
+    return (jsonify({"data": {"samples": returnData, "invalid": request.invalid}}), 200)
 
 
 @views.route("/predict", methods=["POST"])
@@ -91,7 +68,7 @@ def predictgroup():
 @views.route("/analyse", methods=["POST"])
 def analyse():
     results = []
-    return jsonify({"results": results})
+    return jsonify({"data": results})
 
 
 @views.route("/probability", methods=["POST"])
@@ -106,7 +83,7 @@ def probaility():
     for pred, id in zip(probs, data["ids"]):
         results.append({"sampleID": id, "probs": pred})
 
-    return jsonify({"results": results})
+    return jsonify({"data": results})
 
 
 @views.route("/pca", methods=["POST"])
@@ -117,7 +94,7 @@ def pca():
 
     pc = PCA_PIPE.fit_transform(features).tolist()
 
-    return jsonify({"results": pc})
+    return jsonify({"data": pc})
 
 
 @views.route("/tsne", methods=["POST"])
@@ -127,7 +104,7 @@ def tsne():
 
     tsne = TSNE_PIPE.fit_transform(features).tolist()
 
-    return jsonify({"results": tsne})
+    return jsonify({"data": tsne})
 
 
 @views.route("/confidence", methods=["POST"])
@@ -151,12 +128,13 @@ def confidence():
                 },
             }
         )
-    return jsonify({"results": results})
+    return jsonify({"data": results})
 
 
 @views.route("/performanalysis", methods=["POST"])
+@parse_csv
 def perform_analysis():
-    data, invalid = gene_preprocessing(full_analysis=True, request=request)
+    data = gene_preprocessing(full_analysis=True, features=request.features)
 
     predictions, prediction_probs = predict(data["features"])
     confidence_interval_list = confidence_intervals(data["features"])
@@ -201,10 +179,10 @@ def perform_analysis():
                 "genes": genes,
                 "prediction": prediction,
                 "probs": prob_list,
-                "pcs": pc_comps,
+                "pca": pc_comps,
                 "tsne": tsne_comps,
                 "confidence": confidence,
             }
         )
 
-    return jsonify({"results": results})
+    return jsonify({"data": {"samples": results, "invalid": request.invalid}})

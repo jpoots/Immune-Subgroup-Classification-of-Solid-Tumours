@@ -1,6 +1,7 @@
-import React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import uploadIcon from "/upload-solid.svg";
+import { Tooltip } from "react-tooltip";
 
 const Upload = ({
   setPredictions,
@@ -9,15 +10,21 @@ const Upload = ({
   setPca,
   setTsne,
   setConfidence,
+  setResults,
 }) => {
   const [file, setFile] = useState();
+  const [filename, setFileName] = useState("Upload File...");
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleFile = (event) => {
     setFile(event.target.files[0]);
+    setFileName(event.target.files[0].name);
   };
 
   const handlePredict = async () => {
+    setLoading(true);
+
     // set the file for the whole project
     setDataFile(file);
 
@@ -25,6 +32,20 @@ const Upload = ({
     const formData = new FormData();
     formData.append("samples", file);
 
+    let fullResultsResponse = await fetch(
+      "http://127.0.0.1:3000/performanalysis",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    fullResultsResponse = await fullResultsResponse.json();
+    fullResultsResponse = fullResultsResponse.data;
+
+    console.log(fullResultsResponse);
+    setResults(fullResultsResponse);
+
+    /*
     let geneResponse = await fetch("http://127.0.0.1:3000/extractgenes", {
       method: "POST",
       body: formData,
@@ -99,19 +120,76 @@ const Upload = ({
     setPca(pca);
     setTsne(tsne);
     setConfidence(conf);
-
+    */
     navigate("/report");
   };
 
   return (
     <div className="container">
-      <div>
-        <input type="file" onChange={handleFile}></input>
-        <button className="button is-primary" onClick={handlePredict}>
-          Predict
-        </button>
-        <div></div>
+      <div className="box">
+        <div className="block">
+          <h1>
+            RNA-Seq Upload{" "}
+            <a
+              className="queens-branding-text"
+              data-tooltip-content={
+                "ICST accepts FPKM normalised RNA-Seq data structured as shown in the test data. See help for more details."
+              }
+              data-tooltip-id="my-tooltip"
+              data-tooltip-place="right"
+            >
+              ?
+            </a>
+          </h1>
+        </div>
+
+        <div className="file has-name">
+          <label className="file-label">
+            <input type="file" onChange={handleFile} className="file-input" />
+            <span className="file-cta">
+              <span className="file-icon">
+                <img src={uploadIcon} alt="" />
+              </span>
+              <span className="file-label">Choose File</span>
+            </span>
+            <span className="file-name" id="filename">
+              {filename}
+            </span>
+          </label>
+
+          <button
+            className={
+              "button queens-branding queens-button " +
+              (loading ? "is-loading" : "")
+            }
+            onClick={handlePredict}
+            disabled={!file || loading}
+          >
+            {" "}
+            Analyse{" "}
+          </button>
+        </div>
+
+        <div className="block">
+          ICTS is an open-access, open source software package which allows you
+          to classify samples into one of 6 immune subgroups. Please read the
+          help section before use.
+        </div>
+
+        <div className="block">
+          <a
+            href="/test_data.csv"
+            className="queens-branding-text mr-5"
+            download={true}
+          >
+            Download Test Data
+          </a>
+          <a href="" className="queens-branding-text">
+            Help
+          </a>
+        </div>
       </div>
+      <Tooltip id="my-tooltip" />
     </div>
   );
 };

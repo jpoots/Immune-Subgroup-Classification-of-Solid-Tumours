@@ -1,7 +1,7 @@
-import React from "react";
 import Plot from "react-plotly.js";
 
-const Visualisation = ({ data, twoD, isPca }) => {
+const Visualisation = ({ results, twoD, isPca }) => {
+  let samples = results["samples"];
   let x = [];
   let y = [];
   let z = [];
@@ -9,12 +9,12 @@ const Visualisation = ({ data, twoD, isPca }) => {
   let labels = [];
 
   let key = isPca ? "pca" : "tsne";
-  data.forEach((sample) => {
+  samples.forEach((sample) => {
     x.push(sample[key][0]);
     y.push(sample[key][1]);
     z.push(sample[key][2]);
-    ids.push(sample.sampleID);
-    labels.push(sample.prediction);
+    ids.push(sample["sampleID"]);
+    labels.push(sample["prediction"]);
   });
 
   const type = twoD ? "scatter" : "scatter3d";

@@ -2,6 +2,11 @@ from flask import request
 from functools import wraps
 from werkzeug import exceptions
 from fastjsonschema import compile, JsonSchemaValueException
+import pandas as pd
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+NUM_GENES = 440
 
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
@@ -22,8 +27,8 @@ SCHEMA = {
                             "^(?!\s*$).+": {"type": "number"},
                         },
                         "additionalProperties": False,
-                        "minProperties": 440,
-                        "maxProperties": 440,
+                        "minProperties": NUM_GENES,
+                        "maxProperties": NUM_GENES,
                     },
                 },
                 "required": ["sampleID", "genes"],
@@ -63,3 +68,44 @@ def parse_json(f):
         return f(*args, **kwargs)
 
     return _parse_json
+
+
+# decorator for parsing a CSV
+def parse_csv(f):
+    @wraps(f)
+    def _parse_csv(*args, **kwargs):
+
+        try:
+            # is file in request and is it a valid CSV
+            file = request.files["samples"]
+            data = pd.read_csv(file, index_col=0)
+            data = data.T
+        except Exception as e:
+            raise exceptions.BadRequest(
+                'Sample files should be valid CSV or TXT files attached as "samples"'
+            )
+
+        # drop empty rows
+        data.dropna(how="all", inplace=True)
+        # drop rows with more than 2 empty genes, calculate diff
+        original_size = data.shape[0]
+        data.dropna(thresh=438, inplace=True)
+        invalid = original_size - data.shape[0]
+
+        # is data of valid shape
+        n_col, n_row = data.shape[0], data.shape[1]
+        if n_row != 440 or n_row == 0:
+            raise exceptions.BadRequest(
+                "Sample files should contain 440 genes and at least 1 sample"
+            )
+
+        # impute missing values - note, imputation could've been done in pipeline but seperation allows us to keep the gene expression values
+        features = data.values
+        imp = IterativeImputer().set_output(transform="pandas")
+        features = imp.fit_transform(data)
+
+        request.features = features
+        request.invalid = invalid
+        return f(*args, **kwargs)
+
+    return _parse_csv

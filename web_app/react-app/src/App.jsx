@@ -17,6 +17,7 @@ function App() {
   const [pca, setPca] = useState();
   const [tsne, setTsne] = useState();
   const [confidence, setConfidence] = useState();
+  const [results, setResults] = useState();
 
   return (
     <Router>
@@ -33,6 +34,7 @@ function App() {
               setPca={setPca}
               setTsne={setTsne}
               setConfidence={setConfidence}
+              setResults={setResults}
             />
           }
         />
@@ -47,35 +49,45 @@ function App() {
               setPca={setPca}
               setTsne={setTsne}
               setConfidence={setConfidence}
+              setResults={setResults}
             />
           }
         />
         <Route
           path="/geneexpression"
-          element={<GeneExpression samples={genes} />}
+          element={<GeneExpression results={results} />}
         />
-        <Route path="/report" element={<Report predictions={predictions} />} />
+        <Route
+          path="/report"
+          element={<Report predictions={predictions} results={results} />}
+        />
         <Route
           path="/probability"
-          element={<Probability samples={predictions} />}
+          element={<Probability samples={predictions} results={results} />}
         />
         <Route
           path="/pca2d"
-          element={<Visualisation data={pca} twoD={true} isPca={true} />}
+          element={<Visualisation twoD={true} isPca={true} results={results} />}
         />
         <Route
           path="/pca3d"
-          element={<Visualisation data={pca} twoD={false} isPca={true} />}
+          element={
+            <Visualisation twoD={false} isPca={true} results={results} />
+          }
         />
         <Route
           path="/tsne2d"
-          element={<Visualisation data={tsne} twoD={true} isPca={false} />}
+          element={
+            <Visualisation twoD={true} isPca={false} results={results} />
+          }
         />
         <Route
           path="/tsne3d"
-          element={<Visualisation data={tsne} twoD={false} isPca={false} />}
+          element={
+            <Visualisation twoD={false} isPca={false} results={results} />
+          }
         />
-        <Route path="/confidence" element={<Confidence data={confidence} />} />
+        <Route path="/confidence" element={<Confidence results={results} />} />
       </Routes>
     </Router>
   );

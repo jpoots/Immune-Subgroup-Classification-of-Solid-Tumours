@@ -1,4 +1,38 @@
 .queens-branding {
     background-color: #D6000D;
+    color: white !important;
+}
+
+.queens-button:hover {
+    background-color: #9e1c23;
+}
+
+.queens-button:disabled {
+    background-color: #a13f44;
+}
+
+.navbar-item, .navbar-link, .has-dropdown {
     color: white;
+}
+
+.navbar-item:hover, .navbar-link:hover, .navbar-item:focus, .navbar-link:focus {
+    background-color: #a30009;
+}
+
+.queens-branding-text {
+    color: #D6000D !important;
+}
+
+.queens-branding-text:hover {
+    color: #6e0006 !important;
+}
+
+.sort-button{
+    border: none;
+    box-shadow: none;
+}
+
+.queens-textfield:focus {
+    box-shadow: 0 0 3px 2px #D6000D !important;
+    border-color: #D6000D !important;
 }

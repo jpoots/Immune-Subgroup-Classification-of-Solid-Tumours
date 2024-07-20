@@ -1,7 +1,8 @@
-import React from "react";
 import Plot from "react-plotly.js";
 
-const Confidence = ({ data }) => {
+const Confidence = ({ results }) => {
+  let samples = results["samples"];
+
   let upper = [];
   let median = [];
   let lower = [];
@@ -9,7 +10,7 @@ const Confidence = ({ data }) => {
   let max = [];
   let ids = [];
 
-  data.forEach((sample) => {
+  samples.forEach((sample) => {
     upper.push(sample.confidence.upper);
     median.push(sample.confidence.median);
     lower.push(sample.confidence.lower);
