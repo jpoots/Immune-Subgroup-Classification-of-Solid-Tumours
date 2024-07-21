@@ -3,7 +3,7 @@ import queensLogo from "/logo.png";
 
 const Header = () => {
   return (
-    <nav className="navbar queens-branding">
+    <nav className="navbar queens-branding is-info">
       <div className="container">
         <div className="navbar-brand">
           <Link to="/" className="navbar-item">
@@ -59,6 +59,12 @@ const Header = () => {
               </Link>
             </div>
           </div>
+        </div>
+
+        <div className="navbar-end">
+          <Link to="/help" className="navbar-item">
+            Help
+          </Link>
         </div>
       </div>
     </nav>

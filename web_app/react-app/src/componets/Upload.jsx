@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import uploadIcon from "/upload-solid.svg";
 import { Tooltip } from "react-tooltip";
+import SampleQC from "./SampleQC";
 
 const Upload = ({
   setPredictions,
@@ -11,15 +12,29 @@ const Upload = ({
   setTsne,
   setConfidence,
   setResults,
+  results,
+  summary,
+  setSummary,
 }) => {
   const [file, setFile] = useState();
   const [filename, setFileName] = useState("Upload File...");
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const fileInput = useRef();
 
   const handleFile = (event) => {
     setFile(event.target.files[0]);
     setFileName(event.target.files[0].name);
+    console.log("triggered");
+  };
+
+  const handleReset = () => {
+    fileInput.current.value = null;
+    setFile();
+    setFileName("Upload File...");
+    setDataFile();
+    setLoading(false);
+    setResults();
   };
 
   const handlePredict = async () => {
@@ -41,10 +56,24 @@ const Upload = ({
     );
     fullResultsResponse = await fullResultsResponse.json();
     fullResultsResponse = fullResultsResponse.data;
+    setLoading(false);
 
-    console.log(fullResultsResponse);
     setResults(fullResultsResponse);
 
+    let summaryResults = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      NC: 0,
+    };
+    fullResultsResponse["samples"].forEach(
+      (result) => summaryResults[result.prediction]++
+    );
+
+    setSummary(summaryResults);
     /*
     let geneResponse = await fetch("http://127.0.0.1:3000/extractgenes", {
       method: "POST",
@@ -121,7 +150,6 @@ const Upload = ({
     setTsne(tsne);
     setConfidence(conf);
     */
-    navigate("/report");
   };
 
   return (
@@ -145,7 +173,12 @@ const Upload = ({
 
         <div className="file has-name">
           <label className="file-label">
-            <input type="file" onChange={handleFile} className="file-input" />
+            <input
+              type="file"
+              onChange={handleFile}
+              className="file-input"
+              ref={fileInput}
+            />
             <span className="file-cta">
               <span className="file-icon">
                 <img src={uploadIcon} alt="" />
@@ -163,15 +196,24 @@ const Upload = ({
               (loading ? "is-loading" : "")
             }
             onClick={handlePredict}
-            disabled={!file || loading}
+            disabled={!file || loading || results}
           >
             {" "}
             Analyse{" "}
           </button>
+
+          <button
+            className="button is-dark"
+            onClick={handleReset}
+            disabled={loading || !results}
+          >
+            {" "}
+            Reset{" "}
+          </button>
         </div>
 
         <div className="block">
-          ICTS is an open-access, open source software package which allows you
+          ICST is an open-access, open source software package which allows you
           to classify samples into one of 6 immune subgroups. Please read the
           help section before use.
         </div>
@@ -189,6 +231,18 @@ const Upload = ({
           </a>
         </div>
       </div>
+      {results && <SampleQC results={results} />}
+      {results && (
+        <div className="box">
+          <h1 className="block">Results Summary</h1>
+          {Object.keys(summary).map((subgroup) => (
+            <div className="block">
+              Subgroup {subgroup}: {summary[subgroup]} sample(s)
+            </div>
+          ))}
+        </div>
+      )}
+
       <Tooltip id="my-tooltip" />
     </div>
   );

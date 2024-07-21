@@ -1,7 +1,7 @@
 import Plot from "react-plotly.js";
 
 const Confidence = ({ results }) => {
-  let samples = results["samples"];
+  let samples = [];
 
   let upper = [];
   let median = [];
@@ -10,33 +10,40 @@ const Confidence = ({ results }) => {
   let max = [];
   let ids = [];
 
-  samples.forEach((sample) => {
-    upper.push(sample.confidence.upper);
-    median.push(sample.confidence.median);
-    lower.push(sample.confidence.lower);
-    min.push(sample.confidence.min);
-    max.push(sample.confidence.max);
-    ids.push(sample.sampleID);
-  });
-
-  console.log(ids);
+  if (results) {
+    samples = results["samples"];
+    samples.forEach((sample) => {
+      upper.push(sample.confidence.upper);
+      median.push(sample.confidence.median);
+      lower.push(sample.confidence.lower);
+      min.push(sample.confidence.min);
+      max.push(sample.confidence.max);
+      ids.push(sample.sampleID);
+    });
+  }
 
   return (
     <div className="container">
-      <Plot
-        data={[
-          {
-            q1: lower,
-            median: median,
-            q3: upper,
-            lowerfence: min,
-            upperfence: max,
-            x: ids,
-            type: "box",
-          },
-        ]}
-        layout={{ title: `Confidence` }}
-      />
+      <div className="box">
+        {results ? (
+          <Plot
+            data={[
+              {
+                q1: lower,
+                median: median,
+                q3: upper,
+                lowerfence: min,
+                upperfence: max,
+                x: ids,
+                type: "box",
+              },
+            ]}
+            layout={{ title: `Confidence` }}
+          />
+        ) : (
+          <h1>Nothing to display</h1>
+        )}
+      </div>
     </div>
   );
 };

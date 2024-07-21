@@ -13,7 +13,7 @@ from .ml_models.predictions import predict, confidence_intervals, probability
 views = Blueprint("views", __name__)
 
 TSNE_PIPE = Pipeline(
-    steps=[("scaler", MinMaxScaler()), ("dr", TSNE(n_components=3, perplexity=9))]
+    steps=[("scaler", MinMaxScaler()), ("dr", TSNE(n_components=3, perplexity=4))]
 )
 
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
@@ -136,7 +136,7 @@ def confidence():
 def perform_analysis():
     data = gene_preprocessing(full_analysis=True, features=request.features)
 
-    predictions, prediction_probs = predict(data["features"])
+    predictions, prediction_probs, num_nc = predict(data["features"])
     confidence_interval_list = confidence_intervals(data["features"])
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
     tsne = TSNE_PIPE.fit_transform(data["features"]).tolist()
@@ -185,4 +185,6 @@ def perform_analysis():
             }
         )
 
-    return jsonify({"data": {"samples": results, "invalid": request.invalid}})
+    return jsonify(
+        {"data": {"samples": results, "invalid": request.invalid, "nc": num_nc}}
+    )

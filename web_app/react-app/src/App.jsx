@@ -9,6 +9,7 @@ import GeneExpression from "./componets/GeneExpression";
 import Probability from "./componets/Probability";
 import Visualisation from "./componets/Visualisation";
 import Confidence from "./componets/Confidence";
+import Help from "./componets/Help";
 
 function App() {
   const [predictions, setPredictions] = useState([]);
@@ -18,6 +19,7 @@ function App() {
   const [tsne, setTsne] = useState();
   const [confidence, setConfidence] = useState();
   const [results, setResults] = useState();
+  const [summary, setSummary] = useState();
 
   return (
     <Router>
@@ -35,6 +37,9 @@ function App() {
               setTsne={setTsne}
               setConfidence={setConfidence}
               setResults={setResults}
+              results={results}
+              summary={summary}
+              setSummary={setSummary}
             />
           }
         />
@@ -50,6 +55,9 @@ function App() {
               setTsne={setTsne}
               setConfidence={setConfidence}
               setResults={setResults}
+              results={results}
+              summary={summary}
+              setSummary={setSummary}
             />
           }
         />
@@ -88,6 +96,7 @@ function App() {
           }
         />
         <Route path="/confidence" element={<Confidence results={results} />} />
+        <Route path="/help" element={<Help />} />
       </Routes>
     </Router>
   );

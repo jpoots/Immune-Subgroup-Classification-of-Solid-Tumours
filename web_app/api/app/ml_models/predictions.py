@@ -31,7 +31,7 @@ def predict(features):
         for index, prediction in enumerate(predictions)
     ]
 
-    return predictions, prediction_probs.tolist()
+    return predictions, prediction_probs.tolist(), len(nc_indicies)
 
 
 def confidence_intervals(features):
