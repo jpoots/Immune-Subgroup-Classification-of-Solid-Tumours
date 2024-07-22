@@ -3,7 +3,7 @@ import queensLogo from "/logo.png";
 
 const Header = () => {
   return (
-    <nav className="navbar queens-branding is-info">
+    <nav className="navbar queens-branding is-dark">
       <div className="container">
         <div className="navbar-brand">
           <Link to="/" className="navbar-item">

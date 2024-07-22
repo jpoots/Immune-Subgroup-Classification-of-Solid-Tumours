@@ -1,9 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   getCoreRowModel,
   useReactTable,
   flexRender,
   getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
 } from "@tanstack/react-table";
 
 import sortArrows from "/sort-solid.svg";
@@ -15,6 +17,7 @@ const GeneExpression = ({ results }) => {
   let samples = [];
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
+  const [sorting, setSorting] = useState([]);
   const [reverse, setReverse] = useState(false);
   const geneNameList = useRef();
   const allSamples = useRef();
@@ -24,45 +27,61 @@ const GeneExpression = ({ results }) => {
     allSamples.current = results["samples"];
     geneNameList.current = Object.keys(allSamples.current[0]["genes"]);
 
-    samples = allSamples.current.filter((sample) =>
-      sample["sampleID"].toUpperCase().includes(query)
-    );
-
-    if (reverse) {
-      samples.sort((a, b) => a.sampleID.localeCompare(b.sampleID));
-    } else {
-      samples.sort((b, a) => a.sampleID.localeCompare(b.sampleID));
-    }
+    samples = allSamples.current;
   }
 
-  //const currentAllSamples = allSamples.current;
+  const currentAllSamples = allSamples.current;
   const [columnFilters, setColumnFilters] = useState([]);
 
-  let numPages = Math.ceil(samples.length / PAGE_SIZE);
-  let firstOnPage = page * PAGE_SIZE;
-  let lastOnPage = page * PAGE_SIZE + PAGE_SIZE;
-  let data = [];
+  let columns = useMemo(() => {
+    let columns = [
+      {
+        accessorKey: "sampleID",
+        header: "Sample ID",
+        id: "sampleID",
+        cell: (props) => <p>{props.getValue()}</p>,
+      },
+    ];
 
-  if (lastOnPage > samples.length) lastOnPage = samples.length;
+    let append = geneNameList.current.map((name) => ({
+      accessorKey: `genes.${name}`,
+      header: name,
+      id: name,
+      cell: (props) => <p>{props.getValue()}</p>,
+      enableSorting: false,
+    }));
 
-  samples = samples.slice(firstOnPage, lastOnPage);
+    columns = columns.concat(append);
 
-  console.log(page);
+    return columns;
+  }, []);
 
-  const handlePrev = () => {
-    if (page > 0) setPage((p) => p - 1);
-  };
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  const handleNext = () => {
-    if (page < numPages + 1) setPage((p) => p + 1);
-  };
+  const table = useReactTable({
+    data: currentAllSamples,
+    columns,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    getSortedRowModel: getSortedRowModel(),
+    onSortingChange: setSorting,
 
-  const handlePageLink = (e) => {
-    setPage(parseInt(e.target.text) - 1);
-  };
+    state: {
+      columnFilters,
+      pagination,
+      sorting,
+    },
+  });
 
   const exportSamples = () => {
-    let toExport = allSamples.current.map((sample) => {
+    let toExport = table.getFilteredRowModel().rows.map((row) => {
+      let sample = row.original;
       let sampleDict = { sampleID: sample.sampleID };
 
       Object.keys(sample["genes"]).forEach(
@@ -74,107 +93,49 @@ const GeneExpression = ({ results }) => {
     setDownload(toExport);
   };
 
-  /*
-  experimenting with tan tables. Actually more efficient to handle manually
-  const handleSearch = (e) => {
-    setColumnFilters((c) => {
-      return c
-        .filter((filter) => filter.id != "sampleID")
-        .concat({
-          id: "sampleID",
-          value: e.target.value,
-        });
-    });
-  };
-
-  let columns = [
-    {
-      accessorKey: "sampleID",
-      header: "Sample ID",
-      id: "sampleID",
-      cell: (props) => <p>{props.getValue()}</p>,
-    },
-  ];
-
-  columns = columns.concat(
-    geneNameList.current.map((name) => ({
-      accessorKey: `genes.${name}`,
-      header: name,
-      id: name,
-      cell: (props) => <p>{props.getValue()}</p>,
-    }))
-  );
-
-
-  const table = useReactTable({
-    data: currentAllSamples,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      columnFilters,
-    },
-  });
-  */
-
   const tableComponent = (samples) => {
     return (
       <div className="table-container">
-        {/*
-        <table className="table is-bordered">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>{header.column.columnDef.header}</th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        */}
-        <table className="table is-bordered">
-          <tbody>
-            <tr>
-              <th>
-                <span>Sample ID</span>{" "}
-                <span>
-                  <button
-                    className="button is-small sort-button"
-                    onClick={() => setReverse((s) => !s)}
-                  >
-                    <img src={sortArrows} width={10} />
-                  </button>
-                </span>
-              </th>
-              {geneNameList.current.map((geneName) => (
-                <th key={geneName}>{geneName}</th>
+        {
+          <table className="table is-bordered">
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <th key={header.id}>
+                        {header.column.columnDef.header}{" "}
+                        {header.column.getCanSort() && (
+                          <button
+                            className="button is-small sort-button"
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            <img src={sortArrows} width={10} />
+                          </button>
+                        )}
+                      </th>
+                    );
+                  })}
+                </tr>
               ))}
-            </tr>
-            {samples.map((sample) => (
-              <tr key={sample.sampleID}>
-                <th>{sample.sampleID}</th>
-                {Object.keys(sample.genes).map((geneName) => (
-                  <td key={`${sample.sampleID}_${geneName}`}>
-                    {sample.genes[geneName].toFixed(2)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        }
       </div>
     );
   };
@@ -188,8 +149,8 @@ const GeneExpression = ({ results }) => {
               type="text"
               className="input queens-textfield"
               onChange={(e) => {
-                setQuery(e.target.value.toUpperCase());
-                setPage(0);
+                let column = table.getColumn("sampleID");
+                column.setFilterValue(e.target.value.toUpperCase());
               }}
               placeholder="Search by sample ID"
             />
@@ -197,81 +158,47 @@ const GeneExpression = ({ results }) => {
         </div>
 
         {samples.length > 0 ? (
-          tableComponent(samples)
+          [
+            tableComponent(samples),
+            <nav className="pagination is-right">
+              <button
+                onClick={() => table.previousPage()}
+                className="pagination-previous queens-branding queens-button"
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </button>
+
+              <button
+                onClick={() => table.nextPage()}
+                className="pagination-next queens-branding queens-button"
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </button>
+              <ul className="pagination-list">
+                <li>
+                  <span>Go to page:</span>{" "}
+                  <input
+                    onChange={(e) => table.setPageIndex(e.target.value)}
+                    type="number"
+                  />
+                </li>
+              </ul>
+            </nav>,
+            <CSVLink
+              data={download}
+              filename="data"
+              onClick={exportSamples}
+              className="button is-dark"
+            >
+              <button>Download Report</button>
+            </CSVLink>,
+          ]
         ) : (
           <h1>Nothing to display</h1>
         )}
       </div>
-      <nav className="pagination is-centered">
-        <button
-          onClick={handlePrev}
-          className="pagination-previous queens-branding queens-button"
-          disabled={page === 0}
-        >
-          Previous
-        </button>
-
-        <button
-          onClick={handleNext}
-          className="pagination-next queens-branding queens-button"
-          disabled={page + 1 === numPages}
-        >
-          Next
-        </button>
-
-        <ul className="pagination-list">
-          <li>
-            <a className="pagination-link" onClick={handlePageLink}>
-              1
-            </a>
-          </li>
-
-          <li>
-            <span className="pagination-ellipsis">&hellip;</span>
-          </li>
-
-          {page > 1 && (
-            <li>
-              <a className="pagination-link" onClick={handlePageLink}>
-                {page}
-              </a>
-            </li>
-          )}
-
-          {page > 1 && (
-            <li>
-              <a className="pagination-link" onClick={handlePageLink}>
-                {page + 1}
-              </a>
-            </li>
-          )}
-
-          {page + 2 < numPages && (
-            <li>
-              <a className="pagination-link" onClick={handlePageLink}>
-                {page + 2}
-              </a>
-            </li>
-          )}
-
-          <li>
-            <span className="pagination-ellipsis">&hellip;</span>
-          </li>
-
-          <li>
-            <a className="pagination-link">{numPages}</a>
-          </li>
-        </ul>
-      </nav>
-
-      <CSVLink
-        data={download}
-        filename="data"
-        onClick={exportSamples}
-        className="button is-dark"
-      >
-        <button>Download Report</button>
-      </CSVLink>
     </div>
   );
 };

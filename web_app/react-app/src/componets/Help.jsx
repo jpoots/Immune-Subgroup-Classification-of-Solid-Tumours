@@ -7,10 +7,10 @@ const Help = () => {
           ICST (Immune Subgroup Classification of Solid Tumours) is a research
           tool for cancer researchers and immunotherapy practitioners developed
           as an MSc Software Development project by Jordan Poots in concert with
-          research performed by Dr Reza Rafiee at Queen's University Belfast. It
-          seeks to use FPKM normalised RNA-Seq data from 440 genes to group
-          solid tumour samples into one of the six immune sugroups identified in
-          the 2018 publication{" "}
+          research performed by Dr Reza Rafiee at Queen&apos;s University
+          Belfast. It seeks to use FPKM normalised RNA-Seq data from 440 genes
+          to group solid tumour samples into one of the six immune sugroups
+          identified in the 2018 publication{" "}
           <a
             href="https://pubmed.ncbi.nlm.nih.gov/29628290/"
             className="queens-branding-text"
@@ -26,9 +26,9 @@ const Help = () => {
             <p className="block">
               ICST accepts RNA-Seq data and extracts 440 key genes for the
               subgroup classification. Any missing genes are imputed using the
-              MICE algorithm and genes are then scaled betwen -1 and 1 using a
+              MICE algorithm and genes are then scaled between 0 and 1 using a
               Minmax scaling algorithm. They are then fed to a supervised
-              machine learning model trained on over 9000 samples from
+              machine learning model trained on over 7000 samples from
               PanCanAtlas using the gradient boosting algorthim in order the
               attain a classification along with the models probability of each
               subgroup.
@@ -78,17 +78,17 @@ const Help = () => {
           <h1 className="block has-text-weight-bold	">How good is it?</h1>
           <div className="block">
             While training and evaluation of a machine learning model is a
-            complicated process, some evaluation statistics are listed below for
-            your confidence in the models output. All values have been attained
-            using 10 fold cross validation.
+            complicated process, some evaluation statistics from a holdout set
+            of test data are listed below for your confidence in the models
+            output.
           </div>
 
           <div className="block">
             <ul>
-              <li>Accuracy: X</li>
-              <li>F1: Y</li>
-              <li>Precision: Z</li>
-              <li>Recall: O</li>
+              <li>Accuracy: 95.32%</li>
+              <li>F1: 89.78%</li>
+              <li>Precision: 88.73%</li>
+              <li>Recall: 91.42%</li>
             </ul>
           </div>
         </div>

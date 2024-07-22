@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import uploadIcon from "/upload-solid.svg";
 import { Tooltip } from "react-tooltip";
 import SampleQC from "./SampleQC";
+import Summary from "./Summary";
+import { BrowserRouter as Router, Link, Route, Routes } from "react-router-dom";
+import { CSVLink, CSVDownload } from "react-csv";
 
 const Upload = ({
   setPredictions,
@@ -18,9 +21,12 @@ const Upload = ({
 }) => {
   const [file, setFile] = useState();
   const [filename, setFileName] = useState("Upload File...");
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const fileInput = useRef();
+  const [summaryDownload, setSummaryDownload] = useState([]);
+  const [allDownload, setAllDownload] = useState([]);
+
+  console.log(results.samples);
 
   const handleFile = (event) => {
     setFile(event.target.files[0]);
@@ -35,6 +41,52 @@ const Upload = ({
     setDataFile();
     setLoading(false);
     setResults();
+  };
+
+  const handleSummaryDownload = () => {
+    setSummaryDownload(
+      Object.keys(summary).map((sample) => ({
+        subgroup: sample,
+        num_samples: summary[sample],
+      }))
+    );
+  };
+
+  const handleAllDownload = () => {
+    let allDownload = [];
+    results.samples.forEach((result) => {
+      let resultDict = {
+        sampleID: result.sampleID,
+        prediction: result.prediction,
+        upperConfidence: result.confidence.upper,
+        lowerConfidence: result.confidence.lower,
+        maxConfidence: result.confidence.max,
+        minConfidence: result.confidence.min,
+        medianConfidence: result.confidence.median,
+      };
+
+      result.probs.forEach((prob, index) => {
+        resultDict[`prob${index + 1}`] = prob;
+      });
+
+      result.pca.forEach((pca, index) => {
+        resultDict[`pca${index + 1}`] = pca;
+      });
+
+      result.tsne.forEach((tsne, index) => {
+        console.log(tsne);
+        resultDict[`tsne${index + 1}`] = tsne;
+      });
+
+      Object.keys(result.genes).forEach(
+        (gene) => (resultDict[gene] = result.genes[gene])
+      );
+
+      allDownload.push(resultDict);
+    });
+
+    console.log(allDownload);
+    setAllDownload(allDownload);
   };
 
   const handlePredict = async () => {
@@ -60,20 +112,8 @@ const Upload = ({
 
     setResults(fullResultsResponse);
 
-    let summaryResults = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0,
-      6: 0,
-      NC: 0,
-    };
-    fullResultsResponse["samples"].forEach(
-      (result) => summaryResults[result.prediction]++
-    );
+    //setSummary(summaryResults);
 
-    setSummary(summaryResults);
     /*
     let geneResponse = await fetch("http://127.0.0.1:3000/extractgenes", {
       method: "POST",
@@ -156,7 +196,7 @@ const Upload = ({
     <div className="container">
       <div className="box">
         <div className="block">
-          <h1>
+          <h1 className="block has-text-weight-bold">
             RNA-Seq Upload{" "}
             <a
               className="queens-branding-text"
@@ -226,21 +266,36 @@ const Upload = ({
           >
             Download Test Data
           </a>
-          <a href="" className="queens-branding-text">
+          <Link to="/help" className="queens-branding-text">
             Help
-          </a>
+          </Link>
         </div>
       </div>
       {results && <SampleQC results={results} />}
       {results && (
-        <div className="box">
-          <h1 className="block">Results Summary</h1>
-          {Object.keys(summary).map((subgroup) => (
-            <div className="block">
-              Subgroup {subgroup}: {summary[subgroup]} sample(s)
-            </div>
-          ))}
-        </div>
+        <Summary results={results} setSummary={setSummary} summary={summary} />
+      )}
+
+      {results && (
+        <CSVLink
+          data={summaryDownload}
+          filename="data"
+          onClick={handleSummaryDownload}
+          className="button is-dark"
+        >
+          <button>Download Report</button>
+        </CSVLink>
+      )}
+
+      {results && (
+        <CSVLink
+          data={allDownload}
+          filename="data"
+          onClick={handleAllDownload}
+          className="button queens-branding queens-button"
+        >
+          <button>Download All Info</button>
+        </CSVLink>
       )}
 
       <Tooltip id="my-tooltip" />

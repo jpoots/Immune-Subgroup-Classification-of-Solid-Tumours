@@ -1,7 +1,7 @@
 const SampleQC = ({ results }) => {
   return (
     <div className="box">
-      <h1 className="block">Gene QC</h1>
+      <h1 className="block has-text-weight-bold">Gene QC</h1>
       <div className="block">
         {results["samples"].length} sample(s) passed gene QC
       </div>
