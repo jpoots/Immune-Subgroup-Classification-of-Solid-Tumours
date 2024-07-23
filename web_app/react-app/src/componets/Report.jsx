@@ -50,7 +50,7 @@ const Report = ({ results }) => {
         filterFn: "equalsString",
       },
       {
-        accessorFn: (row) => row.probs[row.prediction - 1].toFixed(8),
+        accessorFn: (row) => Math.max(...row.probs).toFixed(8),
         header: "Sample ID",
         id: "prob",
         cell: (props) => <p>{props.getValue()}</p>,
@@ -112,6 +112,7 @@ const Report = ({ results }) => {
                 <option value="4">4</option>
                 <option value="5">5</option>
                 <option value="6">6</option>
+                <option value="NC">Non-classifiable</option>
               </select>
             </div>
           </div>

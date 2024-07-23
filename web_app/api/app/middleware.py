@@ -5,8 +5,12 @@ from fastjsonschema import compile, JsonSchemaValueException
 import pandas as pd
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
+import joblib
+import os
 
 NUM_GENES = 440
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ORDERED_GENE_DF = joblib.load(os.path.join(CURRENT_DIR, "ordered_gene_names.pkl"))
 
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
@@ -53,6 +57,9 @@ def parse_json(f):
         except JsonSchemaValueException as e:
             raise exceptions.BadRequest(e.message)
 
+        if "perplexity" in data:
+            request.perplexity = data["perplexity"]
+
         data = data["samples"]
 
         # extract data from JSON. List comp not used for efficieny with large data
@@ -80,6 +87,7 @@ def parse_csv(f):
             file = request.files["samples"]
             data = pd.read_csv(file, index_col=0)
             data = data.T
+            data = data[ORDERED_GENE_DF.columns.intersection(data.columns)]
         except Exception as e:
             raise exceptions.BadRequest(
                 'Sample files should be valid CSV or TXT files attached as "samples"'

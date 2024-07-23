@@ -10,6 +10,8 @@ import Probability from "./componets/Probability";
 import Visualisation from "./componets/Visualisation";
 import Confidence from "./componets/Confidence";
 import Help from "./componets/Help";
+import Tsne from "./componets/Tsne";
+import Pca from "./componets/Pca";
 
 function App() {
   const [predictions, setPredictions] = useState([]);
@@ -73,28 +75,8 @@ function App() {
           path="/probability"
           element={<Probability samples={predictions} results={results} />}
         />
-        <Route
-          path="/pca2d"
-          element={<Visualisation twoD={true} isPca={true} results={results} />}
-        />
-        <Route
-          path="/pca3d"
-          element={
-            <Visualisation twoD={false} isPca={true} results={results} />
-          }
-        />
-        <Route
-          path="/tsne2d"
-          element={
-            <Visualisation twoD={true} isPca={false} results={results} />
-          }
-        />
-        <Route
-          path="/tsne3d"
-          element={
-            <Visualisation twoD={false} isPca={false} results={results} />
-          }
-        />
+        <Route path="/pca" element={<Pca results={results} />} />
+        <Route path="/tsne" element={<Tsne results={results} />} />
         <Route path="/confidence" element={<Confidence results={results} />} />
         <Route path="/help" element={<Help />} />
       </Routes>

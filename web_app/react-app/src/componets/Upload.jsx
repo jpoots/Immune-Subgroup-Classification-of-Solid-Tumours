@@ -26,8 +26,6 @@ const Upload = ({
   const [summaryDownload, setSummaryDownload] = useState([]);
   const [allDownload, setAllDownload] = useState([]);
 
-  console.log(results.samples);
-
   const handleFile = (event) => {
     setFile(event.target.files[0]);
     setFileName(event.target.files[0].name);
@@ -41,6 +39,7 @@ const Upload = ({
     setDataFile();
     setLoading(false);
     setResults();
+    setSummary();
   };
 
   const handleSummaryDownload = () => {

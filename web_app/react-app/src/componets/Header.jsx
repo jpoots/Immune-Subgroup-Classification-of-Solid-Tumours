@@ -32,33 +32,13 @@ const Header = () => {
             Probability
           </Link>
 
-          <div className="navbar-item has-dropdown is-hoverable">
-            <a className="navbar-link">PCA</a>
+          <Link to="/tsne" className="navbar-item">
+            t-SNE
+          </Link>
 
-            <div className="navbar-dropdown">
-              <Link to="/pca2d" className="navbar-item">
-                2D
-              </Link>
-
-              <Link to="/pca3d" className="navbar-item">
-                3D
-              </Link>
-            </div>
-          </div>
-
-          <div className="navbar-item has-dropdown is-hoverable">
-            <a className="navbar-link">t-SNE</a>
-
-            <div className="navbar-dropdown">
-              <Link to="/tsne2d" className="navbar-item">
-                2D
-              </Link>
-
-              <Link to="/tsne3d" className="navbar-item">
-                3D
-              </Link>
-            </div>
-          </div>
+          <Link to="/pca" className="navbar-item">
+            PCA
+          </Link>
         </div>
 
         <div className="navbar-end">

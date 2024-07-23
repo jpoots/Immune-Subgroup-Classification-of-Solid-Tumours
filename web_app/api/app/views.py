@@ -100,11 +100,25 @@ def pca():
 @views.route("/tsne", methods=["POST"])
 @parse_json
 def tsne():
+
+    idx = request.idx
     features = request.features
+    perplexity = request.perplexity
 
+    print(perplexity)
+    Pipeline(
+        steps=[
+            ("scaler", MinMaxScaler()),
+            ("dr", TSNE(n_components=3, perplexity=perplexity)),
+        ]
+    )
+
+    results = []
     tsne = TSNE_PIPE.fit_transform(features).tolist()
+    for id, tsne_result in zip(idx, tsne):
+        results.append({"sampleID": id, "tsne": tsne_result})
 
-    return jsonify({"data": tsne})
+    return jsonify({"data": results})
 
 
 @views.route("/confidence", methods=["POST"])
