@@ -1,5 +1,7 @@
 import { useEffect, useRef, useMemo, useState } from "react";
 import Plot from "react-plotly.js";
+import NothingToDisplay from "./NothingToDisplay";
+import { CSVLink, CSVDownload } from "react-csv";
 
 const Pca = ({ results }) => {
   const slider = useRef();
@@ -13,6 +15,7 @@ const Pca = ({ results }) => {
   const [dimension, setDimensions] = useState(2);
   const [disabled, setDisabled] = useState(false);
   const [title, setTitle] = useState("PCA");
+  const [download, setDownload] = useState([]);
 
   useMemo(() => {
     let xAdd = {
@@ -91,46 +94,68 @@ const Pca = ({ results }) => {
     }
   };
 
+  const handleDownload = () => {
+    let toDownload = [];
+    console.log(results.samples);
+    results.samples.forEach((sample) => {
+      toDownload.push({
+        sampleID: sample.sampleID,
+        pc1: sample.pca[0],
+        pc2: sample.pca[1],
+        pc3: sample.pca[2],
+      });
+    });
+    setDownload(toDownload);
+  };
+
   return (
     <div className="container">
-      <div className="columns">
-        <div className="column is-one-quarter box">
-          <div className="control block" onChange={handleDim}>
-            <h1 className="has-text-weight-bold	">Dimensions</h1>
-            <label className="radio">
-              <input
-                type="radio"
-                name="dim"
-                value="2"
-                className="mr-2"
-                checked={dimension === 2}
-              />
-              2D
-            </label>
+      {results ? (
+        <div className="columns">
+          <div className="column is-one-quarter box">
+            <div className="control block" onChange={handleDim}>
+              <h1 className="has-text-weight-bold	mt-5">Dimensions</h1>
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="dim"
+                  value="2"
+                  className="queens-radio mr-2"
+                  checked={dimension === 2}
+                />
+                2D
+              </label>
 
-            <label className="radio">
-              <input
-                type="radio"
-                name="dim"
-                value="3"
-                className="mr-2"
-                checked={dimension === 3}
-              />
-              3D
-            </label>
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="dim"
+                  value="3"
+                  className="queens-radio mr-2"
+                  checked={dimension === 3}
+                />
+                3D
+              </label>
+            </div>
+            <h1 className="has-text-weight-bold">Title</h1>
+            <input
+              type="text"
+              placeholder="Title"
+              className="input queens-textfield block"
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <CSVLink
+              data={download}
+              filename="data"
+              onClick={handleDownload}
+              className="button is-dark"
+            >
+              <button>Download Report</button>
+            </CSVLink>
           </div>
-          <h1 className="has-text-weight-bold">Title</h1>
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            className="input"
-            onChange={(e) => setTitle(e.target.value)}
-          />
-        </div>
 
-        <div className="column is-fullheight">
-          {x.current ? (
+          <div className="column is-fullheight">
             <Plot
               data={Object.keys(x.current).map((key) => ({
                 x: x.current[key],
@@ -177,11 +202,11 @@ const Pca = ({ results }) => {
                 },
               }}
             />
-          ) : (
-            <h1>Results will display here</h1>
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <NothingToDisplay />
+      )}
     </div>
   );
 };

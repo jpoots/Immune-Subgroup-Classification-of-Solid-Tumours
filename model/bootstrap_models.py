@@ -1,6 +1,5 @@
 import numpy as np
 import joblib
-import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.neural_network import MLPClassifier
@@ -58,7 +57,7 @@ rus = RandomUnderSampler(sampling_strategy=under_sample)
 smt = SMOTE(sampling_strategy=over_sample)
 
 # set up pipeline and fit
-n_bootstraps = 2
+n_bootstraps = 100
 n_samples = y_test.shape
 predictions = np.empty((n_bootstraps, n_samples[0]))
 

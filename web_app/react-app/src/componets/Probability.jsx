@@ -1,15 +1,17 @@
-import React, { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   getCoreRowModel,
   useReactTable,
-  flexRender,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import sortArrows from "/sort-solid.svg";
-import { CSVLink, CSVDownload } from "react-csv";
+import { Table } from "./Table";
+
+import { CSVLink } from "react-csv";
+import NothingToDisplay from "./NothingToDisplay";
+import { PaginationBar } from "./PaginationBar";
 
 const Proability = ({ results }) => {
   let samples = results ? results["samples"] : [];
@@ -42,7 +44,7 @@ const Proability = ({ results }) => {
     );
   };
 
-  let columns = useMemo(
+  const columns = useMemo(
     () => [
       {
         accessorKey: "sampleID",
@@ -109,109 +111,42 @@ const Proability = ({ results }) => {
 
   return (
     <div className="container">
-      <div className="box">
-        <div className="columns">
-          <div className="column is-one-quarter">
-            <input
-              type="text"
-              className="input queens-textfield"
-              onChange={(e) => {
-                let column = table.getColumn("sampleID");
-                column.setFilterValue(e.target.value.toUpperCase());
-              }}
-              placeholder="Search by sample ID"
-            />
+      {results ? (
+        <>
+          <div className="box">
+            {" "}
+            <div className="columns">
+              <div className="column is-one-quarter">
+                <input
+                  type="text"
+                  className="input queens-textfield"
+                  onChange={(e) => {
+                    let column = table.getColumn("sampleID");
+                    column.setFilterValue(e.target.value.toUpperCase());
+                  }}
+                  placeholder="Search by sample ID"
+                />
+              </div>
+            </div>
+            <Table table={table} />
           </div>
-        </div>
-        <div className="columns"></div>
-        <div className="table-container">
-          {
-            <table className="table is-bordered">
-              <thead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => {
-                      return (
-                        <th key={header.id}>
-                          {header.column.columnDef.header}{" "}
-                          {header.column.getCanSort() && (
-                            <button
-                              className="button is-small sort-button"
-                              onClick={header.column.getToggleSortingHandler()}
-                            >
-                              <img src={sortArrows} width={10} />
-                            </button>
-                          )}
-                        </th>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </thead>
-
-              <tbody>
-                {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          }
-        </div>
-      </div>
-      <nav className="pagination is-right">
-        <button
-          onClick={() => table.previousPage()}
-          className="pagination-previous queens-branding queens-button"
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </button>
-
-        <button
-          onClick={() => table.nextPage()}
-          className="pagination-next queens-branding queens-button"
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </button>
-
-        <ul className="pagination-list">
-          <li className="mr-5">
-            <span>Page </span>{" "}
-            <span className="has-text-weight-bold	">
-              {table.getState().pagination.pageIndex + 1}
-            </span>{" "}
-            <span>of</span>{" "}
-            <span className="has-text-weight-bold	">{table.getPageCount()}</span>{" "}
-          </li>
-
-          <li>
-            <span>Go to page:</span>{" "}
-            <input
-              onChange={(e) => table.setPageIndex(e.target.value - 1)}
-              type="number"
-            />
-          </li>
-        </ul>
-      </nav>
-
-      <CSVLink
-        data={download}
-        filename="data"
-        onClick={exportSamples}
-        className="button is-dark"
-      >
-        <button>Download Report</button>
-      </CSVLink>
+          <PaginationBar
+            table={table}
+            download={download}
+            exportSamples={exportSamples}
+          />
+          <CSVLink
+            data={download}
+            filename="data"
+            onClick={exportSamples}
+            className="button is-dark"
+          >
+            <button>Download Report</button>
+          </CSVLink>
+        </>
+      ) : (
+        <NothingToDisplay />
+      )}
     </div>
   );
 };

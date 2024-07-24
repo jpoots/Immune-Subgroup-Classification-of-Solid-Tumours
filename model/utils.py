@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
+import os
 
 # utility functions for use throughout the project
-
-FILE_LOCATION = "data.csv"
+CURRENT = os.path.dirname(os.path.abspath(__file__))
+FILE_LOCATION = os.path.join(CURRENT, "data.csv")
 
 
 # loads the data into a panda dataframe and returns the transposed data fram

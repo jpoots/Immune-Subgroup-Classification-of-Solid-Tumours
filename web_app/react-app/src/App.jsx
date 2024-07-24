@@ -46,24 +46,6 @@ function App() {
           }
         />
         <Route
-          exact
-          path="/upload"
-          element={
-            <Upload
-              setPredictions={setPredictions}
-              setDataFile={setFile}
-              setGenes={setGenes}
-              setPca={setPca}
-              setTsne={setTsne}
-              setConfidence={setConfidence}
-              setResults={setResults}
-              results={results}
-              summary={summary}
-              setSummary={setSummary}
-            />
-          }
-        />
-        <Route
           path="/geneexpression"
           element={<GeneExpression results={results} />}
         />

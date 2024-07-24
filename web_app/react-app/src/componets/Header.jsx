@@ -5,14 +5,14 @@ const Header = () => {
   return (
     <nav className="navbar queens-branding is-dark">
       <div className="container">
-        <div className="navbar-brand">
-          <Link to="/" className="navbar-item">
+        <Link to="/" className="navbar-brand">
+          <div className="navbar-item">
             <img src={queensLogo} alt="Queens Logo" />
-          </Link>
-        </div>
+          </div>
+        </Link>
 
         <div className="navbar-start">
-          <Link to="/upload" className="navbar-item">
+          <Link to="/" className="navbar-item">
             Upload
           </Link>
 

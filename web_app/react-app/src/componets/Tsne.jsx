@@ -1,5 +1,7 @@
 import { useRef, useState } from "react";
 import Plot from "react-plotly.js";
+import NothingToDisplay from "./NothingToDisplay";
+import { CSVLink, CSVDownload } from "react-csv";
 
 const Tsne = ({ results }) => {
   const slider = useRef();
@@ -14,6 +16,7 @@ const Tsne = ({ results }) => {
   const [dimension, setDimensions] = useState(2);
   const [disabled, setDisabled] = useState(false);
   const [title, setTitle] = useState("t-SNE");
+  const [download, setDownload] = useState([]);
 
   const handleDim = () => {
     if (dimension === 2) {
@@ -21,6 +24,31 @@ const Tsne = ({ results }) => {
     } else {
       setDimensions(2);
     }
+  };
+
+  const handleDownload = () => {
+    let toDownload = [];
+    let id = [];
+    let tsne1 = [];
+    let tsne2 = [];
+    let tsne3 = [];
+
+    Object.keys(x.current).forEach((key) => {
+      id = ids.current[key];
+      tsne1 = x.current[key];
+      tsne2 = y.current[key];
+      tsne3 = z.current[key];
+
+      id.forEach((id, index) => {
+        toDownload.push({
+          sampleID: id,
+          tsne1: tsne1[index],
+          tsne2: tsne2[index],
+          tsne3: tsne3[index],
+        });
+      });
+    });
+    setDownload(toDownload);
   };
 
   const handleTsne = async () => {
@@ -107,121 +135,145 @@ const Tsne = ({ results }) => {
 
     setLoading(false);
     setDisabled(true);
-    setTitlePerplexity(perplexity);
   };
 
   return (
     <div className="container">
-      <div className="columns">
-        <div className="column is-one-quarter box">
-          <div>
-            <h1>Perplexity</h1>
-            <input
-              type="range"
-              min={1}
-              max={50}
-              ref={slider}
-              onChange={(e) => {
-                setPerplexity(e.target.value);
-                setDisabled(false);
-              }}
-            />
-            <div>{perplexity}</div>
-          </div>
-          <div className="control" onChange={handleDim}>
-            <h1>Dimensions</h1>
-            <label className="radio">
+      {results ? (
+        <div className="columns">
+          <div className="column is-one-quarter box">
+            <div className="block">
+              <h1 className="has-text-weight-bold mt-5">Perplexity</h1>
               <input
-                type="radio"
-                name="dim"
-                value="2"
-                checked={dimension === 2}
+                type="range"
+                min={1}
+                max={50}
+                ref={slider}
+                onChange={(e) => {
+                  setPerplexity(e.target.value);
+                  setDisabled(false);
+                }}
+                className="queens-slider"
               />
-              2D
-            </label>
+              <div className="has-text-weight-bold has-text-centered">
+                {perplexity}
+              </div>
+            </div>
+            <div className="control block" onChange={handleDim}>
+              <h1 className="has-text-weight-bold">Dimensions</h1>
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="dim"
+                  value="2"
+                  checked={dimension === 2}
+                  className="queens-radio mr-2"
+                />
+                2D
+              </label>
 
-            <label className="radio">
+              <label className="radio">
+                <input
+                  type="radio"
+                  name="dim"
+                  value="3"
+                  checked={dimension === 3}
+                  className="queens-radio mr-2"
+                />
+                3D
+              </label>
+            </div>
+            <div className="block">
+              <h1 className="has-text-weight-bold">Title</h1>
               <input
-                type="radio"
-                name="dim"
-                value="3"
-                checked={dimension === 3}
+                type="text"
+                placeholder="Title"
+                className="input queens-textfield"
+                onChange={(e) => setTitle(e.target.value)}
               />
-              3D
-            </label>
+            </div>
+            <div className="has-text-centered">
+              <button
+                className={
+                  "button queens-branding queens-button block " +
+                  (loading ? "is-loading" : "")
+                }
+                onClick={handleTsne}
+                disabled={loading || disabled}
+              >
+                {" "}
+                Analyse{" "}
+              </button>{" "}
+              <CSVLink
+                data={download}
+                filename="data"
+                onClick={handleDownload}
+                className="button is-dark"
+                disabled={!x.current}
+              >
+                <button>Download Report</button>
+              </CSVLink>
+            </div>
           </div>
-          <h1 className="has-text-weight-bold">Title</h1>
-          <input
-            type="text"
-            placeholder="Title"
-            value={title}
-            className="input"
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <button
-            className={
-              "button queens-branding queens-button " +
-              (loading ? "is-loading" : "")
-            }
-            onClick={handleTsne}
-            disabled={loading || disabled}
-          >
-            {" "}
-            Analyse{" "}
-          </button>{" "}
-        </div>
 
-        <div className="column">
-          {x.current && (
-            <Plot
-              data={Object.keys(x.current).map((key) => ({
-                x: x.current[key],
-                y: y.current[key],
-                z: z.current[key],
-                name: `${key}`,
-                type: dimension === 2 ? "scatter" : "scatter3d",
-                mode: "markers",
-                text: ids.current[key],
-                marker: {
-                  color: predictions.current,
-                },
-              }))}
-              layout={{
-                title: {
-                  text: title,
-                  pad: {
-                    b: -200,
+          <div className="column">
+            {x.current ? (
+              <Plot
+                data={Object.keys(x.current).map((key) => ({
+                  x: x.current[key],
+                  y: y.current[key],
+                  z: z.current[key],
+                  name: `${key}`,
+                  type: dimension === 2 ? "scatter" : "scatter3d",
+                  mode: "markers",
+                  text: ids.current[key],
+                  marker: {
+                    color: predictions.current,
                   },
-                },
-                height: 700,
-                showlegend: true,
-                legend: {
-                  title: { text: "Subgroup" },
-                },
-                xaxis: {
-                  title: { text: "t-SNE Component 1" },
-                },
-                yaxis: {
-                  title: { text: "t-SNE Component 2" },
-                },
-                scene: {
-                  height: 800,
-                  xaxis: { title: "Component 1" },
-                  yaxis: { title: "Component 2" },
-                  zaxis: { title: "Component 3" },
-                  camera: {
-                    eye: {
-                      x: 1.25,
-                      y: 1.25,
-                      z: 2.25,
+                }))}
+                layout={{
+                  title: {
+                    text: title,
+                    pad: {
+                      b: -200,
                     },
                   },
-                },
-              }}
-            />
-          )}
+                  height: 700,
+                  showlegend: true,
+                  legend: {
+                    title: { text: "Subgroup" },
+                  },
+                  xaxis: {
+                    title: { text: "t-SNE Component 1" },
+                  },
+                  yaxis: {
+                    title: { text: "t-SNE Component 2" },
+                  },
+                  scene: {
+                    height: 800,
+                    xaxis: { title: "Component 1" },
+                    yaxis: { title: "Component 2" },
+                    zaxis: { title: "Component 3" },
+                    camera: {
+                      eye: {
+                        x: 1.25,
+                        y: 1.25,
+                        z: 2.25,
+                      },
+                    },
+                  },
+                }}
+              />
+            ) : (
+              <div className="box has-text-centered">
+                Your graph will appear here when analysis is complete
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <NothingToDisplay />
+      )}
     </div>
   );
 };

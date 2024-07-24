@@ -1,41 +1,41 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef } from "react";
 import uploadIcon from "/upload-solid.svg";
 import { Tooltip } from "react-tooltip";
 import SampleQC from "./SampleQC";
 import Summary from "./Summary";
-import { BrowserRouter as Router, Link, Route, Routes } from "react-router-dom";
-import { CSVLink, CSVDownload } from "react-csv";
+import { Link } from "react-router-dom";
+import { CSVLink } from "react-csv";
 
-const Upload = ({
-  setPredictions,
-  setDataFile,
-  setGenes,
-  setPca,
-  setTsne,
-  setConfidence,
-  setResults,
-  results,
-  summary,
-  setSummary,
-}) => {
+const ALLOWED_FILES = ["csv", "txt"];
+const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
+
+const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
   const [file, setFile] = useState();
   const [filename, setFileName] = useState("Upload File...");
   const [loading, setLoading] = useState(false);
   const fileInput = useRef();
   const [summaryDownload, setSummaryDownload] = useState([]);
   const [allDownload, setAllDownload] = useState([]);
+  const [invalidFile, setInvalidFile] = useState(false);
 
   const handleFile = (event) => {
-    setFile(event.target.files[0]);
-    setFileName(event.target.files[0].name);
-    console.log("triggered");
+    let file = event.target.files[0];
+    handleReset(file.name);
+    setFile(file);
+    setFileName(file.name);
+
+    console.log(file.name.split(".").pop());
+    if (!ALLOWED_FILES.includes(file.name.split(".").pop())) {
+      setInvalidFile(true);
+      handleReset();
+    }
   };
 
-  const handleReset = () => {
+  const handleReset = (fileName) => {
+    fileName = typeof fileName === "undefined" ? "Upload File..." : filename;
     fileInput.current.value = null;
     setFile();
-    setFileName("Upload File...");
+    setFileName(fileName);
     setDataFile();
     setLoading(false);
     setResults();
@@ -98,97 +98,29 @@ const Upload = ({
     const formData = new FormData();
     formData.append("samples", file);
 
-    let fullResultsResponse = await fetch(
-      "http://127.0.0.1:3000/performanalysis",
-      {
-        method: "POST",
-        body: formData,
+    let fullResultsResponse = [];
+
+    try {
+      let fullResultsResponse = await fetch(
+        "http://127.0.0.1:3000/performanalysis",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!fullResultsResponse.ok) {
+        console.log(fullResultsResponse);
       }
-    );
+    } catch (error) {
+      error;
+    }
+
     fullResultsResponse = await fullResultsResponse.json();
     fullResultsResponse = fullResultsResponse.data;
     setLoading(false);
 
     setResults(fullResultsResponse);
-
-    //setSummary(summaryResults);
-
-    /*
-    let geneResponse = await fetch("http://127.0.0.1:3000/extractgenes", {
-      method: "POST",
-      body: formData,
-    });
-    geneResponse = await geneResponse.json();
-    geneResponse = geneResponse.data;
-
-    console.log(geneResponse);
-
-    let predResponse = await fetch("http://127.0.0.1:3000/predict", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(geneResponse),
-    });
-    predResponse = await predResponse.json();
-
-    console.log(predResponse.data);
-
-    let pcaResponse = await fetch("http://127.0.0.1:3000/pca", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(geneResponse),
-    });
-    pcaResponse = await pcaResponse.json();
-
-    let pca = predResponse.data;
-    pca.forEach((sample, index) => {
-      sample["pca"] = pcaResponse.results[index];
-    });
-
-    let tsneResponse = await fetch("http://127.0.0.1:3000/tsne", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(geneResponse),
-    });
-    tsneResponse = await tsneResponse.json();
-
-    let tsne = predResponse.data;
-    tsne.forEach((sample, index) => {
-      sample["tsne"] = tsneResponse.data[index];
-    });
-
-    let confResponse = await fetch("http://127.0.0.1:3000/confidence", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(geneResponse),
-    });
-    confResponse = await confResponse.json();
-
-    let conf = predResponse.results;
-    conf.forEach((sample, index) => {
-      sample["confidence"] = confResponse.results[index]["confidence"];
-    });
-
-    console.log(conf);
-
-    // set predictions and reroute
-    setPredictions(predResponse.results);
-    setGenes(geneResponse);
-    setPca(pca);
-    setTsne(tsne);
-    setConfidence(conf);
-    */
   };
 
   return (
@@ -217,6 +149,7 @@ const Upload = ({
               onChange={handleFile}
               className="file-input"
               ref={fileInput}
+              accept={ALLOWED_FILE_HTML}
             />
             <span className="file-cta">
               <span className="file-icon">
@@ -243,7 +176,7 @@ const Upload = ({
 
           <button
             className="button is-dark"
-            onClick={handleReset}
+            onClick={() => handleReset()}
             disabled={loading || !results}
           >
             {" "}
@@ -295,6 +228,19 @@ const Upload = ({
         >
           <button>Download All Info</button>
         </CSVLink>
+      )}
+
+      {invalidFile && (
+        <div className="modal is-active">
+          <div className="modal-background"></div>
+          <div className="modal-content">
+            <div className="box has-text-centered"> Invalid file type</div>
+          </div>
+          <button
+            className="modal-close is-large"
+            onClick={() => setInvalidFile(false)}
+          ></button>
+        </div>
       )}
 
       <Tooltip id="my-tooltip" />
