@@ -6,42 +6,63 @@ import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
 
+/**
+ * constants for managing the allowed file types to upload
+ */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
 
-const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
+/**
+ *  This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
+ * @param {function} setResults - setter fir results
+ * @param {Object} [results] - results from analysis
+ * @param {Object.<number, number>} [summary] - summary of results
+ * @param {function} setSummary - setter for summary
+ * @returns
+ */
+const Upload = ({ setResults, results, summary, setSummary }) => {
+  // defining state for the component
   const [file, setFile] = useState();
   const [filename, setFileName] = useState("Upload File...");
   const [loading, setLoading] = useState(false);
   const fileInput = useRef();
   const [summaryDownload, setSummaryDownload] = useState([]);
   const [allDownload, setAllDownload] = useState([]);
-  const [invalidFile, setInvalidFile] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState();
 
+  /**
+   * sets the filename and file for the component after reset the current ones
+   * @param {event} event - the onChange event
+   */
   const handleFile = (event) => {
     let file = event.target.files[0];
     handleReset(file.name);
     setFile(file);
     setFileName(file.name);
 
-    console.log(file.name.split(".").pop());
-    if (!ALLOWED_FILES.includes(file.name.split(".").pop())) {
-      setInvalidFile(true);
-      handleReset();
-    }
+    // if invlaid file type, open warning modal
+    if (!ALLOWED_FILES.includes(file.name.split(".").pop()))
+      openWarningModal("Invalid file type");
   };
 
+  /**
+   * resets the state of the app and clears the file input. The use of filename allows the name to persist in the box if resetting for new immediate upload
+   * @param {string} [fileName] - the name of the file to set, optional. If none is given, the filename is reset to default
+   */
   const handleReset = (fileName) => {
     fileName = typeof fileName === "undefined" ? "Upload File..." : filename;
     fileInput.current.value = null;
     setFile();
     setFileName(fileName);
-    setDataFile();
     setLoading(false);
     setResults();
     setSummary();
   };
 
+  /**
+   * Generates a summary of the results when called in an object for downloading
+   */
   const handleSummaryDownload = () => {
     setSummaryDownload(
       Object.keys(summary).map((sample) => ({
@@ -51,9 +72,13 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
     );
   };
 
+  /**
+   * Generates an object from the results which can be given to csv link
+   */
   const handleAllDownload = () => {
     let allDownload = [];
     results.samples.forEach((result) => {
+      // initialising result dict for each result
       let resultDict = {
         sampleID: result.sampleID,
         prediction: result.prediction,
@@ -64,19 +89,23 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
         medianConfidence: result.confidence.median,
       };
 
+      // extracting probs results
       result.probs.forEach((prob, index) => {
         resultDict[`prob${index + 1}`] = prob;
       });
 
+      // extracting pca results
       result.pca.forEach((pca, index) => {
         resultDict[`pca${index + 1}`] = pca;
       });
 
+      // extracting tsne results
       result.tsne.forEach((tsne, index) => {
         console.log(tsne);
         resultDict[`tsne${index + 1}`] = tsne;
       });
 
+      // extracting genes
       Object.keys(result.genes).forEach(
         (gene) => (resultDict[gene] = result.genes[gene])
       );
@@ -84,24 +113,23 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
       allDownload.push(resultDict);
     });
 
-    console.log(allDownload);
     setAllDownload(allDownload);
   };
 
+  /**
+   * handles the logic to reach out to the ML api and set results
+   */
   const handlePredict = async () => {
+    // loading true to make button change
     setLoading(true);
-
-    // set the file for the whole project
-    setDataFile(file);
 
     // create a form and hit the api for predictions
     const formData = new FormData();
     formData.append("samples", file);
 
     let fullResultsResponse = [];
-
     try {
-      let fullResultsResponse = await fetch(
+      fullResultsResponse = await fetch(
         "http://127.0.0.1:3000/performanalysis",
         {
           method: "POST",
@@ -109,18 +137,53 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
         }
       );
 
-      if (!fullResultsResponse.ok) {
-        console.log(fullResultsResponse);
+      if (fullResultsResponse.ok) {
+        fullResultsResponse = await fullResultsResponse.json();
+        fullResultsResponse = fullResultsResponse.data;
+
+        // set state
+        setResults(fullResultsResponse);
+        setSummary(generateSummary(fullResultsResponse));
+        setLoading(false);
+      } else {
+        // known error
+        fullResultsResponse = await fullResultsResponse.json();
+        openWarningModal(fullResultsResponse.error.description);
       }
-    } catch (error) {
-      error;
+    } catch (err) {
+      // unkown error
+      openWarningModal("Something went wrong! Please try again later.");
     }
+  };
 
-    fullResultsResponse = await fullResultsResponse.json();
-    fullResultsResponse = fullResultsResponse.data;
-    setLoading(false);
+  /**
+   * generate a summary given results
+   * @param {object} results
+   * @returns a summary object to be given to csv link
+   */
+  const generateSummary = (results) => {
+    // generate summary
+    let summaryToSet = {
+      1: 0,
+      2: 0,
+      3: 0,
+      4: 0,
+      5: 0,
+      6: 0,
+      NC: 0,
+    };
+    results["samples"].forEach((result) => summaryToSet[result.prediction]++);
+    return summaryToSet;
+  };
 
-    setResults(fullResultsResponse);
+  /**
+   * opens a warning modal with the given message and resets the app
+   * @param {string} message - the message to display in the warning modal
+   */
+  const openWarningModal = (message) => {
+    setModalMessage(message);
+    setOpenModal(true);
+    handleReset();
   };
 
   return (
@@ -134,7 +197,7 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
               data-tooltip-content={
                 "ICST accepts FPKM normalised RNA-Seq data structured as shown in the test data. See help for more details."
               }
-              data-tooltip-id="my-tooltip"
+              data-tooltip-id="icst-tooltip"
               data-tooltip-place="right"
             >
               ?
@@ -170,8 +233,7 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
             onClick={handlePredict}
             disabled={!file || loading || results}
           >
-            {" "}
-            Analyse{" "}
+            Analyse
           </button>
 
           <button
@@ -179,8 +241,7 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
             onClick={() => handleReset()}
             disabled={loading || !results}
           >
-            {" "}
-            Reset{" "}
+            Reset
           </button>
         </div>
 
@@ -204,18 +265,16 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
         </div>
       </div>
       {results && <SampleQC results={results} />}
-      {results && (
-        <Summary results={results} setSummary={setSummary} summary={summary} />
-      )}
+      {results && <Summary summary={summary} />}
 
       {results && (
         <CSVLink
           data={summaryDownload}
           filename="data"
           onClick={handleSummaryDownload}
-          className="button is-dark"
+          className="button is-dark mr-5 mb-5"
         >
-          <button>Download Report</button>
+          <button>Download Summary</button>
         </CSVLink>
       )}
 
@@ -224,26 +283,26 @@ const Upload = ({ setDataFile, setResults, results, summary, setSummary }) => {
           data={allDownload}
           filename="data"
           onClick={handleAllDownload}
-          className="button queens-branding queens-button"
+          className="button queens-branding queens-button mr-5 mb-5"
         >
           <button>Download All Info</button>
         </CSVLink>
       )}
 
-      {invalidFile && (
+      {openModal && (
         <div className="modal is-active">
           <div className="modal-background"></div>
           <div className="modal-content">
-            <div className="box has-text-centered"> Invalid file type</div>
+            <div className="box has-text-centered"> {modalMessage}</div>
           </div>
           <button
             className="modal-close is-large"
-            onClick={() => setInvalidFile(false)}
+            onClick={() => setOpenModal(false)}
           ></button>
         </div>
       )}
 
-      <Tooltip id="my-tooltip" />
+      <Tooltip id="icst-tooltip" />
     </div>
   );
 };

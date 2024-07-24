@@ -1,14 +1,11 @@
-import React from "react";
 import sortArrows from "/sort-solid.svg";
+import { flexRender } from "@tanstack/react-table";
 
-import {
-  getCoreRowModel,
-  useReactTable,
-  flexRender,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-} from "@tanstack/react-table";
+/**
+ * takes a tanstack table and displays it in the appropriate format
+ * @param {TableInstance} table - the tanstack table instance to display
+ * @returns a table
+ */
 export function Table({ table }) {
   return (
     <div className="table-container">
@@ -19,7 +16,7 @@ export function Table({ table }) {
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <th key={header.id}>
+                    <th key={header.id} className="has-text-centered">
                       {header.column.columnDef.header}{" "}
                       {header.column.getCanSort() && (
                         <button

@@ -1,0 +1,102 @@
+import { useRef, useMemo, useState } from "react";
+import Plot from "react-plotly.js";
+import NothingToDisplay from "../general/NothingToDisplay";
+import { CSVLink } from "react-csv";
+import { GraphControls } from "./GraphControls";
+import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
+
+/**
+ * the pca visualisation page for viewing results in 2D and 3D
+ * @param {Object} results
+ * @returns the pca visualisation page
+ */
+const Pca = ({ results }) => {
+  const graphData = useRef();
+  const [dimension, setDimensions] = useState(2);
+  const [title, setTitle] = useState("PCA");
+  const [download, setDownload] = useState([]);
+
+  /**
+   * generates the graph data object using the helper function from the results
+   */
+  useMemo(() => {
+    graphData.current = generateGraphData(results, results.samples, "pca");
+  }, [results]);
+
+  const handleDownload = () => {
+    let toDownload = [];
+    console.log(results.samples);
+    results.samples.forEach((sample) => {
+      toDownload.push({
+        sampleID: sample.sampleID,
+        pc1: sample.pca[0],
+        pc2: sample.pca[1],
+        pc3: sample.pca[2],
+      });
+    });
+    setDownload(toDownload);
+  };
+
+  return (
+    <div className="container">
+      {results ? (
+        <div className="columns">
+          <div className="column is-one-quarter box">
+            <GraphControls
+              setDimensions={setDimensions}
+              dimension={dimension}
+              setTitle={setTitle}
+            />
+
+            <CSVLink
+              data={download}
+              filename="data"
+              onClick={handleDownload}
+              className="button is-dark"
+            >
+              <button>Download Report</button>
+            </CSVLink>
+          </div>
+
+          <div className="column is-fullheight">
+            <Plot
+              data={getPlotlyData(graphData.current, dimension)}
+              layout={{
+                title: {
+                  text: title,
+                },
+                height: 700,
+                showlegend: true,
+                legend: {
+                  title: { text: "Subgroup" },
+                },
+                xaxis: {
+                  title: { text: "Principle Component 1" },
+                },
+                yaxis: {
+                  title: { text: "Principle Component 2" },
+                },
+                scene: {
+                  xaxis: { title: "Component 1" },
+                  yaxis: { title: "Component 2" },
+                  zaxis: { title: "Component 3" },
+                  camera: {
+                    eye: {
+                      x: 1.25,
+                      y: 1.25,
+                      z: 2.25,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      ) : (
+        <NothingToDisplay />
+      )}
+    </div>
+  );
+};
+
+export default Pca;

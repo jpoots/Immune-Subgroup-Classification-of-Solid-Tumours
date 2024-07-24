@@ -1,31 +1,36 @@
+import { GraphControls } from "./GraphControls";
 import { useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import NothingToDisplay from "./NothingToDisplay";
-import { CSVLink, CSVDownload } from "react-csv";
+import NothingToDisplay from "../general/NothingToDisplay";
+import { CSVLink } from "react-csv";
+import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 
+// tnse api url and perplexity setting
+const API_URL = "http://127.0.0.1:3000/tsne";
+const MIN_PERPLEXITY = 1;
+const MAX_PERPLEXITY = 50;
+
+/**
+ * this component contaisn the t-SNE visualisation page where analysis can be done with varying perplexities
+ * @param {object} results
+ * @returns the t-SNE visualisation page
+ */
 const Tsne = ({ results }) => {
+  // setting up to hold dom element and graph points
   const slider = useRef();
+  const graphData = useRef();
+
+  // set app state
   const [perplexity, setPerplexity] = useState(50);
   const [loading, setLoading] = useState(false);
-
-  const x = useRef();
-  const z = useRef();
-  const y = useRef();
-  const ids = useRef();
-  const predictions = useRef();
   const [dimension, setDimensions] = useState(2);
   const [disabled, setDisabled] = useState(false);
   const [title, setTitle] = useState("t-SNE");
   const [download, setDownload] = useState([]);
 
-  const handleDim = () => {
-    if (dimension === 2) {
-      setDimensions(3);
-    } else {
-      setDimensions(2);
-    }
-  };
-
+  /**
+   * generates an object of the tsne results for each sample to be given to csv link
+   */
   const handleDownload = () => {
     let toDownload = [];
     let id = [];
@@ -33,11 +38,15 @@ const Tsne = ({ results }) => {
     let tsne2 = [];
     let tsne3 = [];
 
-    Object.keys(x.current).forEach((key) => {
-      id = ids.current[key];
-      tsne1 = x.current[key];
-      tsne2 = y.current[key];
-      tsne3 = z.current[key];
+    // for readability
+    let currentGraph = graphData.current;
+
+    // for each subgroup
+    Object.keys(currentGraph.x).forEach((key) => {
+      id = currentGraph.ids[key];
+      tsne1 = currentGraph.x[key];
+      tsne2 = currentGraph.y[key];
+      tsne3 = currentGraph.z[key];
 
       id.forEach((id, index) => {
         toDownload.push({
@@ -51,88 +60,26 @@ const Tsne = ({ results }) => {
     setDownload(toDownload);
   };
 
+  /**
+   * reaches out to the data analysis endpoint, handles reponse
+   */
   const handleTsne = async () => {
-    let samples = results.samples;
     setLoading(true);
 
-    let tsneResponse = await fetch("http://127.0.0.1:3000/tsne", {
+    let tsneResponse = await fetch(API_URL, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        samples: samples,
+        samples: results.samples,
         perplexity: perplexity,
       }),
     });
     tsneResponse = await tsneResponse.json();
 
-    let xAdd = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      NC: [],
-    };
-
-    let yAdd = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      NC: [],
-    };
-
-    let zAdd = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      NC: [],
-    };
-
-    let predsAdd = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      NC: [],
-    };
-
-    let idAdd = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
-      6: [],
-      NC: [],
-    };
-
-    tsneResponse.data.forEach((sample, index) => {
-      let prediction = samples[index].prediction;
-      xAdd[prediction].push(sample.tsne[0]);
-      yAdd[prediction].push(sample.tsne[1]);
-      zAdd[prediction].push(sample.tsne[2]);
-      idAdd[prediction].push(sample.sampleID);
-      predsAdd[prediction].push(prediction);
-    });
-
-    x.current = xAdd;
-    y.current = yAdd;
-    z.current = zAdd;
-    ids.current = idAdd;
-    predictions.current = predsAdd;
-
+    graphData.current = generateGraphData(results, tsneResponse.data, "tsne");
     setLoading(false);
     setDisabled(true);
   };
@@ -146,8 +93,8 @@ const Tsne = ({ results }) => {
               <h1 className="has-text-weight-bold mt-5">Perplexity</h1>
               <input
                 type="range"
-                min={1}
-                max={50}
+                min={MIN_PERPLEXITY}
+                max={MAX_PERPLEXITY}
                 ref={slider}
                 onChange={(e) => {
                   setPerplexity(e.target.value);
@@ -159,39 +106,11 @@ const Tsne = ({ results }) => {
                 {perplexity}
               </div>
             </div>
-            <div className="control block" onChange={handleDim}>
-              <h1 className="has-text-weight-bold">Dimensions</h1>
-              <label className="radio">
-                <input
-                  type="radio"
-                  name="dim"
-                  value="2"
-                  checked={dimension === 2}
-                  className="queens-radio mr-2"
-                />
-                2D
-              </label>
-
-              <label className="radio">
-                <input
-                  type="radio"
-                  name="dim"
-                  value="3"
-                  checked={dimension === 3}
-                  className="queens-radio mr-2"
-                />
-                3D
-              </label>
-            </div>
-            <div className="block">
-              <h1 className="has-text-weight-bold">Title</h1>
-              <input
-                type="text"
-                placeholder="Title"
-                className="input queens-textfield"
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
+            <GraphControls
+              setDimensions={setDimensions}
+              dimension={dimension}
+              setTitle={setTitle}
+            />
             <div className="has-text-centered">
               <button
                 className={
@@ -201,15 +120,14 @@ const Tsne = ({ results }) => {
                 onClick={handleTsne}
                 disabled={loading || disabled}
               >
-                {" "}
-                Analyse{" "}
-              </button>{" "}
+                Analyse
+              </button>
               <CSVLink
                 data={download}
                 filename="data"
                 onClick={handleDownload}
                 className="button is-dark"
-                disabled={!x.current}
+                disabled={!graphData.current}
               >
                 <button>Download Report</button>
               </CSVLink>
@@ -217,26 +135,12 @@ const Tsne = ({ results }) => {
           </div>
 
           <div className="column">
-            {x.current ? (
+            {graphData.current ? (
               <Plot
-                data={Object.keys(x.current).map((key) => ({
-                  x: x.current[key],
-                  y: y.current[key],
-                  z: z.current[key],
-                  name: `${key}`,
-                  type: dimension === 2 ? "scatter" : "scatter3d",
-                  mode: "markers",
-                  text: ids.current[key],
-                  marker: {
-                    color: predictions.current,
-                  },
-                }))}
+                data={getPlotlyData(graphData.current, dimension)}
                 layout={{
                   title: {
                     text: title,
-                    pad: {
-                      b: -200,
-                    },
                   },
                   height: 700,
                   showlegend: true,
@@ -250,7 +154,6 @@ const Tsne = ({ results }) => {
                     title: { text: "t-SNE Component 2" },
                   },
                   scene: {
-                    height: 800,
                     xaxis: { title: "Component 1" },
                     yaxis: { title: "Component 2" },
                     zaxis: { title: "Component 3" },

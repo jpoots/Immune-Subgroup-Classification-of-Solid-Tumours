@@ -1,8 +1,7 @@
 import { Table } from "./Table";
 import { PaginationBar } from "./PaginationBar";
-import { useState, useRef, useMemo } from "react";
-import NothingToDisplay from "./NothingToDisplay";
-
+import { useState, useMemo } from "react";
+import NothingToDisplay from "../general/NothingToDisplay";
 import {
   getCoreRowModel,
   useReactTable,
@@ -12,10 +11,16 @@ import {
 } from "@tanstack/react-table";
 import { CSVLink } from "react-csv";
 
+/**
+ * the report page showing the prediction table with confidence
+ * @param {Object} results - the results of the analysis
+ * @returns - a report on the predicitons
+ */
 const Report = ({ results }) => {
-  let samples = [];
-  if (typeof results !== "undefined") samples = results["samples"];
+  let samples = results["samples"];
+  //if (typeof results !== "undefined") samples = results["samples"]; used as extra validation
 
+  // setting state for the component
   const [sorting, setSorting] = useState([]);
   const [download, setDownload] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -25,15 +30,7 @@ const Report = ({ results }) => {
     pageSize: 10,
   });
 
-  const exportSamples = () => {
-    let toExport = table.getFilteredRowModel().rows.map((row) => ({
-      sampleID: row.original.sampleID,
-      prediction: row.original.prediction,
-    }));
-
-    setDownload(toExport);
-  };
-
+  // memo to build columns. Iterating over 440. Only do once
   let columns = useMemo(
     () => [
       {
@@ -79,7 +76,17 @@ const Report = ({ results }) => {
     },
   });
 
-  console.log(table.getState().columnFilters);
+  /**
+   * generate objects of the report to be downloaded
+   */
+  const handleDownload = () => {
+    let toExport = table.getFilteredRowModel().rows.map((row) => ({
+      sampleID: row.original.sampleID,
+      prediction: row.original.prediction,
+    }));
+
+    setDownload(toExport);
+  };
 
   return (
     <div className="container">
@@ -108,7 +115,6 @@ const Report = ({ results }) => {
                         .getColumn("prediction")
                         .setFilterValue(e.target.value);
                     }}
-                    id=""
                   >
                     <option value="">All</option>
                     <option value="1">1</option>
@@ -125,15 +131,11 @@ const Report = ({ results }) => {
 
             <Table table={table} />
           </div>
-          <PaginationBar
-            table={table}
-            download={download}
-            exportSamples={exportSamples}
-          />
+          <PaginationBar table={table} />
           <CSVLink
             data={download}
             filename="data"
-            onClick={exportSamples}
+            onClick={handleDownload}
             className="button is-dark"
           >
             <button>Download Report</button>

@@ -1,6 +1,9 @@
-import { BrowserRouter as Router, Link, Route, Routes } from "react-router-dom";
+import { Link } from "react-router-dom";
 import queensLogo from "/logo.png";
-
+/**
+ * the header navbar for the app
+ * @returns the header
+ */
 const Header = () => {
   return (
     <nav className="navbar queens-branding is-dark">

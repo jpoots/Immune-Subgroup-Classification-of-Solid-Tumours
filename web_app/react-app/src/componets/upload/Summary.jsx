@@ -1,20 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
 
-const Summary = ({ results, setSummary, summary }) => {
-  if (typeof summary === "undefined") {
-    summary = {
-      1: 0,
-      2: 0,
-      3: 0,
-      4: 0,
-      5: 0,
-      6: 0,
-      NC: 0,
-    };
-    results["samples"].forEach((result) => summary[result.prediction]++);
-    setSummary(summary);
-  }
-
+/**
+ * shows a summary from a given object
+ * @param {Object.<number, number>} summary
+ * @returns
+ */
+const Summary = ({ summary }) => {
   return (
     <div className="box">
       <h1 className="block has-text-weight-bold">Results Summary</h1>

@@ -1,3 +1,7 @@
+/**
+ * a help page for the app containing help text
+ * @returns a help page for the ap
+ */
 const Help = () => {
   return (
     <div className="container">

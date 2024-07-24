@@ -1,3 +1,8 @@
+/**
+ * given a resutls object returns a QC summary
+ * @param {Object} results - the resutls of the analysis
+ * @returns - a summary of the QC results
+ */
 const SampleQC = ({ results }) => {
   return (
     <div className="box">

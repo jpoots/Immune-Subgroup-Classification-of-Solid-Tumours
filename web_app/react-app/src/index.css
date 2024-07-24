@@ -32,9 +32,10 @@
     box-shadow: none;
 }
 
-.queens-textfield:focus {
+.queens-textfield:focus, .queens-textfield:focus-visible {
     box-shadow: 0 0 3px 2px #D6000D !important;
     border-color: #D6000D !important;
+    outline: none !important;
 }
 
 .queens-slider {

@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -10,27 +10,31 @@ import {
 import { Table } from "./Table";
 
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "./NothingToDisplay";
+import NothingToDisplay from "../general/NothingToDisplay";
 import { PaginationBar } from "./PaginationBar";
 
+/**
+ * generates the probability page showing the probabiltiy of all subgroups
+ * @param {Object} results - the results of the analysis
+ * @returns a probabiltiy page
+ */
 const Proability = ({ results }) => {
-  let samples = results ? results["samples"] : [];
+  // could add extra layer of protection here
+  let samples = results["samples"];
 
-  const [query, setQuery] = useState("");
-  const [page, setPage] = useState(0);
+  // state for the componet
   const [sorting, setSorting] = useState([]);
-  const [reverse, setReverse] = useState(false);
-  const geneNameList = useRef();
-  const allSamples = useRef();
   const [download, setDownload] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const exportSamples = () => {
+  /**
+   * generates a list of objects to be downloaded by CSV link
+   */
+  const handleDownload = () => {
     setDownload(
       table.getFilteredRowModel().rows.map((row) => ({
         sampleID: row.original.sampleID,
@@ -44,6 +48,7 @@ const Proability = ({ results }) => {
     );
   };
 
+  // generates a list of columns
   const columns = useMemo(
     () => [
       {
@@ -133,12 +138,12 @@ const Proability = ({ results }) => {
           <PaginationBar
             table={table}
             download={download}
-            exportSamples={exportSamples}
+            exportSamples={handleDownload}
           />
           <CSVLink
             data={download}
             filename="data"
-            onClick={exportSamples}
+            onClick={handleDownload}
             className="button is-dark"
           >
             <button>Download Report</button>
