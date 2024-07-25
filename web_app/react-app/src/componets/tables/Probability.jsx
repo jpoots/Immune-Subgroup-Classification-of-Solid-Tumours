@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { Table } from "./Table";
+import { Table } from "../tables/Table";
 
 import { CSVLink } from "react-csv";
 import NothingToDisplay from "../general/NothingToDisplay";

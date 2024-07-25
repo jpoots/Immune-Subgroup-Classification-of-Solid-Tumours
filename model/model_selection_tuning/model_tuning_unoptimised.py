@@ -2,27 +2,19 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import (
     RandomForestClassifier,
     HistGradientBoostingClassifier,
-    GradientBoostingClassifier,
 )
-from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import GaussianNB
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from utils import get_data, split_data
 from imblearn.over_sampling import SMOTE, ADASYN
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import (
-    ConfusionMatrixDisplay,
     f1_score,
-    balanced_accuracy_score,
-    roc_auc_score,
     recall_score,
     precision_score,
-    accuracy_score,
     make_scorer,
 )
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -30,15 +22,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import datetime
+import sys
 
-# This script performs grid search hyperparameter tuning for a number of alogrithms and reports the cross validated results
+# append the path of the parent (taken from chatGPT)
+sys.path.append("..")
+from utils.utils import get_data, split_data, print_tuning_results
 
 RANDOM_STATE = 42
-np.random.seed(RANDOM_STATE)
+TEST_SIZE = 0.2
+CV = 10
 
 
-models = [
-    # donzo
+MODELS = [
     {
         "model": SVC(),
         "params": {
@@ -49,7 +44,6 @@ models = [
         },
     },
     {
-        # donzo
         "model": RandomForestClassifier(n_jobs=-1),
         "params": {  # top two are the most important
             "model__n_estimators": [100, 500, 1000, 2000],
@@ -57,7 +51,6 @@ models = [
             "model__max_depth": [10, 20, 50, 100, None],
         },
     },
-    # donzo
     {
         "model": HistGradientBoostingClassifier(),
         "params": {
@@ -66,7 +59,6 @@ models = [
             "model__max_iter": [100, 500, 1000],
         },
     },
-    # donzo
     {
         "model": LogisticRegression(n_jobs=-1),
         "params": {
@@ -94,20 +86,7 @@ models = [
     },
 ]
 
-# import data using util
-data = get_data()
-idx, x, y, genes = split_data(data)
-
-# data scaler and generic pipeleine
-scaler = MinMaxScaler()
-
-# get rid of test data
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
-
-total_start = time.time()
-
-
-scoring = {
+SCORING = {
     "accuracy": "accuracy",
     "balanced_accuracy": "balanced_accuracy",
     "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
@@ -115,50 +94,57 @@ scoring = {
     "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
 }  # ROC_AUC is not included due to the computational cost
 
-for model in models:
-    start = time.time()
 
-    # try except to prevent long training runs failing because of an issue
-    try:
-        clf = model["model"]
-        params = model["params"]
+def main():
+    np.random.seed(RANDOM_STATE)
 
-        pipe = Pipeline(steps=[("scaler", scaler), ("model", clf)])
+    # import data using util
+    data = get_data()
+    _idx, x, y, _genes = split_data(data)
 
-        # grid search to return results for a range of metrics and refit on accuracy
-        grid_search = GridSearchCV(
-            pipe, params, n_jobs=-1, scoring=scoring, refit="accuracy", cv=10
-        )
-        grid_search.fit(x_train, y_train)
+    # get rid of test data
+    x_train, _x_test, y_train, _y_test = train_test_split(
+        x, y, test_size=TEST_SIZE, stratify=y
+    )
 
-        # model tuning time
-        end = time.time()
-        duration_seconds = end - start
-        duration = datetime.timedelta(seconds=duration_seconds)
+    total_start = time.time()
 
-        results = grid_search.cv_results_
-        best_index = grid_search.best_index_
+    tune_models(x_train, y_train)
 
-        # model scoring on accuracy
-        print("CROSS VALIDATION ON BEST MODEL")
-        print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
-        print(f"Tuning time: {duration}")
-        print(f"Best Params: {grid_search.best_params_}")
-        print(f"Accuracy: {results['mean_test_accuracy'][best_index]}")
-        print(f"F1: {results['mean_test_f1'][best_index]}")
-        print(f"Precision: {results['mean_test_precision'][best_index]}")
-        print(f"Recall: {results['mean_test_recall'][best_index]}")
-        print(
-            f"Balanced accuracy: {results['mean_test_balanced_accuracy'][best_index]}"
-        )
-        print()
-
-    except Exception as e:
-        print(e)
-try:
     total_end = time.time()
     duration_seconds_total = total_end - total_start
     duration_total = datetime.timedelta(seconds=duration_seconds_total)
     print(f"Total tuning time: {duration_total}")
-except Exception as e:
-    print(e)
+
+
+def tune_models(x_train, y_train):
+    # data scaler and generic pipeleine
+    scaler = MinMaxScaler()
+    for model in MODELS:
+        start = time.time()
+        # try except to prevent long training runs failing because of an issue
+        try:
+            clf = model["model"]
+            params = model["params"]
+
+            pipe = Pipeline(steps=[("scaler", scaler), ("model", clf)])
+
+            # grid search to return results for a range of metrics and refit on accuracy
+            grid_search = GridSearchCV(
+                pipe, params, n_jobs=-1, scoring=SCORING, refit="accuracy", cv=CV
+            )
+            grid_search.fit(x_train, y_train)
+
+            # model tuning time
+            end = time.time()
+            duration_seconds = end - start
+            duration = datetime.timedelta(seconds=duration_seconds)
+
+            print(f"Model Name: {pipe.named_steps["model"].__class__.__name__}")
+            print_tuning_results(grid_search, duration)
+        except Exception as e:
+            print(e)
+
+
+if __name__ == "__main__":
+    main()

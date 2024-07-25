@@ -93,7 +93,22 @@ const GeneExpression = ({ results }) => {
     <div className="container">
       {results ? (
         <>
-          <Table table={table} />
+          <div className="box">
+            <div className="columns">
+              <div className="column is-half">
+                <input
+                  type="text"
+                  className="input queens-textfield"
+                  onChange={(e) => {
+                    let column = table.getColumn("sampleID");
+                    column.setFilterValue(e.target.value.toUpperCase());
+                  }}
+                  placeholder="Search by sample ID"
+                />
+              </div>
+            </div>
+            <Table table={table} />
+          </div>
           <PaginationBar table={table} />
           <CSVLink
             data={download}

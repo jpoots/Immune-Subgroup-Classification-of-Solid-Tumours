@@ -5,6 +5,7 @@ import SampleQC from "./SampleQC";
 import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
+import ErrorModal from "../general/ErrorModal";
 
 /**
  * constants for managing the allowed file types to upload
@@ -144,7 +145,6 @@ const Upload = ({ setResults, results, summary, setSummary }) => {
         // set state
         setResults(fullResultsResponse);
         setSummary(generateSummary(fullResultsResponse));
-        setLoading(false);
       } else {
         // known error
         fullResultsResponse = await fullResultsResponse.json();
@@ -154,6 +154,7 @@ const Upload = ({ setResults, results, summary, setSummary }) => {
       // unkown error
       openWarningModal("Something went wrong! Please try again later.");
     }
+    setLoading(false);
   };
 
   /**
@@ -226,10 +227,9 @@ const Upload = ({ setResults, results, summary, setSummary }) => {
           </label>
 
           <button
-            className={
-              "button queens-branding queens-button " +
-              (loading ? "is-loading" : "")
-            }
+            className={`button queens-branding queens-button ml-2 mr-2 ${
+              loading ? "is-loading" : ""
+            }`}
             onClick={handlePredict}
             disabled={!file || loading || results}
           >
@@ -272,7 +272,7 @@ const Upload = ({ setResults, results, summary, setSummary }) => {
           data={summaryDownload}
           filename="data"
           onClick={handleSummaryDownload}
-          className="button is-dark mr-5 mb-5"
+          className="button is-dark mr-2 mb-5"
         >
           <button>Download Summary</button>
         </CSVLink>
@@ -283,23 +283,14 @@ const Upload = ({ setResults, results, summary, setSummary }) => {
           data={allDownload}
           filename="data"
           onClick={handleAllDownload}
-          className="button queens-branding queens-button mr-5 mb-5"
+          className="button queens-branding queens-button mr-2 mb-5"
         >
           <button>Download All Info</button>
         </CSVLink>
       )}
 
       {openModal && (
-        <div className="modal is-active">
-          <div className="modal-background"></div>
-          <div className="modal-content">
-            <div className="box has-text-centered"> {modalMessage}</div>
-          </div>
-          <button
-            className="modal-close is-large"
-            onClick={() => setOpenModal(false)}
-          ></button>
-        </div>
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
 
       <Tooltip id="icst-tooltip" />

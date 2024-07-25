@@ -4,6 +4,7 @@ import Plot from "react-plotly.js";
 import NothingToDisplay from "../general/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
+import ErrorModal from "../general/ErrorModal";
 
 // tnse api url and perplexity setting
 const API_URL = "http://127.0.0.1:3000/tsne";
@@ -27,6 +28,8 @@ const Tsne = ({ results }) => {
   const [disabled, setDisabled] = useState(false);
   const [title, setTitle] = useState("t-SNE");
   const [download, setDownload] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState();
 
   /**
    * generates an object of the tsne results for each sample to be given to csv link
@@ -66,22 +69,42 @@ const Tsne = ({ results }) => {
   const handleTsne = async () => {
     setLoading(true);
 
-    let tsneResponse = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        samples: results.samples,
-        perplexity: perplexity,
-      }),
-    });
-    tsneResponse = await tsneResponse.json();
+    try {
+      let tsneResponse = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          samples: results.samples,
+          perplexity: perplexity,
+        }),
+      });
 
-    graphData.current = generateGraphData(results, tsneResponse.data, "tsne");
-    setLoading(false);
-    setDisabled(true);
+      if (tsneResponse.ok) {
+        tsneResponse = await tsneResponse.json();
+      } else {
+        // known error
+        tsneResponse = await tsneResponse.json();
+        openWarningModal(tsneResponse.error.description);
+      }
+      graphData.current = generateGraphData(results, tsneResponse.data, "tsne");
+      setDisabled(true);
+    } catch (err) {
+      openWarningModal("Something went wrong! Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * opens a warning modal with the given message
+   * @param {string} message - the message to display in the warning modal
+   */
+  const openWarningModal = (message) => {
+    setModalMessage(message);
+    setOpenModal(true);
   };
 
   return (
@@ -122,15 +145,15 @@ const Tsne = ({ results }) => {
               >
                 Analyse
               </button>
-              <CSVLink
-                data={download}
-                filename="data"
-                onClick={handleDownload}
-                className="button is-dark"
-                disabled={!graphData.current}
-              >
-                <button>Download Report</button>
-              </CSVLink>
+              {graphData.current && (
+                <CSVLink
+                  data={download}
+                  filename="data"
+                  onClick={handleDownload}
+                >
+                  <button className="button is-dark">Download Report</button>
+                </CSVLink>
+              )}
             </div>
           </div>
 
@@ -176,6 +199,10 @@ const Tsne = ({ results }) => {
         </div>
       ) : (
         <NothingToDisplay />
+      )}
+
+      {openModal && (
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
     </div>
   );

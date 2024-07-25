@@ -1,11 +1,17 @@
 import pandas as pd
-import numpy as np
 from gene_list import GENE_LIST
 import joblib
 
 FILE_NAME = "ordered_gene_names.pkl"
-gene_list_df = pd.DataFrame(columns=GENE_LIST)
-joblib.dump(gene_list_df, filename=FILE_NAME)
+
+
+def main():
+    gene_list_df = pd.DataFrame(columns=GENE_LIST)
+    joblib.dump(gene_list_df, filename=FILE_NAME)
+
+
+if __name__ == "__main__":
+    main()
 
 
 """
