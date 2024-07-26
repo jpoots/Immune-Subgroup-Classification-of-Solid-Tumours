@@ -1,6 +1,7 @@
 import joblib
 import sklearn
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.preprocessing import MinMaxScaler
@@ -24,7 +25,7 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.2
 MODEL_FILE_NAME = "./trained_models/model.pkl"
 PROBS_FOLDER_NAME = "./prob_analysis/"
-QC_THRESHOLD = 0.989
+QC_THRESHOLD = 0.98
 
 
 def main():
@@ -51,6 +52,7 @@ def main():
 
     predictions, true, num_removed = predict(loaded_model, QC_THRESHOLD, x_test1, y_test1)
     evaluate_performance(true, predictions, num_removed)
+    plt.show()
 
 
 
@@ -60,16 +62,19 @@ def extract_nc_probs(pipe, threshold, x):
     features = [features for _id, features in x]
 
     prediction_probs = pipe.predict_proba(features)
+    predictions = pipe.predict(features)
 
     max_probs_test = np.amax(prediction_probs, axis=1)
     nc_indicies = [i for i, prob in enumerate(max_probs_test) if prob < threshold]
 
     nc_probabilities = max_probs_test[nc_indicies]
-
+    nc_predictions = predictions[nc_indicies]
+    nc_predictions = [pred + 1 for pred in nc_predictions]
     nc_ids = [x[i][0] for i in nc_indicies]
 
     nc_df = pd.DataFrame(data=nc_probabilities, index=nc_ids, columns=["max_prob"])
     nc_df.index.name = "sampleID"
+    nc_df.insert(loc=1, column="prediction", value=nc_predictions)
     nc_df.to_csv(f"{PROBS_FOLDER_NAME}nc.csv")
 
 
@@ -88,9 +93,13 @@ def extract_missmatch_probs(pipe, x, y):
     ]
     mismatched_probs = [max_probs[i] for i in mismatched_indicies]
     mismatched_ids = [y[i][0] for i in mismatched_indicies]
+    mismatched_predictions = predictions[mismatched_indicies]
+    mismatched_predictions = [pred + 1 for pred in mismatched_predictions]
+
 
     df = pd.DataFrame(data=mismatched_probs, index=mismatched_ids, columns=["max_prob"])
     df.index.name = "sampleID"
+    df.insert(loc=1, column="prediction", value=mismatched_predictions)
     df.to_csv(f"{PROBS_FOLDER_NAME}mismatch.csv")
 
 

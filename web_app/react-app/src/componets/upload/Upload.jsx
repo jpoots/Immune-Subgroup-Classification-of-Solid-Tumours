@@ -5,7 +5,7 @@ import SampleQC from "./SampleQC";
 import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
-import ErrorModal from "../general/ErrorModal";
+import ErrorModal from "../errors/ErrorModal";
 
 /**
  * constants for managing the allowed file types to upload
@@ -21,10 +21,16 @@ const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
  * @param {function} setSummary - setter for summary
  * @returns
  */
-const Upload = ({ setResults, results, summary, setSummary }) => {
+const Upload = ({
+  setResults,
+  results,
+  summary,
+  setSummary,
+  filename,
+  setFileName,
+}) => {
   // defining state for the component
   const [file, setFile] = useState();
-  const [filename, setFileName] = useState("Upload File...");
   const [loading, setLoading] = useState(false);
   const fileInput = useRef();
   const [summaryDownload, setSummaryDownload] = useState([]);

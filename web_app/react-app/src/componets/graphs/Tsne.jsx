@@ -1,28 +1,27 @@
 import { GraphControls } from "./GraphControls";
 import { useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import NothingToDisplay from "../general/NothingToDisplay";
+import NothingToDisplay from "../errors/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
-import ErrorModal from "../general/ErrorModal";
+import ErrorModal from "../errors/ErrorModal";
 
 // tnse api url and perplexity setting
 const API_URL = "http://127.0.0.1:3000/tsne";
 const MIN_PERPLEXITY = 1;
-const MAX_PERPLEXITY = 50;
 
 /**
  * this component contaisn the t-SNE visualisation page where analysis can be done with varying perplexities
  * @param {object} results
  * @returns the t-SNE visualisation page
  */
-const Tsne = ({ results }) => {
+const Tsne = ({ results, graphData, setGraphData }) => {
   // setting up to hold dom element and graph points
   const slider = useRef();
-  const graphData = useRef();
+  const max_perplexity = results.samples.length - 1;
 
   // set app state
-  const [perplexity, setPerplexity] = useState(50);
+  const [perplexity, setPerplexity] = useState(max_perplexity);
   const [loading, setLoading] = useState(false);
   const [dimension, setDimensions] = useState(2);
   const [disabled, setDisabled] = useState(false);
@@ -41,15 +40,12 @@ const Tsne = ({ results }) => {
     let tsne2 = [];
     let tsne3 = [];
 
-    // for readability
-    let currentGraph = graphData.current;
-
     // for each subgroup
-    Object.keys(currentGraph.x).forEach((key) => {
-      id = currentGraph.ids[key];
-      tsne1 = currentGraph.x[key];
-      tsne2 = currentGraph.y[key];
-      tsne3 = currentGraph.z[key];
+    Object.keys(graphData.x).forEach((key) => {
+      id = graphData.ids[key];
+      tsne1 = graphData.x[key];
+      tsne2 = graphData.y[key];
+      tsne3 = graphData.z[key];
 
       id.forEach((id, index) => {
         toDownload.push({
@@ -89,7 +85,7 @@ const Tsne = ({ results }) => {
         tsneResponse = await tsneResponse.json();
         openWarningModal(tsneResponse.error.description);
       }
-      graphData.current = generateGraphData(results, tsneResponse.data, "tsne");
+      setGraphData(generateGraphData(results, tsneResponse.data, "tsne"));
       setDisabled(true);
     } catch (err) {
       openWarningModal("Something went wrong! Please try again later.");
@@ -107,18 +103,34 @@ const Tsne = ({ results }) => {
     setOpenModal(true);
   };
 
+  const pageTitle = "t-SNE Visualisation";
+  const tooltip =
+    " is an unsupervised non-linear dimensionality reduction technique for visualizing high-dimensional data.";
+  const fullName = "t-distributed Stochastic Neighbor Embedding (t-SNE)";
+  const tooltipLink = "https://www.datacamp.com/tutorial/introduction-t-sne";
+
   return (
     <div className="container">
       {results ? (
         <div className="columns">
           <div className="column is-one-quarter box">
+            <GraphControls
+              setDimensions={setDimensions}
+              dimension={dimension}
+              setTitle={setTitle}
+              pageTitle={pageTitle}
+              tooltipMessage={tooltip}
+              fullName={fullName}
+              tooltipLink={tooltipLink}
+            />
             <div className="block">
               <h1 className="has-text-weight-bold mt-5">Perplexity</h1>
               <input
                 type="range"
                 min={MIN_PERPLEXITY}
-                max={MAX_PERPLEXITY}
+                max={max_perplexity}
                 ref={slider}
+                value={perplexity}
                 onChange={(e) => {
                   setPerplexity(e.target.value);
                   setDisabled(false);
@@ -129,11 +141,6 @@ const Tsne = ({ results }) => {
                 {perplexity}
               </div>
             </div>
-            <GraphControls
-              setDimensions={setDimensions}
-              dimension={dimension}
-              setTitle={setTitle}
-            />
             <div className="has-text-centered">
               <button
                 className={
@@ -145,7 +152,7 @@ const Tsne = ({ results }) => {
               >
                 Analyse
               </button>
-              {graphData.current && (
+              {graphData && (
                 <CSVLink
                   data={download}
                   filename="data"
@@ -158,9 +165,9 @@ const Tsne = ({ results }) => {
           </div>
 
           <div className="column">
-            {graphData.current ? (
+            {graphData ? (
               <Plot
-                data={getPlotlyData(graphData.current, dimension)}
+                data={getPlotlyData(graphData, dimension)}
                 layout={{
                   title: {
                     text: title,

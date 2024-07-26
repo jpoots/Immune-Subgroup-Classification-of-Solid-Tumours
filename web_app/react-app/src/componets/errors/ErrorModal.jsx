@@ -1,4 +1,4 @@
-const ErrorModal = (modalMessage, setOpenModal) => {
+const ErrorModal = ({ modalMessage, setOpenModal }) => {
   return (
     <div className="modal is-active">
       <div className="modal-background"></div>

@@ -7,18 +7,22 @@ import Report from "./componets/tables/Report";
 import "./index.css";
 import GeneExpression from "./componets/tables/GeneExpression";
 import Probability from "./componets/tables/Probability";
-import Confidence from "./componets/tables/Confidence";
+import Confidence from "./componets/graphs/Confidence";
 import Help from "./componets/general/Help";
 import Tsne from "./componets/graphs/Tsne";
 import Pca from "./componets/graphs/Pca";
 import ProtectedRoute from "./componets/general/ProtectedRoute";
-import NothingToDisplay from "./componets/general/NothingToDisplay";
+import NothingToDisplay from "./componets/errors/NothingToDisplay";
+import NotFound from "./componets/errors/NotFound";
+import ClassificationByType from "./componets/graphs/ClassificationByType";
+import Protected2 from "./componets/general/Protected2";
 
 function App() {
   const [predictions, setPredictions] = useState([]);
-
+  const [fileName, setFileName] = useState("Upload File...");
   const [results, setResults] = useState();
   const [summary, setSummary] = useState();
+  const [tsneGrahData, setTsneGraphData] = useState();
 
   return (
     <Router>
@@ -34,6 +38,8 @@ function App() {
               results={results}
               summary={summary}
               setSummary={setSummary}
+              filename={fileName}
+              setFileName={setFileName}
             />
           }
         />
@@ -73,7 +79,11 @@ function App() {
           path="/tsne"
           element={
             <ProtectedRoute results={results}>
-              <Tsne results={results} />
+              <Tsne
+                results={results}
+                graphData={tsneGrahData}
+                setGraphData={setTsneGraphData}
+              />
             </ProtectedRoute>
           }
         />
@@ -85,8 +95,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/bytype"
+          element={
+            <ProtectedRoute results={results}>
+              <ClassificationByType results={results} />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/help" element={<Help />} />
         <Route path="/empty" element={<NothingToDisplay />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

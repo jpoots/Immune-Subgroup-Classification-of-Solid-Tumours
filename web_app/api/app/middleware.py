@@ -95,6 +95,13 @@ def parse_csv(f):
 
         # drop empty rows
         data.dropna(how="all", inplace=True)
+        if "TYPEID" in data.columns:
+            data = data.fillna({"TYPEID": "None"})
+        else:
+            data["TYPEID"] = "None"
+
+        type_ids = data.pop("TYPEID").values
+
         # drop rows with more than 2 empty genes, calculate diff
         original_size = data.shape[0]
         data.dropna(thresh=438, inplace=True)
@@ -114,6 +121,7 @@ def parse_csv(f):
 
         request.features = features
         request.invalid = invalid
+        request.typeids = type_ids
         return f(*args, **kwargs)
 
     return _parse_csv

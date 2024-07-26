@@ -444,4 +444,5 @@ GENE_LIST = [
     "MMP3_S2",
     "PLG_S5",
     "RGS8_S5",
+    "TYPEID",
 ]

@@ -1,3 +1,4 @@
+import { TitleAndSearch } from "./TitleAndSearch";
 import { useState, useMemo } from "react";
 import {
   getCoreRowModel,
@@ -9,7 +10,7 @@ import {
 import { Table } from "./Table";
 
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "../general/NothingToDisplay";
+import NothingToDisplay from "../errors/NothingToDisplay";
 import { PaginationBar } from "./PaginationBar";
 
 /**
@@ -89,24 +90,14 @@ const GeneExpression = ({ results }) => {
     setDownload(toExport);
   };
 
+  const title = "Gene Expression Report";
+
   return (
     <div className="container">
       {results ? (
         <>
           <div className="box">
-            <div className="columns">
-              <div className="column is-half">
-                <input
-                  type="text"
-                  className="input queens-textfield"
-                  onChange={(e) => {
-                    let column = table.getColumn("sampleID");
-                    column.setFilterValue(e.target.value.toUpperCase());
-                  }}
-                  placeholder="Search by sample ID"
-                />
-              </div>
-            </div>
+            <TitleAndSearch title={title} table={table} />
             <Table table={table} />
           </div>
           <PaginationBar table={table} />

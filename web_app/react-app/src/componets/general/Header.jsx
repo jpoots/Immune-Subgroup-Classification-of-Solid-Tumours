@@ -1,53 +1,60 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import queensLogo from "/logo.png";
+
 /**
  * the header navbar for the app
  * @returns the header
  */
 const Header = () => {
+  const navbarClassName = ({ isActive }) =>
+    ["navbar-item", isActive ? "is-current-page" : ""].join(" ");
+
   return (
     <nav className="navbar queens-branding is-dark">
       <div className="container">
-        <Link to="/" className="navbar-brand">
+        <NavLink to="/" className="navbar-brand">
           <div className="navbar-item">
             <img src={queensLogo} alt="Queens Logo" />
           </div>
-        </Link>
+        </NavLink>
 
         <div className="navbar-start">
-          <Link to="/" className="navbar-item">
+          <NavLink to="/" className={navbarClassName}>
             Upload
-          </Link>
+          </NavLink>
 
-          <Link to="/report" className="navbar-item">
+          <NavLink to="/report" className={navbarClassName}>
             Report
-          </Link>
+          </NavLink>
 
-          <Link to="/geneexpression" className="navbar-item">
+          <NavLink to="/geneexpression" className={navbarClassName}>
             Gene Expression
-          </Link>
+          </NavLink>
 
-          <Link to="/confidence" className="navbar-item">
+          <NavLink to="/confidence" className={navbarClassName}>
             Confidence
-          </Link>
+          </NavLink>
 
-          <Link to="/probability" className="navbar-item">
+          <NavLink to="/probability" className={navbarClassName}>
             Probability
-          </Link>
+          </NavLink>
 
-          <Link to="/tsne" className="navbar-item">
+          <NavLink to="/tsne" className={navbarClassName}>
             t-SNE
-          </Link>
+          </NavLink>
 
-          <Link to="/pca" className="navbar-item">
+          <NavLink to="/pca" className={navbarClassName}>
             PCA
-          </Link>
+          </NavLink>
+          <NavLink to="/bytype" className={navbarClassName}>
+            Type
+          </NavLink>
         </div>
 
         <div className="navbar-end">
-          <Link to="/help" className="navbar-item">
+          <NavLink to="/help" className={navbarClassName}>
             Help
-          </Link>
+          </NavLink>
         </div>
       </div>
     </nav>

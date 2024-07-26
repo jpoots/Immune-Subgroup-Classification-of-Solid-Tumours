@@ -165,6 +165,7 @@ def perform_analysis():
         tsne_comps,
         pc_comps,
         confidence_interval,
+        type_id,
     ) in zip(
         data["ids"],
         data["features"],
@@ -173,6 +174,7 @@ def perform_analysis():
         tsne,
         pc,
         confidence_interval_list,
+        request.typeids,
     ):
         genes = {
             gene_name: expression
@@ -196,6 +198,7 @@ def perform_analysis():
                 "pca": pc_comps,
                 "tsne": tsne_comps,
                 "confidence": confidence,
+                "typeid": type_id,
             }
         )
 

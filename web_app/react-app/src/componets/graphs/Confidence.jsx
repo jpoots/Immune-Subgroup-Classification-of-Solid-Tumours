@@ -1,6 +1,6 @@
 import Plot from "react-plotly.js";
 import { useRef, useMemo } from "react";
-import NothingToDisplay from "../general/NothingToDisplay";
+import NothingToDisplay from "../errors/NothingToDisplay";
 
 /**
  * generates the 95% confidence interval box plot from the results

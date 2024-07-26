@@ -6,15 +6,10 @@ from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.preprocessing import MinMaxScaler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
+from sklearn.calibration import CalibratedClassifierCV
 from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.metrics import (
-    ConfusionMatrixDisplay,
-    accuracy_score,
-    f1_score,
-    precision_score,
-    recall_score,
-    balanced_accuracy_score,
-)
+from sklearn.metrics import ConfusionMatrixDisplay
+
 import sys
 
 # append the path of the parent (taken from chatGPT)
@@ -31,9 +26,9 @@ RANDOM_STATE = 42
 
 # param for gb model
 MODEL_PARAMS = {
-    "max_iter": 1000,
-    "learning_rate": 0.1,
-    "max_depth": 75,
+    "max_iter": 1500,
+    "learning_rate": 0.05,
+    "max_depth": 100,
     "max_leaf_nodes": 41,
     "min_samples_leaf": 20,
 }
@@ -81,7 +76,7 @@ def main():
     loaded_model.predict(x_test)
 
     print(f"Removed: {num_removed}")
-    analyse_prediction_results(true, predictions)
+    analyse_prediction_results(predictions, true)
     ConfusionMatrixDisplay.from_predictions(true, predictions)
     plt.show()
 

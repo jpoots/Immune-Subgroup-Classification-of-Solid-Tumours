@@ -10,6 +10,7 @@ import { Navigate } from "react-router-dom";
  * @returns - the appropriate router - either naivgate or the original
  */
 const ProtectedRoute = ({ results, children }) => {
+  console.log(results);
   if (!results) {
     return <Navigate to="/empty" replace={true} />;
   } else {

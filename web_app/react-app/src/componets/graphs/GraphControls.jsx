@@ -1,3 +1,7 @@
+import { Tooltip } from "react-tooltip";
+import { renderToStaticMarkup } from "react-dom/server";
+import TitleSetter from "./TitleSetter";
+
 /**
  * a componet which handles the dimensions viewed and the title of a visualisation graph
  * @param {function} setDimensions
@@ -5,9 +9,38 @@
  * @param {function} setTitle
  * @returns - the graph controls
  */
-export function GraphControls({ setDimensions, dimension, setTitle }) {
+
+export function GraphControls({
+  setDimensions,
+  dimension,
+  setTitle,
+  pageTitle,
+  tooltipMessage,
+  tooltipLink,
+  fullName,
+}) {
+  const tooltipHTML = () =>
+    renderToStaticMarkup(
+      <div>
+        <a className="queens-branding-text" href={tooltipLink} target="_blank">
+          {fullName}
+        </a>
+        {tooltipMessage}
+      </div>
+    );
+
   return (
     <>
+      <h1 className="has-text-weight-bold block mt-2">
+        {pageTitle}{" "}
+        <a
+          className="queens-branding-text"
+          data-tooltip-html={`${tooltipHTML()}`}
+          data-tooltip-id="visual-tooltip"
+        >
+          ?
+        </a>
+      </h1>
       <div
         className="control block"
         onChange={() => setDimensions(dimension === 2 ? 3 : 2)}
@@ -35,15 +68,13 @@ export function GraphControls({ setDimensions, dimension, setTitle }) {
           3D
         </label>
       </div>
-      <div className="block">
-        <h1 className="has-text-weight-bold">Title</h1>
-        <input
-          type="text"
-          placeholder="Title"
-          className="input queens-textfield"
-          onChange={(e) => setTitle(e.target.value)}
-        />
-      </div>
+      <TitleSetter setTitle={setTitle} />
+      <Tooltip
+        id="visual-tooltip"
+        place="right-end"
+        className="tooltip"
+        clickable={true}
+      />
     </>
   );
 }

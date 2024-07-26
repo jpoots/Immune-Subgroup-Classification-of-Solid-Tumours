@@ -76,7 +76,7 @@ SCORING = {
     "f1_group6": make_scorer(f1_score, average=None, labels=[5]),
     "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
 }
-QC_THRESHOLD = 0.992
+QC_THRESHOLD = 0.989
 
 
 def main():

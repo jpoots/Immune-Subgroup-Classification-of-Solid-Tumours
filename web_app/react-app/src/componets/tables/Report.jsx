@@ -1,7 +1,8 @@
+import { SearchByID } from "./SearchByID";
 import { Table } from "./Table";
 import { PaginationBar } from "./PaginationBar";
 import { useState, useMemo } from "react";
-import NothingToDisplay from "../general/NothingToDisplay";
+import NothingToDisplay from "../errors/NothingToDisplay";
 import {
   getCoreRowModel,
   useReactTable,
@@ -41,7 +42,7 @@ const Report = ({ results }) => {
       },
       {
         accessorKey: "prediction",
-        header: "Classification",
+        header: "Class label",
         id: "prediction",
         cell: (props) => <p>{props.getValue()}</p>,
         enableSorting: false,
@@ -49,7 +50,7 @@ const Report = ({ results }) => {
       },
       {
         accessorFn: (row) => Math.max(...row.probs).toFixed(8),
-        header: "Sample ID",
+        header: "Probability",
         id: "prob",
         cell: (props) => <p>{props.getValue()}</p>,
         enableSorting: false,
@@ -93,17 +94,11 @@ const Report = ({ results }) => {
       {results ? (
         <>
           <div className="box">
+            <h1 className="block has-text-weight-bold">Prediction Report</h1>
+
             <div className="columns">
               <div className="column is-one-quarter">
-                <input
-                  type="text"
-                  className="input queens-textfield"
-                  onChange={(e) => {
-                    let column = table.getColumn("sampleID");
-                    column.setFilterValue(e.target.value.toUpperCase());
-                  }}
-                  placeholder="Search by sample ID"
-                />
+                <SearchByID table={table} />
               </div>
               <div className="column is-half">
                 <div className="select is-danger">

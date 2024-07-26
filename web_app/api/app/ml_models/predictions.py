@@ -16,7 +16,7 @@ bootstrap_models = joblib.load(BOOTSTRAP_LOCATION)
 def predict(features):
 
     # get probabilites and mark those below QC
-    qc_threshold = 0.982
+    qc_threshold = 0.98
     prediction_probs = model.predict_proba(features)
     nc_indicies = [
         index

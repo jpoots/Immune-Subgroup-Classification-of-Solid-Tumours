@@ -15,10 +15,9 @@
     color: white;
 }
 
-.navbar-item:hover, .navbar-link:hover, .navbar-item:focus, .navbar-link:focus {
-    background-color: #a30009;
+.navbar-item:hover, .navbar-link:hover, .navbar-item:focus, .navbar-link:focus, .navbar-item:active, .is-current-page {
+    background-color: #a30009 !important;
 }
-
 .queens-branding-text {
     color: #D6000D !important;
 }
@@ -45,4 +44,8 @@
 
 .queens-radio {
     accent-color: #D6000D !important;
+}
+
+.tooltip {
+    z-index: 100 !important;
 }
