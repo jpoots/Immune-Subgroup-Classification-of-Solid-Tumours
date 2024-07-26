@@ -38,6 +38,8 @@ SCHEMA = {
                 "required": ["sampleID", "genes"],
             },
         },
+        "interval": {"type": "integer", "minimum": 0, "maximum": 100},
+        "perplexity": {"type": "integer"},
     },
     "required": ["samples"],
 }
@@ -59,6 +61,8 @@ def parse_json(f):
 
         if "perplexity" in data:
             request.perplexity = data["perplexity"]
+        if "interval" in data:
+            request.interval = int(data["interval"])
 
         data = data["samples"]
 

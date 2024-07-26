@@ -34,7 +34,11 @@ def predict(features):
     return predictions, prediction_probs.tolist(), len(nc_indicies)
 
 
-def confidence_intervals(features):
+def confidence_intervals(features, interval):
+    bound = 100 - interval
+
+    upper = 100 - bound / 2
+    lower = bound / 2
 
     all_classified = []
 
@@ -49,7 +53,7 @@ def confidence_intervals(features):
 
     all_classified = np.transpose(np.array(all_classified))
     intervals = [
-        np.percentile(classified, [0, 2.5, 50, 97.5, 100])
+        np.percentile(classified, [0, lower, 50, upper, 100])
         for classified in all_classified
     ]
     return intervals

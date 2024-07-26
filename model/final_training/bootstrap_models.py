@@ -34,9 +34,9 @@ N_BOOTSTRAPS = 10
 
 # param for gb model
 MODEL_PARAMS = {
-    "max_iter": 1000,
-    "learning_rate": 0.1,
-    "max_depth": 75,
+    "max_iter": 1500,
+    "learning_rate": 0.05,
+    "max_depth": 100,
     "max_leaf_nodes": 41,
     "min_samples_leaf": 20,
 }

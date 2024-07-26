@@ -126,20 +126,19 @@ def tsne():
 def confidence():
     features = request.features
     sample_ids = request.idx
+    interval = request.interval
 
     results = []
-    for interval, id in zip(confidence_intervals(features), sample_ids):
+    for interval, id in zip(confidence_intervals(features, interval), sample_ids):
 
         results.append(
             {
                 "sampleID": id,
-                "confidence": {
-                    "min": interval[0],
-                    "lower": interval[1],
-                    "median": interval[2],
-                    "upper": interval[3],
-                    "max": interval[4],
-                },
+                "min": interval[0],
+                "lower": interval[1],
+                "median": interval[2],
+                "upper": interval[3],
+                "max": interval[4],
             }
         )
     return jsonify({"data": results})
@@ -151,9 +150,7 @@ def perform_analysis():
     data = gene_preprocessing(full_analysis=True, features=request.features)
 
     predictions, prediction_probs, num_nc = predict(data["features"])
-    confidence_interval_list = confidence_intervals(data["features"])
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
-    tsne = TSNE_PIPE.fit_transform(data["features"]).tolist()
 
     results = []
 
@@ -162,31 +159,19 @@ def perform_analysis():
         feature_list,
         prediction,
         prob_list,
-        tsne_comps,
         pc_comps,
-        confidence_interval,
         type_id,
     ) in zip(
         data["ids"],
         data["features"],
         predictions,
         prediction_probs,
-        tsne,
         pc,
-        confidence_interval_list,
         request.typeids,
     ):
         genes = {
             gene_name: expression
             for gene_name, expression in zip(data["gene_names"], feature_list)
-        }
-
-        confidence = {
-            "min": confidence_interval[0],
-            "lower": confidence_interval[1],
-            "median": confidence_interval[2],
-            "upper": confidence_interval[3],
-            "max": confidence_interval[4],
         }
 
         results.append(
@@ -196,8 +181,6 @@ def perform_analysis():
                 "prediction": prediction,
                 "probs": prob_list,
                 "pca": pc_comps,
-                "tsne": tsne_comps,
-                "confidence": confidence,
                 "typeid": type_id,
             }
         )

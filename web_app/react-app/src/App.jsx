@@ -15,7 +15,7 @@ import ProtectedRoute from "./componets/general/ProtectedRoute";
 import NothingToDisplay from "./componets/errors/NothingToDisplay";
 import NotFound from "./componets/errors/NotFound";
 import ClassificationByType from "./componets/graphs/ClassificationByType";
-import Protected2 from "./componets/general/Protected2";
+import Footer from "./componets/general/Footer";
 
 function App() {
   const [predictions, setPredictions] = useState([]);
@@ -23,10 +23,11 @@ function App() {
   const [results, setResults] = useState();
   const [summary, setSummary] = useState();
   const [tsneGrahData, setTsneGraphData] = useState();
+  const [confidenceGraphData, setConfidenceGraphData] = useState();
 
   return (
     <Router>
-      <Header></Header>
+      <Header />
       <Routes>
         <Route
           exact
@@ -40,6 +41,8 @@ function App() {
               setSummary={setSummary}
               filename={fileName}
               setFileName={setFileName}
+              setTsneGraphData={setTsneGraphData}
+              setConfidenceGraphData={setConfidenceGraphData}
             />
           }
         />
@@ -91,7 +94,11 @@ function App() {
           path="/confidence"
           element={
             <ProtectedRoute results={results}>
-              <Confidence results={results} />
+              <Confidence
+                results={results}
+                graphData={confidenceGraphData}
+                setGraphData={setConfidenceGraphData}
+              />
             </ProtectedRoute>
           }
         />
@@ -107,6 +114,7 @@ function App() {
         <Route path="/empty" element={<NothingToDisplay />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+      <Footer />
     </Router>
   );
 }
