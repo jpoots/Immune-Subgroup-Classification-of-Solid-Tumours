@@ -6,6 +6,7 @@ import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import ErrorModal from "../errors/ErrorModal";
+import { getData } from "../../../utils/asyncAPI";
 
 /**
  * constants for managing the allowed file types to upload
@@ -112,7 +113,6 @@ const Upload = ({
 
       // extracting tsne results
       result.tsne.forEach((tsne, index) => {
-        console.log(tsne);
         resultDict[`tsne${index + 1}`] = tsne;
       });
 
@@ -140,16 +140,16 @@ const Upload = ({
 
     let fullResultsResponse = [];
     try {
-      fullResultsResponse = await fetch(
-        "http://127.0.0.1:3000/performanalysis",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      fullResultsResponse = await fetch("http://127.0.0.1:3000/analyseasync", {
+        method: "POST",
+        body: formData,
+      });
 
       if (fullResultsResponse.ok) {
         fullResultsResponse = await fullResultsResponse.json();
+        let taskID = fullResultsResponse.id;
+        fullResultsResponse = await getData(taskID);
+        console.log(fullResultsResponse);
         fullResultsResponse = fullResultsResponse.data;
 
         // set state

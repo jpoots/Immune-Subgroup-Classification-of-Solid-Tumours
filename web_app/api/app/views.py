@@ -1,14 +1,28 @@
-from flask import render_template, request, session, redirect, jsonify, Blueprint
+from flask import (
+    render_template,
+    request,
+    session,
+    redirect,
+    jsonify,
+    Blueprint,
+)
+from flask import current_app
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import numpy as np
 import pandas as pd
-
-from .middleware import parse_json, parse_csv
+import time
+from .middleware import parse_json, parse_csv, csv_func, json_func
 from werkzeug import exceptions
 from .ml_models.predictions import predict, confidence_intervals, probability
+from . import celery
+import base64
+import uuid
+import os
+from werkzeug import exceptions
+from .errors.BadRequest import BadRequest
 
 views = Blueprint("views", __name__)
 
@@ -62,12 +76,6 @@ def predictgroup():
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
         results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
 
-    return jsonify({"data": results})
-
-
-@views.route("/analyse", methods=["POST"])
-def analyse():
-    results = []
     return jsonify({"data": results})
 
 
@@ -188,3 +196,125 @@ def perform_analysis():
     return jsonify(
         {"data": {"samples": results, "invalid": request.invalid, "nc": num_nc}}
     )
+
+
+@views.route("/getresults/<task_id>", methods=["GET"])
+def task_status(task_id):
+    task = celery.AsyncResult(task_id)
+    status = 200
+
+    if task.status == "SUCCESS":
+        result = jsonify({"status": "SUCCESS", "data": task.result})
+    elif task.status == "PENDING":
+        result = jsonify({"status": "PENDING"})
+    else:
+        err = task.result
+        result = jsonify(
+            {
+                "error": {
+                    "code": err.status_code,
+                    "name": err.headers,
+                    "description": err.body,
+                }
+            },
+        )
+        status = err.status_code
+    return result, status
+
+
+def celery_return(self, status, retval, task_id, args, kwargs, einfo):
+    os.remove(args[0])
+    return
+
+
+@celery.task(
+    throws=(BadRequest,),
+    after_return=celery_return,
+)
+def analyse(filepath):
+    parsed_results = csv_func(filepath)
+    data = gene_preprocessing(full_analysis=True, features=parsed_results["features"])
+
+    predictions, prediction_probs, num_nc = predict(data["features"])
+    pc = PCA_PIPE.fit_transform(data["features"]).tolist()
+
+    results = []
+
+    for (
+        sample_id,
+        feature_list,
+        prediction,
+        prob_list,
+        pc_comps,
+        type_id,
+    ) in zip(
+        data["ids"],
+        data["features"],
+        predictions,
+        prediction_probs,
+        pc,
+        parsed_results["type_ids"],
+    ):
+        genes = {
+            gene_name: expression
+            for gene_name, expression in zip(data["gene_names"], feature_list)
+        }
+
+        results.append(
+            {
+                "sampleID": sample_id,
+                "genes": genes,
+                "prediction": prediction,
+                "probs": prob_list,
+                "pca": pc_comps,
+                "typeid": type_id,
+            }
+        )
+
+    return {"samples": results, "invalid": parsed_results["invalid"], "nc": num_nc}
+
+
+@celery.task(
+    throws=(BadRequest,),
+)
+def tsne_celery(data):
+    data = json_func(data)
+
+    idx = data["ids"]
+    features = data["features"]
+
+    Pipeline(
+        steps=[
+            ("scaler", MinMaxScaler()),
+            ("dr", TSNE(n_components=3, perplexity=2)),
+        ]
+    )
+
+    results = []
+    tsne = TSNE_PIPE.fit_transform(features).tolist()
+    for id, tsne_result in zip(idx, tsne):
+        results.append({"sampleID": id, "tsne": tsne_result})
+
+    return results
+
+
+@views.route("/analyseasync", methods=["POST"])
+def analyse_async():
+    # is file in request and is it a valid CSV
+    try:
+        file = request.files["samples"]
+    except Exception as e:
+        raise exceptions.BadRequest("Missing file")
+
+    filename = f"{uuid.uuid4()}.csv"
+    file.save("./temp/" + filename)
+    task = analyse.apply_async(args=["./temp/" + filename])
+    return jsonify({"id": task.id}), 200
+
+
+@views.route("/tsneasync", methods=["POST"])
+def tsne_async():
+    # handles error automatically if the request isn't JSON
+    data = request.get_json()
+    task = tsne_celery.apply_async(args=[data])
+    return jsonify({"id": task.id}), 200

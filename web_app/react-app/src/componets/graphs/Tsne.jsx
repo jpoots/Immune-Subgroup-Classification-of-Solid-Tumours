@@ -5,9 +5,10 @@ import NothingToDisplay from "../errors/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import ErrorModal from "../errors/ErrorModal";
+import { getData } from "../../../utils/asyncAPI";
 
 // tnse api url and perplexity setting
-const API_URL = "http://127.0.0.1:3000/tsne";
+const API_URL = "http://127.0.0.1:3000/tsneasync";
 const MIN_PERPLEXITY = 1;
 
 /**
@@ -80,6 +81,9 @@ const Tsne = ({ results, graphData, setGraphData }) => {
 
       if (tsneResponse.ok) {
         tsneResponse = await tsneResponse.json();
+        let taskID = tsneResponse.id;
+        tsneResponse = await getData(taskID);
+        console.log(tsneResponse.data);
       } else {
         // known error
         tsneResponse = await tsneResponse.json();
