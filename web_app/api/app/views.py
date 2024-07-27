@@ -282,11 +282,12 @@ def tsne_celery(data):
 
     idx = data["ids"]
     features = data["features"]
+    perplexity = data["perplexity"]
 
     Pipeline(
         steps=[
             ("scaler", MinMaxScaler()),
-            ("dr", TSNE(n_components=3, perplexity=2)),
+            ("dr", TSNE(n_components=3, perplexity=perplexity)),
         ]
     )
 
@@ -318,3 +319,38 @@ def tsne_async():
     data = request.get_json()
     task = tsne_celery.apply_async(args=[data])
     return jsonify({"id": task.id}), 200
+
+
+@views.route("/confidenceasync", methods=["POST"])
+def confidence_async():
+    # handles error automatically if the request isn't JSON
+    data = request.get_json()
+
+    task = confidence_celery.apply_async(args=[data])
+    return jsonify({"id": task.id}), 200
+
+
+@celery.task(
+    throws=(BadRequest,),
+)
+def confidence_celery(data):
+    data = json_func(data)
+
+    features = data["features"]
+    sample_ids = data["ids"]
+    interval = data["interval"]
+
+    results = []
+    for interval, id in zip(confidence_intervals(features, interval), sample_ids):
+
+        results.append(
+            {
+                "sampleID": id,
+                "min": interval[0],
+                "lower": interval[1],
+                "median": interval[2],
+                "upper": interval[3],
+                "max": interval[4],
+            }
+        )
+    return results

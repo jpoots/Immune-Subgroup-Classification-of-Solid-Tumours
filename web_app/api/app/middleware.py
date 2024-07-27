@@ -172,17 +172,22 @@ def csv_func(filepath):
 
 def json_func(data):
     # validate jsona and raise exception if invalid
+    perplexity = None
+    interval = None
+
     try:
         VALIDATOR(data)
     except JsonSchemaValueException as e:
-        raise exceptions.BadRequest(e.message)
+        raise BadRequest(body=e.message)
 
-    """    
+    try:
         if "perplexity" in data:
-            request.perplexity = data["perplexity"]
+            perplexity = int(data["perplexity"])
         if "interval" in data:
-            request.interval = int(data["interval"])
-    """
+            interval = int(data["interval"])
+    except:
+        raise BadRequest("Recieved invalid value for option")
+
     data = data["samples"]
 
     # extract data from JSON. List comp not used for efficieny with large data
@@ -191,4 +196,10 @@ def json_func(data):
         idx.append(sample["sampleID"])
         features.append(list(sample["genes"].values()))
 
-    return {"features": features, "ids": idx, "data": data}
+    return {
+        "features": features,
+        "ids": idx,
+        "data": data,
+        "perplexity": perplexity,
+        "interval": interval,
+    }

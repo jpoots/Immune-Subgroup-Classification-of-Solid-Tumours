@@ -75,7 +75,7 @@ const Tsne = ({ results, graphData, setGraphData }) => {
         },
         body: JSON.stringify({
           samples: results.samples,
-          perplexity: perplexity,
+          perplexity: parseInt(perplexity),
         }),
       });
 

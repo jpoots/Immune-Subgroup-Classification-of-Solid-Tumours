@@ -2,10 +2,11 @@ import Plot from "react-plotly.js";
 import { useRef, useMemo, useState } from "react";
 import TitleSetter from "./TitleSetter";
 import { CSVLink } from "react-csv";
+import { getData } from "../../../utils/asyncAPI";
 
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
-const API_URL = "http://127.0.0.1:3000/confidence";
+const API_URL = "http://127.0.0.1:3000/confidenceasync";
 
 /**
  * generates the 95% confidence interval box plot from the results
@@ -104,14 +105,17 @@ const Confidence = ({ results, graphData, setGraphData }) => {
 
       if (confidenceResponse.ok) {
         confidenceResponse = await confidenceResponse.json();
+        console.log(confidenceResponse);
+        let task_id = confidenceResponse.id;
+        confidenceResponse = await getData(task_id);
+
+        setGraphData(generateConfidenceData(confidenceResponse.data));
+        setDisabled(true);
       } else {
         // known error
         confidenceResponse = await confidenceResponse.json();
         openWarningModal(confidenceResponse.error.description);
       }
-
-      setGraphData(generateConfidenceData(confidenceResponse.data));
-      setDisabled(true);
     } catch (err) {
       openWarningModal("Something went wrong! Please try again later.");
     } finally {
