@@ -1,0 +1,26 @@
+consumes:
+  - multipart/form-data
+parameters:
+  - description: sample file to upload
+    in: formData
+    name: samples
+    required: true
+    type: file
+produces:
+  - application/json
+responses:
+  200:
+    description: background task started
+    schema:
+      properties:
+        id:
+          example: 1234-abcd
+          type: string
+      type: object
+  400:
+    description: There was an issue with the file sent
+  500:
+    description: An interval server error has occured
+summary: Performs a full non configurable analysis
+tags:
+  - Analyse

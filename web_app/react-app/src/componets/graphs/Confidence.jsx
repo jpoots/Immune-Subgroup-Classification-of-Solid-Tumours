@@ -107,7 +107,7 @@ const Confidence = ({ results, graphData, setGraphData }) => {
         confidenceResponse = await confidenceResponse.json();
         console.log(confidenceResponse);
         let task_id = confidenceResponse.id;
-        confidenceResponse = await getData(task_id);
+        confidenceResponse = await getData("confidence", task_id);
 
         setGraphData(generateConfidenceData(confidenceResponse.data));
         setDisabled(true);

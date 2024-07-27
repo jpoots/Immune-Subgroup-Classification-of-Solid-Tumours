@@ -13,6 +13,8 @@ import { getData } from "../../../utils/asyncAPI";
  */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
+const MAX_FILE_SIZE_BYTES = 30;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_BYTES * 1048576;
 
 /**
  *  This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
@@ -54,6 +56,8 @@ const Upload = ({
     // if invlaid file type, open warning modal
     if (!ALLOWED_FILES.includes(file.name.split(".").pop()))
       openWarningModal("Invalid file type");
+    if (file.size > MAX_FILE_SIZE)
+      openWarningModal(`Files must be smaller than ${MAX_FILE_SIZE_BYTES} MB`);
   };
 
   /**
@@ -148,7 +152,7 @@ const Upload = ({
       if (fullResultsResponse.ok) {
         fullResultsResponse = await fullResultsResponse.json();
         let taskID = fullResultsResponse.id;
-        fullResultsResponse = await getData(taskID);
+        fullResultsResponse = await getData("analysis", taskID);
         console.log(fullResultsResponse);
         fullResultsResponse = fullResultsResponse.data;
 
@@ -218,6 +222,8 @@ const Upload = ({
 
         <div className="file has-name">
           <label className="file-label">
+            <input type="hidden" name="MAX_FILE_SIZE" value="1" />
+
             <input
               type="file"
               onChange={handleFile}

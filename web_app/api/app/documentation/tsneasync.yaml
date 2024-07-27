@@ -1,0 +1,48 @@
+consumes:
+  - application/json
+parameters:
+  - description: The samples to be analysed along with a perplexity
+    in: body
+    name: samples
+    required: true
+    schema:
+      properties:
+        interval:
+          maximum: 100
+          minimum: 0
+          type: integer
+        perplexity:
+          type: integer
+        samples:
+          items:
+            properties:
+              genes:
+                properties:
+                  gene_name:
+                    type: number
+                type: object
+              sampleID:
+                type: string
+            type: object
+          type: array
+      required:
+        - samples
+      type: object
+produces:
+  - application/json
+responses:
+  200:
+    description: background task started
+    schema:
+      properties:
+        id:
+          example: 1234-abcd
+          type: string
+      type: object
+  400:
+    description: There was an issue with the file sent
+  500:
+    description: An interval server error has occured
+summary: Performs t-SNE analysis
+tags:
+  - t-SNE

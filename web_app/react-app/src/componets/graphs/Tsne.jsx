@@ -82,7 +82,7 @@ const Tsne = ({ results, graphData, setGraphData }) => {
       if (tsneResponse.ok) {
         tsneResponse = await tsneResponse.json();
         let taskID = tsneResponse.id;
-        tsneResponse = await getData(taskID);
+        tsneResponse = await getData("tsne", taskID);
         console.log(tsneResponse.data);
       } else {
         // known error

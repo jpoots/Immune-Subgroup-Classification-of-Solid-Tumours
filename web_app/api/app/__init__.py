@@ -4,6 +4,7 @@ from flask_cors import CORS
 from werkzeug import exceptions
 from .error_handling import handle_http_exception, handle_generic_exception
 from celery import Celery
+from flasgger import Swagger, swag_from, LazyString
 
 # https://blog.miguelgrinberg.com/post/celery-and-the-flask-application-factory-pattern
 celery = Celery(
@@ -15,14 +16,25 @@ def create_app():
     # set up app and cross origin
     app = Flask(__name__)
     CORS(app)
+    Swagger(
+        app,
+        template={
+            "info": {
+                "title": "ICST",
+                "version": "1.0",
+                "description": "API access for ICST",
+            }
+        },
+    )
 
     # register routes
-    from .views import views
+    from .views.main import main
+    from .views.get_results import get_result
 
-    app.register_blueprint(views, url_prefix="/")
+    app.register_blueprint(main, url_prefix="/")
+    app.register_blueprint(get_result, url_prefix="/getresult")
 
     celery.conf.update(app.config)
-
     # Set result_expires to 1 hours
     celery.conf.result_expires = 36000
 
