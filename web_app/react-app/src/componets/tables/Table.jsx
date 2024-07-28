@@ -10,7 +10,7 @@ export function Table({ table }) {
   return (
     <div className="table-container">
       {
-        <table className="table is-bordered">
+        <table className="table is-bordered is-striped">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>

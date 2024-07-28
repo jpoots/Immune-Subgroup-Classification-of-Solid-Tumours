@@ -6,15 +6,18 @@ import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import ErrorModal from "../errors/ErrorModal";
-import { getData } from "../../../utils/asyncAPI";
+import { callAsyncApi } from "../../../utils/asyncAPI";
+import { API_ROOT } from "../../../utils/constants";
+import { openWarningModal } from "../../../utils/openWarningModal";
 
 /**
  * constants for managing the allowed file types to upload
  */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
-const MAX_FILE_SIZE_BYTES = 30;
-const MAX_FILE_SIZE = MAX_FILE_SIZE_BYTES * 1048576;
+const MAX_FILE_SIZE_MB = 30;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1048576;
+const API_URL = `${API_ROOT}/analyse`;
 
 /**
  *  This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
@@ -45,19 +48,24 @@ const Upload = ({
 
   /**
    * sets the filename and file for the component after reset the current ones
-   * @param {event} event - the onChange event
+   * @param {event} event - the onChange event from the file input
    */
   const handleFile = (event) => {
-    let file = event.target.files[0];
+    const file = event.target.files[0];
     handleReset(file.name);
     setFile(file);
     setFileName(file.name);
 
-    // if invlaid file type, open warning modal
+    // if invlaid file type or too big, open warning modal
+
     if (!ALLOWED_FILES.includes(file.name.split(".").pop()))
-      openWarningModal("Invalid file type");
+      openWarningModal(setModalMessage, setOpenModal, "Invalid file type");
     if (file.size > MAX_FILE_SIZE)
-      openWarningModal(`Files must be smaller than ${MAX_FILE_SIZE_BYTES} MB`);
+      openWarningModal(
+        setModalMessage,
+        setOpenModal,
+        `Files must be smaller than ${MAX_FILE_SIZE_MB} MB`
+      );
   };
 
   /**
@@ -66,7 +74,10 @@ const Upload = ({
    */
   const handleReset = (fileName) => {
     fileName = typeof fileName === "undefined" ? "Upload File..." : filename;
+    // clear field
     fileInput.current.value = null;
+
+    // reset the app elements
     setFile();
     setFileName(fileName);
     setLoading(false);
@@ -81,9 +92,9 @@ const Upload = ({
    */
   const handleSummaryDownload = () => {
     setSummaryDownload(
-      Object.keys(summary).map((sample) => ({
+      Object.entries(summary).map(([sample, num_samples]) => ({
         subgroup: sample,
-        num_samples: summary[sample],
+        num_samples: num_samples,
       }))
     );
   };
@@ -92,17 +103,12 @@ const Upload = ({
    * Generates an object from the results which can be given to csv link
    */
   const handleAllDownload = () => {
-    let allDownload = [];
+    const allDownload = [];
     results.samples.forEach((result) => {
       // initialising result dict for each result
       let resultDict = {
         sampleID: result.sampleID,
         prediction: result.prediction,
-        upperConfidence: result.confidence.upper,
-        lowerConfidence: result.confidence.lower,
-        maxConfidence: result.confidence.max,
-        minConfidence: result.confidence.min,
-        medianConfidence: result.confidence.median,
       };
 
       // extracting probs results
@@ -115,14 +121,9 @@ const Upload = ({
         resultDict[`pca${index + 1}`] = pca;
       });
 
-      // extracting tsne results
-      result.tsne.forEach((tsne, index) => {
-        resultDict[`tsne${index + 1}`] = tsne;
-      });
-
       // extracting genes
-      Object.keys(result.genes).forEach(
-        (gene) => (resultDict[gene] = result.genes[gene])
+      Object.entries(result.genes).forEach(
+        ([geneName, expression]) => (resultDict[geneName] = expression)
       );
 
       allDownload.push(resultDict);
@@ -135,38 +136,28 @@ const Upload = ({
    * handles the logic to reach out to the ML api and set results
    */
   const handlePredict = async () => {
+    const formData = new FormData();
+    let request = {
+      method: "POST",
+      body: formData,
+    };
+
     // loading true to make button change
     setLoading(true);
 
     // create a form and hit the api for predictions
-    const formData = new FormData();
     formData.append("samples", file);
 
-    let fullResultsResponse = [];
-    try {
-      fullResultsResponse = await fetch("http://127.0.0.1:3000/analyseasync", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (fullResultsResponse.ok) {
-        fullResultsResponse = await fullResultsResponse.json();
-        let taskID = fullResultsResponse.id;
-        fullResultsResponse = await getData("analysis", taskID);
-        console.log(fullResultsResponse);
-        fullResultsResponse = fullResultsResponse.data;
-
-        // set state
-        setResults(fullResultsResponse);
-        setSummary(generateSummary(fullResultsResponse));
-      } else {
-        // known error
-        fullResultsResponse = await fullResultsResponse.json();
-        openWarningModal(fullResultsResponse.error.description);
-      }
-    } catch (err) {
-      // unkown error
-      openWarningModal("Something went wrong! Please try again later.");
+    let asyncResults = await callAsyncApi(
+      API_URL,
+      request,
+      setModalMessage,
+      setOpenModal
+    );
+    if (asyncResults.success) {
+      // set state
+      setResults(asyncResults.results);
+      setSummary(generateSummary(asyncResults.results));
     }
     setLoading(false);
   };
@@ -191,16 +182,6 @@ const Upload = ({
     return summaryToSet;
   };
 
-  /**
-   * opens a warning modal with the given message and resets the app
-   * @param {string} message - the message to display in the warning modal
-   */
-  const openWarningModal = (message) => {
-    setModalMessage(message);
-    setOpenModal(true);
-    handleReset();
-  };
-
   return (
     <div className="container">
       <div className="box">
@@ -209,9 +190,7 @@ const Upload = ({
             RNA-Seq Upload{" "}
             <a
               className="queens-branding-text"
-              data-tooltip-content={
-                "ICST accepts FPKM normalised RNA-Seq data structured as shown in the test data. See help for more details."
-              }
+              data-tooltip-content={`ICST accepts FPKM normalised RNA-Seq data in CSV or TXT format up to ${MAX_FILE_SIZE_MB}MB. See help for more details.`}
               data-tooltip-id="icst-tooltip"
               data-tooltip-place="right"
             >
@@ -263,8 +242,9 @@ const Upload = ({
 
         <div className="block">
           ICST is an open-access, open source software package which allows you
-          to classify samples into one of 6 immune subgroups. Please read the
-          help section before use.
+          to classify samples solid tumour samples into one of 6 immune
+          subgroups using FPKM normalised RNA-Seq data. Please read the help
+          section before use.
         </div>
 
         <div className="block">

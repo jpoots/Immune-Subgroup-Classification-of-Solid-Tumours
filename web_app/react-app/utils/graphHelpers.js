@@ -34,7 +34,7 @@ const getPlotlyData = (graphData, dimension) => {
  * @returns 
  */
 const generateGraphData = (results, graphResponse, accessorKey) => {
-    let x = {
+    let x  = {
         1: [],
         2: [],
         3: [],

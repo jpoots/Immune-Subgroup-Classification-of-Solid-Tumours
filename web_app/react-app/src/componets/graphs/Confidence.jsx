@@ -2,11 +2,14 @@ import Plot from "react-plotly.js";
 import { useRef, useMemo, useState } from "react";
 import TitleSetter from "./TitleSetter";
 import { CSVLink } from "react-csv";
-import { getData } from "../../../utils/asyncAPI";
+import { getData, callAsyncApi } from "../../../utils/asyncAPI";
+import ErrorModal from "../errors/ErrorModal";
+import { API_ROOT } from "../../../utils/constants";
+import { openWarningModal } from "../../../utils/openWarningModal";
 
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
-const API_URL = "http://127.0.0.1:3000/confidenceasync";
+const API_URL = `${API_ROOT}/confidence`;
 
 /**
  * generates the 95% confidence interval box plot from the results
@@ -16,21 +19,12 @@ const API_URL = "http://127.0.0.1:3000/confidenceasync";
 const Confidence = ({ results, graphData, setGraphData }) => {
   const slider = useRef();
   const [download, setDownload] = useState([]);
-  const [title, setTitle] = useState("Confidence Interval");
-  const [interval, setInterval] = useState(MAX_INTERVAL);
+  const [title, setTitle] = useState();
+  const [interval, setInterval] = useState(95);
   const [disabled, setDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState();
   const [openModal, setOpenModal] = useState(false);
-
-  /**
-   * opens a warning modal with the given message
-   * @param {string} message - the message to display in the warning modal
-   */
-  const openWarningModal = (message) => {
-    setModalMessage(message);
-    setOpenModal(true);
-  };
 
   const handleDownload = () => {
     let toDownload = results.samples.map((sample) => ({
@@ -89,38 +83,31 @@ const Confidence = ({ results, graphData, setGraphData }) => {
 
   const handleConfidenceInterval = async () => {
     setLoading(true);
+    let request = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        samples: results.samples,
+        interval: parseInt(interval),
+      }),
+    };
 
-    try {
-      let confidenceResponse = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          samples: results.samples,
-          interval: parseInt(interval),
-        }),
-      });
-
-      if (confidenceResponse.ok) {
-        confidenceResponse = await confidenceResponse.json();
-        console.log(confidenceResponse);
-        let task_id = confidenceResponse.id;
-        confidenceResponse = await getData("confidence", task_id);
-
-        setGraphData(generateConfidenceData(confidenceResponse.data));
-        setDisabled(true);
-      } else {
-        // known error
-        confidenceResponse = await confidenceResponse.json();
-        openWarningModal(confidenceResponse.error.description);
-      }
-    } catch (err) {
-      openWarningModal("Something went wrong! Please try again later.");
-    } finally {
-      setLoading(false);
+    let confidenceResults = await callAsyncApi(
+      API_URL,
+      request,
+      setModalMessage,
+      setOpenModal
+    );
+    if (confidenceResults.success) {
+      setTitle(`${interval}% Confidence Interval`);
+      setGraphData(generateConfidenceData(confidenceResults.results));
+      setDisabled(true);
     }
+
+    setLoading(false);
   };
 
   return (
@@ -198,6 +185,9 @@ const Confidence = ({ results, graphData, setGraphData }) => {
         </div>
       </div>
       <button onClick={() => console.log(graphData)}>button</button>
+      {openModal && (
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
+      )}
     </div>
   );
 };

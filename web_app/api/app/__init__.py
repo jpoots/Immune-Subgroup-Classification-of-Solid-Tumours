@@ -2,7 +2,7 @@ from flask import Flask
 import joblib
 from flask_cors import CORS
 from werkzeug import exceptions
-from .error_handling import handle_http_exception, handle_generic_exception
+from .handlers import handle_http_exception, handle_generic_exception
 from celery import Celery
 from flasgger import Swagger, swag_from, LazyString
 
@@ -29,10 +29,10 @@ def create_app():
 
     # register routes
     from .views.main import main
-    from .views.get_results import get_result
+    from .views.get_results import get_results
 
     app.register_blueprint(main, url_prefix="/")
-    app.register_blueprint(get_result, url_prefix="/getresult")
+    app.register_blueprint(get_results, url_prefix="/getresults")
 
     celery.conf.update(app.config)
     # Set result_expires to 1 hours

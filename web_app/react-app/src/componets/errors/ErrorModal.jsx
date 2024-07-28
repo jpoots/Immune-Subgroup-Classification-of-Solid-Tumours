@@ -1,3 +1,9 @@
+/**
+ * an error modal that can be popped up with an error message and closed
+ * @param {string} modalMessage - the pages model message variable
+ * @param {function} setOpenModal - the function to set the
+ * @returns an error modal with a message
+ */
 const ErrorModal = ({ modalMessage, setOpenModal }) => {
   return (
     <div className="modal is-active">

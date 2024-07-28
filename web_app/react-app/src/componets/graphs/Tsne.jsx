@@ -5,10 +5,12 @@ import NothingToDisplay from "../errors/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import ErrorModal from "../errors/ErrorModal";
-import { getData } from "../../../utils/asyncAPI";
+import { getData, callAsyncApi } from "../../../utils/asyncAPI";
+import { API_ROOT } from "../../../utils/constants";
+import { openWarningModal } from "../../../utils/openWarningModal";
 
 // tnse api url and perplexity setting
-const API_URL = "http://127.0.0.1:3000/tsneasync";
+const API_URL = `${API_ROOT}/tsne`;
 const MIN_PERPLEXITY = 1;
 
 /**
@@ -65,46 +67,31 @@ const Tsne = ({ results, graphData, setGraphData }) => {
    */
   const handleTsne = async () => {
     setLoading(true);
+    let request = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        samples: results.samples,
+        perplexity: parseInt(perplexity),
+      }),
+    };
 
-    try {
-      let tsneResponse = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          samples: results.samples,
-          perplexity: parseInt(perplexity),
-        }),
-      });
+    let tsneResults = await callAsyncApi(
+      API_URL,
+      request,
+      setModalMessage,
+      setOpenModal
+    );
 
-      if (tsneResponse.ok) {
-        tsneResponse = await tsneResponse.json();
-        let taskID = tsneResponse.id;
-        tsneResponse = await getData("tsne", taskID);
-        console.log(tsneResponse.data);
-      } else {
-        // known error
-        tsneResponse = await tsneResponse.json();
-        openWarningModal(tsneResponse.error.description);
-      }
-      setGraphData(generateGraphData(results, tsneResponse.data, "tsne"));
+    if (tsneResults.success) {
+      setGraphData(generateGraphData(results, tsneResults.results, "tsne"));
       setDisabled(true);
-    } catch (err) {
-      openWarningModal("Something went wrong! Please try again later.");
-    } finally {
-      setLoading(false);
     }
-  };
 
-  /**
-   * opens a warning modal with the given message
-   * @param {string} message - the message to display in the warning modal
-   */
-  const openWarningModal = (message) => {
-    setModalMessage(message);
-    setOpenModal(true);
+    setLoading(false);
   };
 
   const pageTitle = "t-SNE Visualisation";
