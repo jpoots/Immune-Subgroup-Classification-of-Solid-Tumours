@@ -31,7 +31,7 @@ return new Promise((resolve) => {
  */
 const callAsyncApi = async (url, request, setModalMessage, setOpenModal) => {
     let apiResponse;
-    let errorMessage;
+    let errorMessage = "Sorry something went wrong! Please try agian later.";
     let results;
     let resultURL;
 

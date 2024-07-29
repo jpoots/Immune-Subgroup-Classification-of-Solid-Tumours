@@ -97,7 +97,9 @@ def csv_func(filepath):
     # is data of valid shape
     n_col, n_row = data.shape[0], data.shape[1]
     if n_row != 440 or n_row == 0:
-        BadRequest(body="Sample files should contain 440 genes and at least 1 sample")
+        raise BadRequest(
+            body="Sample files should contain 440 genes and at least 1 sample"
+        )
 
     # impute missing values - note, imputation could've been done in pipeline but seperation allows us to keep the gene expression values
     features = data.values

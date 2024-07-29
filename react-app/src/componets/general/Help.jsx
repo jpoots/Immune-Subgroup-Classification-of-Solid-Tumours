@@ -1,3 +1,5 @@
+import { API_ROOT } from "../../../utils/constants";
+
 /**
  * a help page for the app containing help text
  * @returns a help page for the ap
@@ -18,6 +20,7 @@ const Help = () => {
           <a
             href="https://pubmed.ncbi.nlm.nih.gov/29628290/"
             className="queens-branding-text"
+            target="_blank"
           >
             The Immune Landscape of Cancer
           </a>
@@ -94,6 +97,23 @@ const Help = () => {
               <li>Precision: 88.73%</li>
               <li>Recall: 91.42%</li>
             </ul>
+          </div>
+        </div>
+
+        <div className="block">
+          <h1 className="block has-text-weight-bold	">For developers</h1>
+          <div className="block">
+            In keeping with the open access nature of ICST, all APIs used to
+            provide site functionality are open. Full Swagger documumentation
+            for these can be found{" "}
+            <a
+              href={`${API_ROOT}/apidocs`}
+              className="queens-branding-text"
+              target="_blank"
+            >
+              here
+            </a>
+            .
           </div>
         </div>
       </div>

@@ -17,6 +17,7 @@ from app.utils import (
     gene_preprocessing,
 )
 from flasgger import swag_from
+from app import limiter
 
 """
 The main api endpoints for the system to perform analysis
@@ -28,11 +29,14 @@ PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components
 RESULTS_ENDPOINT = "http://127.0.0.1:3000/getresults"
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
+LIMIT = "1000 per minute"
+LIMIT_MESSAGE = "Request are limited to 5 per minute"
 
 main = Blueprint("main", __name__)
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "extractgenes.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/extractgenes", methods=["POST"])
 def extract_genes():
     """Endpoint to extract data from a csv file attached as samples to an HTTP request. Full details of request input in swagger docs.
@@ -65,6 +69,7 @@ def extract_genes():
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "predict.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/predict", methods=["POST"])
 def predictgroup():
     """Endpoint to form predictions from json data in a request. Full details of request input in swagger docs.
@@ -101,6 +106,7 @@ def predictgroup():
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "probability.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/probability", methods=["POST"])
 def probaility():
     """Endpoint to get prediction probabilities from JSON. Full details of request input in swagger docs.
@@ -139,6 +145,7 @@ def probaility():
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "pca.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/pca", methods=["POST"])
 def pca():
     """Endpoint to perform PCA analysis. Full details of request input in swagger docs.
@@ -167,6 +174,7 @@ def pca():
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "analyse.yaml"))
 @main.route("/analyse", methods=["POST"])
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 def analyse_async():
     """Endpoint to begin a full async analysis from a csv file attached as samples to an HTTP request. Full details of request input in swagger docs.
 
@@ -191,6 +199,7 @@ def analyse_async():
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "tsne.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/tsne", methods=["POST"])
 def tsne_async():
     """Endpoint to begin tsne analysis from JSON. Full details of request input in swagger docs.
@@ -210,6 +219,7 @@ def tsne_async():
 
 
 @swag_from(os.path.join(DOCUMENTATION_PATH, "confidence.yaml"))
+@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/confidence", methods=["POST"])
 def confidence_async():
     """Endpoint to begin confidence analysis from JSON. Full details of request input in swagger docs.
