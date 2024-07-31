@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bulma/css/bulma.min.css";
 import Header from "./componets/general/Header";
 import Upload from "./componets/upload/Upload";
-import Report from "./componets/tables/tablePages/Report";
+import Prediction from "./componets/tables/tablePages/Prediction";
 import "./index.css";
 import GeneExpression from "./componets/tables/tablePages/GeneExpression";
 import Probability from "./componets/tables/tablePages/Probability";
@@ -42,9 +42,9 @@ function App() {
   };
 
   return (
-    <ErrorBoundary FallbackComponent={<FallbackError />} onError={resetApp}>
-      <Router>
-        <Header />
+    <Router>
+      <Header />
+      <ErrorBoundary FallbackComponent={FallbackError} onError={resetApp}>
         <Routes>
           <Route
             exact
@@ -72,10 +72,10 @@ function App() {
             }
           />
           <Route
-            path="/report"
+            path="/prediction"
             element={
               <ProtectedRoute results={results}>
-                <Report predictions={predictions} results={results} />
+                <Prediction predictions={predictions} results={results} />
               </ProtectedRoute>
             }
           />
@@ -131,9 +131,10 @@ function App() {
           <Route path="/empty" element={<NothingToDisplay />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <Footer />
-      </Router>
-    </ErrorBoundary>
+      </ErrorBoundary>
+
+      <Footer />
+    </Router>
   );
 }
 

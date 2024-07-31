@@ -23,8 +23,8 @@ const Header = () => {
             Upload
           </NavLink>
 
-          <NavLink to="/report" className={navbarClassName}>
-            Report
+          <NavLink to="/prediction" className={navbarClassName}>
+            Prediction
           </NavLink>
 
           <NavLink to="/geneexpression" className={navbarClassName}>

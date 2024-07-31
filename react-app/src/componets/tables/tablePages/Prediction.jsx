@@ -17,7 +17,7 @@ import { CSVLink } from "react-csv";
  * @param {Object} results - the results of the analysis
  * @returns - a report on the predicitons
  */
-const Report = ({ results }) => {
+const Prediction = ({ results }) => {
   let samples = results["samples"];
 
   // setting state for the component
@@ -82,7 +82,8 @@ const Report = ({ results }) => {
   const handleDownload = () => {
     let toExport = table.getFilteredRowModel().rows.map((row) => ({
       sampleID: row.original.sampleID,
-      prediction: row.original.prediction,
+      classLabel: row.original.prediction,
+      maxProbability: Math.max(...row.original.probs),
     }));
 
     setDownload(toExport);
@@ -104,7 +105,6 @@ const Report = ({ results }) => {
                   <select
                     name=""
                     onChange={(e) => {
-                      console.log(e.target.value);
                       table
                         .getColumn("prediction")
                         .setFilterValue(e.target.value);
@@ -142,4 +142,4 @@ const Report = ({ results }) => {
   );
 };
 
-export default Report;
+export default Prediction;

@@ -24,35 +24,46 @@ const Help = () => {
           >
             The Immune Landscape of Cancer
           </a>
-          . The tool also provides useful visualisation tools for sample data.
+          . The tool also provides useful visualisation tools for the data.
         </div>
 
         <div className="block">
           <h1 className="block has-text-weight-bold	">How does it work?</h1>
           <div className="block">
             <p className="block">
-              ICST accepts RNA-Seq data and extracts 440 key genes for the
-              subgroup classification. Any missing genes are imputed using the
-              MICE algorithm and genes are then scaled between 0 and 1 using a
-              Minmax scaling algorithm. They are then fed to a supervised
-              machine learning model trained on over 7000 samples from
-              PanCanAtlas using the gradient boosting algorthim in order the
-              attain a classification along with the models probability of each
-              subgroup.
+              ICST accepts FPKM normalised RNA-Seq data and extracts 440 key
+              genes for the subgroup classification. Any missing genes are
+              imputed using MICE (Multivariate Imputation by Chained Equations).
+              To ensure the quality of predictions samples with over 10 or more
+              missing genes will be rejected. Gene expression values are then
+              scaled between 0 and 1 using a Minmax scaling algorithm. These
+              &quot;features&quot; are fed to a supervised machine learning
+              model trained on over 7000 samples from PanCanAtlas using the
+              <a
+                href="https://xgboost.readthedocs.io/en/stable/index.html"
+                className="queens-branding-text"
+                target="_blank"
+              >
+                Extreme Gradient Boosting
+              </a>{" "}
+              algorthim in order the attain a classification along with the
+              models probability of each subgroup.
             </p>
 
             <p className="block">
-              The tool also uses the PCA algorithm with standard scaling and the
-              t-SNE algorithm to visualise the sample data and identify
-              clustering.
+              The tool also uses the PCA (Principle Component Analysis)
+              algorithm with standard scaling and the t-SNE algorithm to
+              visualise the sample data and identify clustering.
             </p>
 
             <p className="block">
-              Confidence intervals are attained using models trained on X random
-              bootstraps of the training data. Prediction probabilities are
-              generated from each of these models and a 95% confidence interval
-              is extracted from these. This is shown via a box plot where the
-              box contains the 95%.
+              Confidence intervals are attained using models trained on 10
+              random bootstraps of the training data. Note that this is for
+              demonstration purposes only. A larger number of bootstraps should
+              be used in production. Prediction probabilities are generated from
+              each of these models and a confidence interval is extracted. This
+              is shown via a box plot where the box contains the requested
+              percentage.
             </p>
           </div>
         </div>
@@ -60,10 +71,10 @@ const Help = () => {
         <div className="block">
           <h1 className="block has-text-weight-bold	">How do I use it?</h1>
           <div>
-            ICST accepts RNA-Seq data from solid tumours in CSV or TXT files and
-            assumes the data has already been FPKM normalised. This may be
-            uploaded on the upload page. Data should be formatted as shown in
-            the{" "}
+            ICST accepts RNA-Seq data from solid tumours in CSV or TXT files
+            with a comma, semicolon or tab delimiter and assumes the data has
+            already been FPKM normalised. This may be uploaded on the upload
+            page. Data should be formatted as shown in the{" "}
             <a
               href="/test_data.csv"
               className="queens-branding-text"
@@ -71,13 +82,15 @@ const Help = () => {
             >
               Test Data
             </a>{" "}
-            with each column representing a sample and each row a gene. A label
-            row/column should be included for both axis. While ICST can impute
-            genes, for quality reasons samples with more than Y missing genes
-            will be rejected. In addition, to maintain accuracy, any samples for
-            which ICST cannot make a confident prediction will be deemed
-            non-classifiable (NC). Results can be viewed using the navigation
-            bar at the top of the screen.
+            with each column representing a sample and each row a gene. A list
+            of the current accepted gene names can be found here. The genes may
+            be in any order and a file may contain more than the 440 required
+            genes. A label row/column should be included for both axis. In
+            addition, to maintain accuracy, any samples for which ICST cannot
+            make a confident prediction will be deemed non-classifiable (NC).
+            The current threshold for this is 87%. Results and visualisations
+            can be viewed using the navigation bar at the top of the screen. All
+            data including graphs is available to download.
           </div>
         </div>
 
@@ -87,15 +100,16 @@ const Help = () => {
             While training and evaluation of a machine learning model is a
             complicated process, some evaluation statistics from a holdout set
             of test data are listed below for your confidence in the models
-            output.
+            output. In addition, the model has underwent 10 fold cross
+            validation prior to QC thresholding and final testing.
           </div>
 
           <div className="block">
             <ul>
-              <li>Accuracy: 95.32%</li>
-              <li>F1: 89.78%</li>
-              <li>Precision: 88.73%</li>
-              <li>Recall: 91.42%</li>
+              <li>Accuracy: 95.02%</li>
+              <li>F1: 89.37%</li>
+              <li>Precision: 89.11%</li>
+              <li>Recall: 89.80%</li>
             </ul>
           </div>
         </div>
@@ -105,7 +119,8 @@ const Help = () => {
           <div className="block">
             In keeping with the open access nature of ICST, all APIs used to
             provide site functionality are open. Full Swagger documumentation
-            for these can be found{" "}
+            for these can be found. These can used to perform your own custom
+            analysis
             <a
               href={`${API_ROOT}/apidocs`}
               className="queens-branding-text"

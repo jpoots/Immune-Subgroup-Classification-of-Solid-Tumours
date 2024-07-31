@@ -111,7 +111,8 @@ const Upload = ({
       // initialising result dict for each result
       let resultDict = {
         sampleID: result.sampleID,
-        prediction: result.prediction,
+        classLabel: result.prediction,
+        type: result.typeid,
       };
 
       // extracting probs results
