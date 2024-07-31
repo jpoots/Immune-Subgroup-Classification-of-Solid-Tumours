@@ -54,10 +54,11 @@ SCHEMA = {
 VALIDATOR = compile(SCHEMA)
 
 
-def parse_csv(filepath):
-    """Parses a csv from a file path and returns key info as a dict
+def parse_csv(filepath, delimiter):
+    """Parses a file from a file path and returns key info as a dict
     Args:
     filepath: The file path to read from
+    delimiter: The files delimiter
 
     Returns:
         A dict including the features dataframe, type IDs and the number of invlaid samples
@@ -67,14 +68,14 @@ def parse_csv(filepath):
     """
     try:
         # is file in request and is it a valid CSV
-        data = pd.read_csv(filepath, index_col=0)
+        data = pd.read_csv(filepath, index_col=0, delimiter=delimiter)
         data = data.T
         # extract valid data
         data = data[ORDERED_GENE_DF.columns.intersection(data.columns)]
     except Exception as e:
         # if file could not be succesfully read
         raise BadRequest(
-            body='Sample files should be valid CSV or TXT files attached as "samples"'
+            body='Sample files should be valid CSV or TXT files attached as "samples" and a delimiter as "delimiter"'
         )
 
     # drop empty rows

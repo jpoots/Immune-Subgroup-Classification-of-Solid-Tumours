@@ -40,7 +40,7 @@ print(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
 @main.route("/parsesamples", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
 def parse_samples():
-    """Endpoint to extract data from a csv file attached as samples to an HTTP request. Full details of request input in swagger docs.
+    """Endpoint to extract data from a csv file attached as samples to an HTTP from using delimtier delimtiter. Full details of request input in swagger docs.
 
     Returns:
         A dict including key the sample data, number of invlaid samples.
@@ -64,8 +64,12 @@ def parse_samples():
         file = request.files["samples"]
     except Exception as e:
         raise exceptions.BadRequest("Missing file")
+    try:
+        delimiter = request.form["delimiter"]
+    except Exception as e:
+        raise exceptions.BadRequest("Missing delimiter")
 
-    data = parse_csv(file)
+    data = parse_csv(file, delimiter)
 
     features = pd.DataFrame(data["features"], columns=data["gene_names"])
     features = features.T.to_dict()
@@ -204,10 +208,14 @@ def analyse_async():
         file = request.files["samples"]
     except Exception as e:
         raise exceptions.BadRequest("Missing file")
+    try:
+        delimiter = request.form["delimiter"]
+    except Exception as e:
+        raise exceptions.BadRequest("Missing delimiter")
 
-    filename = f"{uuid.uuid4()}.csv"
+    filename = f"{uuid.uuid4()}"
     file.save("./temp/" + filename)
-    task = analyse.apply_async(args=["./temp/" + filename])
+    task = analyse.apply_async(args=[f"./temp/{filename}", delimiter])
     return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 
 

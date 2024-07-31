@@ -112,11 +112,12 @@ def tsne_celery(data):
 
 
 @celery.task(throws=(BadRequest,), after_return=delete_file_on_return)
-def analyse(filepath):
+def analyse(filepath, delimiter):
     """
     Performs a full non-configurable analysis on a csv file
     Args:
     filepath: The path of the csv file to analyse
+    delimiter: the files delimiter
 
     Returns:
         The analysis results as a dict
@@ -138,7 +139,7 @@ def analyse(filepath):
 
     Throws: BadRequest if invalid JSON data is input
     """
-    data = parse_csv(filepath)
+    data = parse_csv(filepath, delimiter)
     predictions, prediction_probs, num_nc = predict(data["features"])
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
 

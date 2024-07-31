@@ -46,6 +46,7 @@ const Upload = ({
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
   const cancelled = useRef();
+  const [delimiter, setDelimiter] = useState();
 
   /**
    * sets the filename and file for the component after reset the current ones
@@ -138,20 +139,22 @@ const Upload = ({
    * handles the logic to reach out to the ML api and set results
    */
   const handlePredict = async () => {
-    // if the cancelled ref has been set to true it must be reset
-    cancelled.current = false;
-
     const formData = new FormData();
     let request = {
       method: "POST",
       body: formData,
     };
 
+    // if the cancelled ref has been set to true it must be reset
+    cancelled.current = false;
     // loading true to make button change
     setLoading(true);
 
     // create a form and hit the api for predictions
     formData.append("samples", file);
+    formData.append("delimiter", delimiter);
+
+    console.log(formData);
 
     let asyncResults = await callAsyncApi(
       API_URL,
@@ -205,7 +208,6 @@ const Upload = ({
             </a>
           </h1>
         </div>
-
         <div className="file has-name">
           <label className="file-label">
             <input type="hidden" name="MAX_FILE_SIZE" value="1" />
@@ -233,7 +235,7 @@ const Upload = ({
               loading ? "is-loading" : ""
             }`}
             onClick={handlePredict}
-            disabled={!file || loading || results}
+            disabled={!file || loading || results || !delimiter}
           >
             Analyse
           </button>
@@ -246,6 +248,18 @@ const Upload = ({
             Reset
           </button>
         </div>
+        <div className="block is-flex is-align-content-center">
+          <div className="select is-danger">
+            <select onChange={(e) => setDelimiter(e.target.value)}>
+              <option default value="">
+                Select Delimiter
+              </option>
+              <option value=",">Comma</option>
+              <option value=";">Semicolon</option>
+              <option value="\t">Tab</option>
+            </select>
+          </div>
+        </div>
 
         <div className="block">
           ICST is an open-access, open source software package which allows you
@@ -253,7 +267,6 @@ const Upload = ({
           subgroups using FPKM normalised RNA-Seq data. Please read the help
           section before use.
         </div>
-
         <div className="block">
           <a
             href="/test_data.csv"

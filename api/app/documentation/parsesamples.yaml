@@ -6,6 +6,11 @@ parameters:
     name: samples
     required: true
     type: file
+  - description: file delimiter
+    in: formData
+    name: delimiter
+    required: true
+    type: string
 produces:
   - application/json
 responses:
