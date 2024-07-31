@@ -45,12 +45,14 @@ const Upload = ({
   const [allDownload, setAllDownload] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
+  const cancelled = useRef();
 
   /**
    * sets the filename and file for the component after reset the current ones
    * @param {event} event - the onChange event from the file input
    */
   const handleFile = (event) => {
+    cancelled.current = true;
     const file = event.target.files[0];
     handleReset(file.name);
     setFile(file);
@@ -136,6 +138,9 @@ const Upload = ({
    * handles the logic to reach out to the ML api and set results
    */
   const handlePredict = async () => {
+    // if the cancelled ref has been set to true it must be reset
+    cancelled.current = false;
+
     const formData = new FormData();
     let request = {
       method: "POST",
@@ -152,8 +157,10 @@ const Upload = ({
       API_URL,
       request,
       setModalMessage,
-      setOpenModal
+      setOpenModal,
+      cancelled
     );
+
     if (asyncResults.success) {
       // set state
       setResults(asyncResults.results);

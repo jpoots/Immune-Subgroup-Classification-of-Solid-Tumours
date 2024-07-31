@@ -1,4 +1,4 @@
-import { TitleAndSearch } from "./TitleAndSearch";
+import { TitleAndSearch } from "../tableComponents/TitleAndSearch";
 import { useState, useMemo } from "react";
 import {
   getCoreRowModel,
@@ -7,11 +7,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { Table } from "./Table";
+import { Table } from "../tableComponents/Table";
 
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "../errors/NothingToDisplay";
-import { PaginationBar } from "./PaginationBar";
+import NothingToDisplay from "../../errors/NothingToDisplay";
+import { PaginationBar } from "../tableComponents/PaginationBar";
 
 /**
  * the gene expression page where the extracted genes can be viewed

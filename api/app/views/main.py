@@ -6,18 +6,16 @@ from flask import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from ..utils import csv_func, json_func
+from ..utils import parse_csv, parse_json
 from werkzeug import exceptions
 from ..ml_models.predictions import predict, probability
 import uuid
 import os
 from werkzeug import exceptions
 from .celery_tasks import confidence_celery, tsne_celery, analyse
-from app.utils import (
-    gene_preprocessing,
-)
 from flasgger import swag_from
 from app import limiter
+import pandas as pd
 
 """
 The main api endpoints for the system to perform analysis
@@ -35,10 +33,13 @@ LIMIT_MESSAGE = "Request are limited to 5 per minute"
 main = Blueprint("main", __name__)
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "extractgenes.yaml"))
+print(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
+
+
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
-@main.route("/extractgenes", methods=["POST"])
-def extract_genes():
+@main.route("/parsesamples", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
+def parse_samples():
     """Endpoint to extract data from a csv file attached as samples to an HTTP request. Full details of request input in swagger docs.
 
     Returns:
@@ -52,6 +53,7 @@ def extract_genes():
                 "ACTL6A_S5": 745.567,
                 },
                 "sampleID": "TCGA.02.0047.GBM.C4"
+                "typeid": GBM
             },
         }
 
@@ -63,14 +65,25 @@ def extract_genes():
     except Exception as e:
         raise exceptions.BadRequest("Missing file")
 
-    data = csv_func(file)
-    returnData = gene_preprocessing(full_analysis=False, features=data["features"])
+    data = parse_csv(file)
+
+    features = pd.DataFrame(data["features"], columns=data["gene_names"])
+    features = features.T.to_dict()
+
+    returnData = []
+    for sample_id, feature_index, type_id in zip(
+        data["ids"], features, data["type_ids"]
+    ):
+        returnData.append(
+            {"sampleID": sample_id, "genes": features[feature_index], "typeid": type_id}
+        )
+
     return (jsonify({"data": {"samples": returnData, "invalid": data["invalid"]}}), 200)
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "predict.yaml"))
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/predict", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "predict.yaml"))
 def predictgroup():
     """Endpoint to form predictions from json data in a request. Full details of request input in swagger docs.
 
@@ -90,7 +103,7 @@ def predictgroup():
     """
 
     data = request.get_json()
-    data = json_func(data)
+    data = parse_json(data)
 
     idx = data["ids"]
     features = data["features"]
@@ -105,8 +118,8 @@ def predictgroup():
     return jsonify({"data": results})
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "probability.yaml"))
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@swag_from(os.path.join(DOCUMENTATION_PATH, "probability.yaml"))
 @main.route("/probability", methods=["POST"])
 def probaility():
     """Endpoint to get prediction probabilities from JSON. Full details of request input in swagger docs.
@@ -131,7 +144,7 @@ def probaility():
         BadRequest: The JSON sent is missing or invalid
     """
     data = request.get_json()
-    data = json_func(data)
+    data = parse_json(data)
 
     # make prediction
     probs = probability(data["features"])
@@ -144,9 +157,9 @@ def probaility():
     return jsonify({"data": results})
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "pca.yaml"))
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/pca", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "pca.yaml"))
 def pca():
     """Endpoint to perform PCA analysis. Full details of request input in swagger docs.
 
@@ -165,16 +178,16 @@ def pca():
         BadRequest: The JSON sent is missing or invalid
     """
     data = request.get_json()
-    data = json_func(data)
+    data = parse_json(data)
 
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
 
     return jsonify({"data": pc})
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "analyse.yaml"))
-@main.route("/analyse", methods=["POST"])
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@main.route("/analyse", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "analyse.yaml"))
 def analyse_async():
     """Endpoint to begin a full async analysis from a csv file attached as samples to an HTTP request. Full details of request input in swagger docs.
 
@@ -198,9 +211,9 @@ def analyse_async():
     return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "tsne.yaml"))
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/tsne", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "tsne.yaml"))
 def tsne_async():
     """Endpoint to begin tsne analysis from JSON. Full details of request input in swagger docs.
 
@@ -218,9 +231,9 @@ def tsne_async():
     return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
 
 
-@swag_from(os.path.join(DOCUMENTATION_PATH, "confidence.yaml"))
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/confidence", methods=["POST"])
+@swag_from(os.path.join(DOCUMENTATION_PATH, "confidence.yaml"))
 def confidence_async():
     """Endpoint to begin confidence analysis from JSON. Full details of request input in swagger docs.
 
@@ -235,4 +248,4 @@ def confidence_async():
     # handles error automatically if the request isn't JSON
     data = request.get_json()
     task = confidence_celery.apply_async(args=[data])
-    return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
+    return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202

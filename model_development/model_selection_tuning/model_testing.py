@@ -7,6 +7,7 @@ from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassif
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import MinMaxScaler
+from xgboost import XGBClassifier
 from imblearn.under_sampling import RandomUnderSampler
 
 from sklearn.metrics import (
@@ -20,7 +21,6 @@ from imblearn.over_sampling import SMOTE, BorderlineSMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 import sys
 
-# append the path of the parent (taken from chatGPT)
 sys.path.append("..")
 from utils.utils import (
     get_data,
@@ -43,6 +43,8 @@ SCORING = {
     "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
 }
 
+# the QC threshold to use in validation evaluation
+QC_THRESHOLD = 0
 
 # define sample strategy
 UNDER_SAMPLE = {
@@ -57,11 +59,69 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
+# scaler and samplers
 SCALER = MinMaxScaler()
 RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
 SMT = SMOTE(sampling_strategy=OVER_SAMPLE)
 
+# define models to test
+RF = ImbPipeline(
+    steps=[
+        ("rus", RUS),
+        ("smt", SMT),
+        ("scaler", MinMaxScaler()),
+        (
+            "model",
+            RandomForestClassifier(
+                max_depth=50, max_features="sqrt", n_estimators=1000, n_jobs=-1
+            ),
+        ),
+    ]
+)
+
 # define candidate models wiht best hyperparams
+XGBOOST = ImbPipeline(
+    steps=[
+        ("rus", RUS),
+        ("smt", SMT),
+        ("scaler", SCALER),
+        (
+            "model",
+            XGBClassifier(
+                learning_rate=0.3, max_depth=3, min_child_weight=None, n_estimators=1000
+            ),
+        ),
+    ]
+)
+
+# define candidate models wiht best hyperparams
+XGBOOST1 = ImbPipeline(
+    steps=[
+        ("rus", RUS),
+        ("smt", SMT),
+        ("scaler", SCALER),
+        (
+            "model",
+            XGBClassifier(),
+        ),
+    ]
+)
+
+# define candidate models wiht best hyperparams
+XGBOOST2 = ImbPipeline(
+    steps=[
+        ("rus", RUS),
+        ("smt", SMT),
+        ("scaler", SCALER),
+        (
+            "model",
+            XGBClassifier(
+                learning_rate=0.1, max_depth=7, min_child_weight=12, n_estimators=1500
+            ),
+        ),
+    ]
+)
+
 GB_AC = ImbPipeline(
     steps=[
         ("rus", RUS),
@@ -100,11 +160,11 @@ GB_F1_FINE = ImbPipeline(
         (
             "model",
             HistGradientBoostingClassifier(
-                max_iter=1500,
-                learning_rate=0.05,
-                max_depth=100,
-                max_leaf_nodes=41,
-                min_samples_leaf=20,
+                max_iter=2000,
+                learning_rate=0.1,
+                max_depth=50,
+                max_leaf_nodes=31,
+                min_samples_leaf=30,
             ),
         ),
     ]
@@ -154,10 +214,27 @@ GB_F1 = ImbPipeline(
     ]
 )
 
-MODELS = [GB_AC, GB_AC_FINE, GB_F1_FINE, GB_BA, GB_BA_FINE, GB_F1]
+MODELS = [
+    XGBOOST,
+    XGBOOST1,
+    XGBOOST2,
+    GB_F1,
+    GB_F1_FINE,
+    XGBOOST,
+    RF,
+    GB_AC,
+    GB_AC_FINE,
+    GB_BA,
+    GB_BA_FINE,
+]
+# the number of cross validation splits
+CV = 10
 
 
 def main():
+    """
+    gets data, trains models on the test data and analyses the results
+    """
     np.random.seed(RANDOM_STATE)
 
     # import data using util
@@ -178,6 +255,13 @@ def main():
 
 
 def analyse_models(x, y, axs_test, axs_train):
+    """Trains models, cross validates, fits on a validation split and evaulates performance, printing to console
+    Args:
+    x_train: the training data
+    y_train: the training data
+    axs_test: the axis of the test confusion matrix
+    axs_test: the axis of the training confusion matrix
+    """
 
     # split train test
     x_train, _, y_train, __ = train_test_split(x, y, test_size=0.20, stratify=y)
@@ -187,19 +271,20 @@ def analyse_models(x, y, axs_test, axs_train):
 
     for pipe, ax_test, ax_train in zip(MODELS, axs_test.flatten(), axs_train.flatten()):
         # run cv on all data and evaluate
-        cv = cross_validate(pipe, x_train, y_train, cv=10, n_jobs=-1, scoring=SCORING)
+        cv = cross_validate(pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING)
         # print scores
         print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
         print_cv_results(cv)
 
-        # fit on all training data and predict
+        # fit on valdiation training data and predict
         pipe.fit(x_train_val, y_train_val)
 
-        qc_threshold = 0.982
+        # predict on the val set
         predictions_test, labels_test, num_removed = predict_with_qc(
-            pipe, qc_threshold, x_test_val, y_test_val
+            pipe, QC_THRESHOLD, x_test_val, y_test_val
         )
 
+        # predictions on the train set
         predictions_train = pipe.predict(x_train_val)
 
         # set up confusion matricies
@@ -213,7 +298,7 @@ def analyse_models(x, y, axs_test, axs_train):
         )
         ax_train.set_title(pipe.named_steps["model"].__class__.__name__)
 
-        print(f"QC Threshold: {qc_threshold}")
+        print(f"QC Threshold: {QC_THRESHOLD}")
         print("VALIDATION SCORES")
         analyse_prediction_results(predictions_test, labels_test)
 

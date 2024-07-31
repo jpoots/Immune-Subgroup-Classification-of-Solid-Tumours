@@ -31,12 +31,12 @@ const Header = () => {
             Gene Expression
           </NavLink>
 
-          <NavLink to="/confidence" className={navbarClassName}>
-            Confidence
-          </NavLink>
-
           <NavLink to="/probability" className={navbarClassName}>
             Probability
+          </NavLink>
+
+          <NavLink to="/confidence" className={navbarClassName}>
+            Confidence
           </NavLink>
 
           <NavLink to="/tsne" className={navbarClassName}>

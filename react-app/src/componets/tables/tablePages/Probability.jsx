@@ -7,12 +7,12 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { Table } from "../tables/Table";
+import { TableWithBoldMax } from "../tableComponents/TableWithBoldMax";
 
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "../errors/NothingToDisplay";
-import { PaginationBar } from "./PaginationBar";
-import { TitleAndSearch } from "./TitleAndSearch";
+import NothingToDisplay from "../../errors/NothingToDisplay";
+import { PaginationBar } from "../tableComponents/PaginationBar";
+import { TitleAndSearch } from "../tableComponents/TitleAndSearch";
 
 /**
  * generates the probability page showing the probabiltiy of all subgroups
@@ -117,13 +117,14 @@ const Proability = ({ results }) => {
 
   const title = "Prediction Probability by Subgroup";
 
+  console.log(table.getRowModel().rows[0].original.probs);
   return (
     <div className="container">
       {results ? (
         <>
           <div className="box">
             <TitleAndSearch title={title} table={table} />
-            <Table table={table} />
+            <TableWithBoldMax table={table} accessor="probs" />
           </div>
           <PaginationBar
             table={table}

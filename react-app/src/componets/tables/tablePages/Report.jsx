@@ -1,8 +1,8 @@
-import { SearchByID } from "./SearchByID";
-import { Table } from "./Table";
-import { PaginationBar } from "./PaginationBar";
+import { SearchByID } from "../tableComponents/SearchByID";
+import { Table } from "../tableComponents/Table";
+import { PaginationBar } from "../tableComponents/PaginationBar";
 import { useState, useMemo } from "react";
-import NothingToDisplay from "../errors/NothingToDisplay";
+import NothingToDisplay from "../../errors/NothingToDisplay";
 import {
   getCoreRowModel,
   useReactTable,
@@ -19,7 +19,6 @@ import { CSVLink } from "react-csv";
  */
 const Report = ({ results }) => {
   let samples = results["samples"];
-  //if (typeof results !== "undefined") samples = results["samples"]; used as extra validation
 
   // setting state for the component
   const [sorting, setSorting] = useState([]);

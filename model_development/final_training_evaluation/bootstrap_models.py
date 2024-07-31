@@ -7,13 +7,20 @@ from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.utils import resample
+from xgboost import XGBClassifier
 import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
 from utils.utils import get_data, split_data
 
+"""
+Trains N_BOOSTRAPS number of models on a bootstrap resample of the dataset and saves to a file to be used for confidence predictions
+"""
+
+# location to save
 FILE_NAME = "./trained_models/bootstrap_models.pkl"
+
 RANDOM_STATE = 42
 
 # define sample strategy
@@ -28,34 +35,52 @@ OVER_SAMPLE = {
     4: 1000,
     5: 1000,
 }
+
 # training params
 TEST_SIZE = 0.2
-N_BOOTSTRAPS = 10
-
-# param for gb model
-MODEL_PARAMS = {
-    "max_iter": 1500,
-    "learning_rate": 0.05,
-    "max_depth": 100,
-    "max_leaf_nodes": 41,
-    "min_samples_leaf": 20,
-}
+N_BOOTSTRAPS = 2
 
 
 def main():
+    """
+    Splits data, trains the bootstrap models and saves to disk
+    """
     np.random.seed(RANDOM_STATE)
 
     # import data using util
     data = get_data()
     idx, x, y, genes = split_data(data)
 
-    # data scaler and generic pipeleine
-    scaler = MinMaxScaler()
-
     # remove the test set
-    x_train, _x_test, y_train, _y_test = train_test_split(
+    x_train, x_test, y_train, y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y
     )
+
+    # remove the validation
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_train, y_train, test_size=TEST_SIZE, stratify=y_train
+    )
+
+    models = train_bootstraps(x_train, y_train)
+    print("TRAINING COMPLETE SAVING")
+    joblib.dump(models, FILE_NAME)
+
+    # saving and testing save successful
+    print("SAVE SUCCESSFUL")
+
+
+def train_bootstraps(x_train, y_train):
+    """Trains N_BOOTSRAPS models on a bootstrap resample of the training data
+    Args:
+    axs: Axs of the confusion amtric plot
+    x_train: the training data
+    y_train: the training data
+
+    Returns:
+    models: a list of trained models
+    """
+    # data scaler
+    scaler = MinMaxScaler()
 
     # set up samplers and fit
     rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
@@ -64,12 +89,18 @@ def main():
     # set up pipeline and fit
     models = []
     for bootstrap in range(N_BOOTSTRAPS):
-        model = HistGradientBoostingClassifier(**MODEL_PARAMS)
+        model = XGBClassifier(
+            nthread=1,
+            learning_rate=0.1,
+            max_depth=7,
+            min_child_weight=12,
+            n_estimators=1500,
+        )
         pipe = ImbPipeline(
             steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]
         )
 
-        # handles any sort of invalid sample
+        # handles any sort of invalid sample by ignoring and resampling
         invalid_sample = True
         while invalid_sample:
             try:
@@ -82,12 +113,7 @@ def main():
 
         print(f"FIT {bootstrap + 1} COMPLETE")
         models.append(pipe)
-
-    print("TRAINING COMPLETE SAVING")
-    joblib.dump(models, FILE_NAME)
-
-    # saving and testing save successful
-    print("SAVE SUCCESSFUL")
+    return models
 
 
 if __name__ == "__main__":

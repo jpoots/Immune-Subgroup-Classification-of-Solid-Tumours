@@ -6,17 +6,24 @@ import { openWarningModal } from "./openWarningModal";
  * @param {string} resultURL - the api to hit
  * @returns the result when the promise resolves
  */
-const getData = (resultURL) => {
-return new Promise((resolve) => {
+const getData = (resultURL, cancelled) => {
+return new Promise((resolve, reject) => {
     const interval = setInterval(async () => {
+
+    if (cancelled && cancelled.current){
+        clearInterval(interval);}
+
     let result = await fetch(resultURL);
-    
+    if (!result.ok){
+        clearInterval(interval);
+        reject()
+    }
+
     if (result.status !== 201) {
         clearInterval(interval);
         resolve(result);
     }
-
-    }, 200);
+    }, 2000);
 });
 };
 
@@ -29,11 +36,12 @@ return new Promise((resolve) => {
  * @param {function} setOpenModal  - the function to set he openModal variable
  * @returns an object containing the results from the api and the success status
  */
-const callAsyncApi = async (url, request, setModalMessage, setOpenModal) => {
+const callAsyncApi = async (url, request, setModalMessage, setOpenModal, cancelled) => {
     let apiResponse;
     let errorMessage = "Sorry something went wrong! Please try agian later.";
     let results;
     let resultURL;
+    console.log(cancelled)
 
     try {
         apiResponse = await fetch(url, request);
@@ -48,7 +56,7 @@ const callAsyncApi = async (url, request, setModalMessage, setOpenModal) => {
         // use the async getData to poll for result
         apiResponse = await apiResponse.json();
         resultURL = apiResponse.resultURL;
-        results = await getData(resultURL);
+        results = await getData(resultURL, cancelled);
 
         // if results not ok
         if (!results.ok) {

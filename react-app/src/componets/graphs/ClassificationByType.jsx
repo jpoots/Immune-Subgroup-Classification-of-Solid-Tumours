@@ -62,6 +62,10 @@ const ClassificationByType = ({ results }) => {
     <div className="container">
       <div className="columns">
         <div className="column is-one-quarter box">
+          <h1 className="mt-4 block has-text-weight-bold">
+            Classification by Type
+          </h1>
+
           <TitleSetter setTitle={setTitle} />
 
           <CSVLink

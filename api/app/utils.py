@@ -9,30 +9,15 @@ import joblib
 import os
 from .errors.BadRequest import BadRequest
 
+"""
+utility functions to be used throughout the project
+"""
 
-def gene_preprocessing(full_analysis, features):
-    # if being sent back in JSON or if part of full analysis
-    if not full_analysis:
-        features = features.T.to_dict()
-        returnData = []
-        for sample in features.keys():
-            returnData.append({"sampleID": sample, "genes": features[sample]})
-    else:
-        # split data for further processing
-        idx = [sample_id for sample_id in features.index]
-        genes = [gene for gene in features.columns.values]
-        features = features.values.tolist()
-
-        returnData = {
-            "ids": idx,
-            "gene_names": genes,
-            "features": features,
-        }
-    return returnData
-
-
+# the number of genes
 NUM_GENES = 440
+# current directory
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# the path to the pickle file containing the gene names
 ORDERED_GENE_DF = joblib.load(os.path.join(CURRENT_DIR, "ordered_gene_names.pkl"))
 
 # defining as constants for json validation, much less code than manual validation
@@ -69,24 +54,37 @@ SCHEMA = {
 VALIDATOR = compile(SCHEMA)
 
 
-def csv_func(filepath):
+def parse_csv(filepath):
+    """Parses a csv from a file path and returns key info as a dict
+    Args:
+    filepath: The file path to read from
+
+    Returns:
+        A dict including the features dataframe, type IDs and the number of invlaid samples
+
+    Raises:
+        BadRequest: The file is missing from the request or the sample file is invalid
+    """
     try:
         # is file in request and is it a valid CSV
         data = pd.read_csv(filepath, index_col=0)
         data = data.T
+        # extract valid data
         data = data[ORDERED_GENE_DF.columns.intersection(data.columns)]
     except Exception as e:
+        # if file could not be succesfully read
         raise BadRequest(
             body='Sample files should be valid CSV or TXT files attached as "samples"'
         )
 
     # drop empty rows
     data.dropna(how="all", inplace=True)
+
+    # extract type ids or set to none
     if "TYPEID" in data.columns:
         data = data.fillna({"TYPEID": "None"})
     else:
         data["TYPEID"] = "None"
-
     type_ids = data.pop("TYPEID").values
 
     # drop rows with more than 2 empty genes, calculate diff
@@ -96,20 +94,40 @@ def csv_func(filepath):
 
     # is data of valid shape
     n_col, n_row = data.shape[0], data.shape[1]
-    if n_row != 440 or n_row == 0:
+    if n_row != 440 or n_col == 0:
         raise BadRequest(
             body="Sample files should contain 440 genes and at least 1 sample"
         )
 
-    # impute missing values - note, imputation could've been done in pipeline but seperation allows us to keep the gene expression values
-    features = data.values
+    # impute missing values - note, imputation could've been done in pipeline but seperation allows us to return the imputed gene expression values to the client
     imp = IterativeImputer().set_output(transform="pandas")
-    features = imp.fit_transform(data)
+    data = imp.fit_transform(data)
 
-    return {"features": features, "invalid": invalid, "type_ids": type_ids}
+    gene_names = data.columns.tolist()
+    ids = data.index.values.tolist()
+    features = data.to_numpy()
+
+    return {
+        "ids": ids,
+        "features": features,
+        "invalid": invalid,
+        "gene_names": gene_names,
+        "type_ids": type_ids,
+    }
 
 
-def json_func(data):
+def parse_json(data):
+    """Parses a json request sent to the api for processing
+
+    Args:
+    data: The JSON data to process
+
+    Returns:
+        A dict including the features dataframe, type IDs and the number of invlaid samples
+
+    Raises:
+        BadRequest: The JSON is invalid
+    """
     # validate jsona and raise exception if invalid
     perplexity = None
     interval = None

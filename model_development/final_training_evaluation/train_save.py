@@ -1,8 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import joblib
+from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.ensemble import (
+    HistGradientBoostingClassifier,
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+)
+from xgboost import XGBClassifier
 from sklearn.preprocessing import MinMaxScaler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
@@ -24,14 +30,6 @@ from utils.utils import (
 FILE_NAME = "./trained_models/model.pkl"
 RANDOM_STATE = 42
 
-# param for gb model
-MODEL_PARAMS = {
-    "max_iter": 1500,
-    "learning_rate": 0.05,
-    "max_depth": 100,
-    "max_leaf_nodes": 41,
-    "min_samples_leaf": 20,
-}
 TEST_SIZE = 0.2
 
 # define sample strategy
@@ -47,8 +45,6 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
-QC_THRESHOLD = 0.989
-
 
 def main():
     np.random.seed(RANDOM_STATE)
@@ -60,10 +56,14 @@ def main():
         x, y, test_size=TEST_SIZE, stratify=y
     )
 
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_train, y_train, test_size=0.2, stratify=y_train
+    )
+
     pipe = build_model(x_train, y_train)
 
     # get prediction probs for test
-    predictions, true, num_removed = predict_with_qc(pipe, QC_THRESHOLD, x_test, y_test)
+    predictions, true, num_removed = predict_with_qc(pipe, 0, x_test, y_test)
 
     print("TRAINING COMPLETE SAVING")
 
@@ -82,8 +82,22 @@ def main():
 
 
 def build_model(x, y):
+    """Trains a gradient boosting model on the data using sampling
+    Args:
+    x: the training data
+    y: the training data
+
+    Returns:
+    pipe: a trained model
+    """
     # define model to train
-    model = HistGradientBoostingClassifier(**MODEL_PARAMS)
+    model = XGBClassifier(
+        nthread=1,
+        learning_rate=0.1,
+        max_depth=7,
+        min_child_weight=12,
+        n_estimators=1500,
+    )
 
     # data scaler and generic pipeleine
     scaler = MinMaxScaler()
@@ -96,8 +110,7 @@ def build_model(x, y):
     pipe = ImbPipeline(
         steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]
     )
-    pipe.fit(x, y)
-
+    pipe = pipe.fit(x, y)
     return pipe
 
 

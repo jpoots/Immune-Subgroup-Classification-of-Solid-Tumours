@@ -2,6 +2,12 @@ import pandas as pd
 from gene_list import GENE_LIST
 import joblib
 
+"""
+Generates a pandas data frame with columns being gene list which
+can then be used to extract genes from a given dataframe
+"""
+
+# the location to save the object
 FILE_NAME = "ordered_gene_names.pkl"
 
 

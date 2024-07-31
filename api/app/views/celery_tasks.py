@@ -1,26 +1,54 @@
 from ..ml_models.predictions import predict, confidence_intervals, probability
 from .. import celery
 from ..errors.BadRequest import BadRequest
-from ..utils import json_func, csv_func
+from ..utils import parse_csv, parse_json
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from app.utils import gene_preprocessing
 import os
 
-TSNE_PIPE = Pipeline(
-    steps=[("scaler", MinMaxScaler()), ("dr", TSNE(n_components=3, perplexity=4))]
-)
-
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
+
+
+def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
+    """
+    Takes args from a celery task given a file name as input and deletes the file on return.
+
+    Args:
+    See the celery on_return documentation
+    """
+    os.remove(args[0])
+    return
 
 
 @celery.task(
     throws=(BadRequest,),
 )
 def confidence_celery(data):
-    data = json_func(data)
+    """
+    Calculates confidence intervals for JSON input samples
+    Args:
+    data: The json data dict to processe
+
+    Returns:
+        The confidence results as a dict
+            "data": {
+        {
+            "sampleID": "TCGA.02.0047.GBM.C4",
+            "confidence": {
+                "upper": 6
+                "lower": 4
+                "median": 5
+                "max": 10
+                "min": 1
+            },
+        },
+    }
+
+    Throws: BadRequest if invalid JSON data is input
+    """
+    data = parse_json(data)
 
     features = data["features"]
     sample_ids = data["ids"]
@@ -46,13 +74,29 @@ def confidence_celery(data):
     throws=(BadRequest,),
 )
 def tsne_celery(data):
-    data = json_func(data)
+    """
+    Performs t-SNE analysis on input JSON data
+    Args:
+    data: The json data dict to processe
+
+    Returns:
+        The confidence results as a dict
+            "data": {
+        {
+            "sampleID": "TCGA.02.0047.GBM.C4",
+            "tsne": [1,2,3],
+        },
+    }
+
+    Throws: BadRequest if invalid JSON data is input
+    """
+    data = parse_json(data)
 
     idx = data["ids"]
     features = data["features"]
     perplexity = data["perplexity"]
 
-    Pipeline(
+    tsne_pipeline = Pipeline(
         steps=[
             ("scaler", MinMaxScaler()),
             ("dr", TSNE(n_components=3, perplexity=perplexity)),
@@ -60,26 +104,41 @@ def tsne_celery(data):
     )
 
     results = []
-    tsne = TSNE_PIPE.fit_transform(features).tolist()
+    tsne = tsne_pipeline.fit_transform(features).tolist()
     for id, tsne_result in zip(idx, tsne):
         results.append({"sampleID": id, "tsne": tsne_result})
 
     return results
 
 
-def celery_return(self, status, retval, task_id, args, kwargs, einfo):
-    os.remove(args[0])
-    return
-
-
-@celery.task(
-    throws=(BadRequest,),
-    after_return=celery_return,
-)
+@celery.task(throws=(BadRequest,), after_return=delete_file_on_return)
 def analyse(filepath):
-    parsed_results = csv_func(filepath)
-    data = gene_preprocessing(full_analysis=True, features=parsed_results["features"])
+    """
+    Performs a full non-configurable analysis on a csv file
+    Args:
+    filepath: The path of the csv file to analyse
 
+    Returns:
+        The analysis results as a dict
+
+    "data": {
+        "invalid": 0,
+        "samples": [
+        {
+            "genes": {
+            "ACTL6A_S5": 745.567,
+            },
+            "sampleID": "TCGA.02.0047.GBM.C4",
+            "probs":[0.1,0.1,0.1,0.1,0.1,0.5],
+            "prediction: 1,
+            "pca": [1,2,3],
+            "typeid: "GBM
+        },
+    }
+
+    Throws: BadRequest if invalid JSON data is input
+    """
+    data = parse_csv(filepath)
     predictions, prediction_probs, num_nc = predict(data["features"])
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
 
@@ -98,8 +157,10 @@ def analyse(filepath):
         predictions,
         prediction_probs,
         pc,
-        parsed_results["type_ids"],
+        data["type_ids"],
     ):
+        print(feature_list)
+        print(data["gene_names"])
         genes = {
             gene_name: expression
             for gene_name, expression in zip(data["gene_names"], feature_list)
@@ -116,4 +177,4 @@ def analyse(filepath):
             }
         )
 
-    return {"samples": results, "invalid": parsed_results["invalid"], "nc": num_nc}
+    return {"samples": results, "invalid": data["invalid"], "nc": num_nc}

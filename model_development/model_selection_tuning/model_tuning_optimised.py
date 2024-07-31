@@ -23,11 +23,17 @@ import time
 import datetime
 import sys
 
-# append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, print_tuning_results
+from utils.utils import (
+    get_data,
+    split_data,
+    tune_models,
+)  # append the path of the parent (taken from chatGPT)
 
-# This script performs grid search hyperparameter tuning for a number of alogrithms and reports the cross validated results
+
+"""
+Tuning hyperparamets of models on their best data balance as attained in balancing_tests.py
+"""
 
 RANDOM_STATE = 42
 
@@ -44,11 +50,12 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
-# set up samplers and fit
+# set up samplers and scaler
 RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
 SMT = SMOTE(sampling_strategy=OVER_SAMPLE)
 SCALER = MinMaxScaler()
 
+# models to train
 MODELS = [
     {
         "model": ImbPipeline(
@@ -118,6 +125,7 @@ MODELS = [
     },
 ]
 
+# scoring metrics to use
 SCORING = {
     "accuracy": "accuracy",
     "balanced_accuracy": "balanced_accuracy",
@@ -125,12 +133,16 @@ SCORING = {
     "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
     "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
 }
-
+# size of test set
 TEST_SIZE = 0.2
+# number of cross validation splits to do
 CV = 10
 
 
 def main():
+    """
+    takes all models, tunes them over a hyperparmeter grid and evaluates their performance
+    """
     np.random.seed(RANDOM_STATE)
 
     # data scaler and generic pipeleine
@@ -146,38 +158,13 @@ def main():
     )
 
     total_start = time.time()
-    tune_models(x_train, y_train)
-    try:
-        total_end = time.time()
-        duration_seconds_total = total_end - total_start
-        duration_total = datetime.timedelta(seconds=duration_seconds_total)
-        print(f"Total tuning time: {duration_total}")
-    except Exception as e:
-        print(e)
+    tune_models(x_train, y_train, MODELS)
+
+    total_end = time.time()
+    duration_seconds_total = total_end - total_start
+    duration_total = datetime.timedelta(seconds=duration_seconds_total)
+    print(f"Total tuning time: {duration_total}")
 
 
-def tune_models(x_train, y_train):
-    for model in MODELS:
-        start = time.time()
-
-        # try except to prevent long training runs failing because of an issue
-        try:
-            pipe = model["model"]
-            params = model["params"]
-
-            # grid search to return results for a range of metrics and refit on accuracy
-            grid_search = GridSearchCV(
-                pipe, params, n_jobs=-1, scoring=SCORING, refit="accuracy", cv=CV
-            )
-            grid_search.fit(x_train, y_train)
-
-            # model tuning time
-            end = time.time()
-            duration_seconds = end - start
-            duration = datetime.timedelta(seconds=duration_seconds)
-            
-            print(f"Model Name: {pipe.named_steps["model"].__class__.__name__}")
-            print_tuning_results(grid_search, duration)
-
-        except Exception as e:
-            print(e)
+if __name__ == "__main__":
+    main()

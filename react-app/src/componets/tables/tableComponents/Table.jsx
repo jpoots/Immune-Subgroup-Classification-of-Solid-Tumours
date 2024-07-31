@@ -1,5 +1,6 @@
 import sortArrows from "/sort-solid.svg";
 import { flexRender } from "@tanstack/react-table";
+import NumEntriesSelector from "./NumEntriesSelector";
 
 /**
  * takes a tanstack table and displays it in the appropriate format
@@ -10,7 +11,7 @@ export function Table({ table }) {
   return (
     <div className="table-container">
       {
-        <table className="table is-bordered is-striped">
+        <table className="table is-bordered is-striped is-fullwidth">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -46,6 +47,7 @@ export function Table({ table }) {
           </tbody>
         </table>
       }
+      <NumEntriesSelector table={table} />
     </div>
   );
 }

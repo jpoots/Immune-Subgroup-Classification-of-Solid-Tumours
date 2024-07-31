@@ -114,11 +114,14 @@ const Confidence = ({ results, graphData, setGraphData }) => {
     <div className="container">
       <div className="columns">
         <div className="column is-one-quarter box">
-          <h1 className="has-text-weight-bold"> Confidence Interval</h1>
+          <h1 className="mt-4 block has-text-weight-bold">
+            {" "}
+            Confidence Interval
+          </h1>
           <TitleSetter setTitle={setTitle} />
 
           <div className="block">
-            <h1 className="has-text-weight-bold mt-5">Confidence Interval</h1>
+            <h1 className="has-text-weight-bold mt-5">Interval</h1>
             <input
               type="range"
               min={MIN_INTERVAL}
@@ -184,7 +187,6 @@ const Confidence = ({ results, graphData, setGraphData }) => {
           )}
         </div>
       </div>
-      <button onClick={() => console.log(graphData)}>button</button>
       {openModal && (
         <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}

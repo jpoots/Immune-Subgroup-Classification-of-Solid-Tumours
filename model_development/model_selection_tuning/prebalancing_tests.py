@@ -19,11 +19,16 @@ from sklearn.pipeline import Pipeline
 import sys
 import math
 
+"""
+Inital testing of models with default parameters before any form of tuning or data balancing occurred
+"""
+
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data
+from utils.utils import get_data, split_data, print_cv_results
 
 RANDOM_STATE = 42
+# scoring metrics to use
 SCORING = {
     "accuracy": "accuracy",
     "f1_macro": "f1_macro",
@@ -33,6 +38,7 @@ SCORING = {
     "f1_group6": make_scorer(f1_score, average=None, labels=[5]),
     "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
 }
+# models to test
 MODELS = [
     HistGradientBoostingClassifier(),
     MLPClassifier(),
@@ -42,10 +48,16 @@ MODELS = [
     GaussianNB(),
     LogisticRegression(n_jobs=-1),
 ]
+# n_cols on confusion matrix
 N_COLS = 4
+# number of cross validation splits
+CV = 10
 
 
 def main():
+    """
+    splits data, trains all models and evaultes their performance, printing them to console. Confusion matricies are plotted.
+    """
     np.random.seed(RANDOM_STATE)
 
     # import data using util
@@ -75,6 +87,16 @@ def main():
 def test_models(
     axs, x_train, y_train, x_train_val, x_test_val, y_train_val, y_test_val
 ):
+    """Cross validates all models, trains them on val data and evaluates with confusion matrix
+    Args:
+    axs: Axs of the confusion amtric plot
+    x_train: the training data
+    y_train: the training data
+    x_train_val: the validation training data
+    x_test_val: the validation test data
+    y_train_val: the validation trainign data
+    y_test_val: the validation test data
+    """
 
     # data scaler and generic pipeleine
     scaler = MinMaxScaler()
@@ -84,32 +106,16 @@ def test_models(
         pipe = Pipeline(steps=[("scaler", scaler), ("model", model)])
 
         # run cv and evaluate
-        cv = cross_validate(pipe, x_train, y_train, cv=10, n_jobs=-1, scoring=SCORING)
+        cv = cross_validate(pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING)
 
-        # pulling out my performance metrics
-        accuracy = np.average(cv["test_accuracy"])
-        f1 = np.average(cv["test_f1_macro"])
-        precision = np.average(cv["test_precision_macro"])
-        recall = np.average(cv["test_recall_macro"])
-        bal_accuracy = np.average(cv["test_balanced_accuracy"])
-        f1_group6 = np.average(cv["test_f1_group6"])
-        recall_group6 = np.average(cv["test_recall_group6"])
-
-        # print scores
         print("Model Name: " + model.__class__.__name__)
-        print(f"Accuracy: {accuracy}")
-        print(f"F1: {f1}")
-        print(f"Precision: {precision}")
-        print(f"Recall: {recall}")
-        print(f"Balanced accuracy: {bal_accuracy}")
-        print(f"Group 6 F1: {f1_group6}")
-        print(f"Group 6 Recall: {recall_group6}")
-        print()
+        print_cv_results(cv)
 
         # fit and predict
         pipe.fit(x_train_val, y_train_val)
         predictions = pipe.predict(x_test_val)
 
+        # generate confusion matrix
         ConfusionMatrixDisplay.from_predictions(y_test_val, predictions, ax=ax)
         ax.set_title(model.__class__.__name__)
 

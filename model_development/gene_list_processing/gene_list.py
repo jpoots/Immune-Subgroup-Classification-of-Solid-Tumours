@@ -1,8 +1,12 @@
 import pandas as pd
 import numpy as np
 
-# this is the list of all gene names in order. Alternative gene names should be added immediately before or after the current gene name(s)
-
+"""
+A list of the gene names to be input to the model in order.
+Alternate gene names should be added before or after the current name.
+This list uses the gene names provided in the dataset but could be changed at will
+to be include any alternative names or to be renamed.
+"""
 GENE_LIST = [
     "ACTL6A_S5",
     "ADAM9_S2",

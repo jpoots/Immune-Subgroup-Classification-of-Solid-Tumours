@@ -11,6 +11,11 @@ import sys
 sys.path.append("..")
 from utils.utils import get_data, split_data
 
+"""
+Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished
+"""
+
+# all variables are self explanitory by na,e
 DATA_POINTS_TO_VISUALISE = 9000
 PERPLEXITY = 1
 OUTPUT_FOLDER = "data_plots/"
@@ -20,6 +25,9 @@ RANDOM_STATE = 42
 
 
 def main():
+    """
+    generates an output folder if doesn't exist, gets and splits data and generates and opens plots
+    """
     np.random.seed(RANDOM_STATE)
     check_folder()
     data = get_data()
@@ -34,10 +42,19 @@ def main():
 
 
 def perform_pca(features, id_list, classification_list):
-    # normalise features for PCA and t-SNE
+    """Perfoms PCA analysis on the data
+    Args:
+    features: The feautres to visualise
+    id_list: list of ids for the samples
+    classification_list: the classification of the samples
+
+    Returns:
+    pca_dataframe: a dataframe with the N_COMPONENTS_PCA principle components
+    """
+    # normalise features for PC
     features = StandardScaler().fit_transform(features)
 
-    # high component PCA (because it's fast) and t-SNE
+    # perform
     pca_canc = PCA(n_components=N_COMPONENTS_PCA)
     principle_components = pca_canc.fit_transform(features)
 
@@ -52,10 +69,20 @@ def perform_pca(features, id_list, classification_list):
 
 
 def perform_tsne(features, id_list, classification_list):
-    # normalise features for PCA and t-SNE
+    """Perfoms t-SNE analysis on the data
+    Args:
+    features: The feautres to visualise
+    id_list: list of ids for the samples
+    classification_list: the classification of the samples
+
+    Returns:
+    tsne_dataframe: a dataframe with the N_COMPONENTS_TSNE
+    """
+
+    # normalise features for PCA
     features = MinMaxScaler().fit_transform(features)
 
-    # high component PCA (because it's fast) and t-SNE
+    # perform
     tsne_canc = TSNE(
         n_components=N_COMPONENTS_TSNE, perplexity=PERPLEXITY, random_state=42
     )
@@ -72,6 +99,12 @@ def perform_tsne(features, id_list, classification_list):
 
 
 def generate_graphs(tsne_dataframe, pca_dataframe):
+    """Generates t-SNE plots and PCA plots from the data, opens them in the browser and saves to the file
+    Args:
+    tsne_dataframe: The dataframe of tsne components
+    pca_dataframe: The dataframe of pca components
+    """
+
     # plot my interactive figures using plotly
     fig_tsne = px.scatter(
         tsne_dataframe.head(DATA_POINTS_TO_VISUALISE),
@@ -125,6 +158,9 @@ def generate_graphs(tsne_dataframe, pca_dataframe):
 
 
 def check_folder():
+    """
+    Checks for the existence of the save folder and creates if necessary
+    """
     current_dir = os.path.dirname(os.path.abspath(__file__))
     abs_path = os.path.join(current_dir, OUTPUT_FOLDER)
     if not os.path.exists(abs_path):

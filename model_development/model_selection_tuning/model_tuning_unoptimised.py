@@ -8,8 +8,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from imblearn.over_sampling import SMOTE, ADASYN
-from imblearn.under_sampling import RandomUnderSampler
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import (
     f1_score,
@@ -17,7 +15,6 @@ from sklearn.metrics import (
     precision_score,
     make_scorer,
 )
-from imblearn.pipeline import Pipeline as ImbPipeline
 import matplotlib.pyplot as plt
 import numpy as np
 import time
@@ -26,13 +23,19 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, print_tuning_results
+from utils.utils import get_data, split_data, tune_models
+
+"""
+Takes a range of models and tunes them on a hyperparameter grid on the unbalanced dataset
+"""
 
 RANDOM_STATE = 42
+# size of test split
 TEST_SIZE = 0.2
+# number of crossvalidation runs
 CV = 10
 
-
+# models to tune and parameters
 MODELS = [
     {
         "model": SVC(),
@@ -86,16 +89,11 @@ MODELS = [
     },
 ]
 
-SCORING = {
-    "accuracy": "accuracy",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
-    "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
-    "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
-}  # ROC_AUC is not included due to the computational cost
-
 
 def main():
+    """
+    gets data, splits it into train and test and tunes all miodels
+    """
     np.random.seed(RANDOM_STATE)
 
     # import data using util
@@ -107,43 +105,15 @@ def main():
         x, y, test_size=TEST_SIZE, stratify=y
     )
 
+    # timer for model tuning
     total_start = time.time()
 
-    tune_models(x_train, y_train)
+    tune_models(x_train, y_train, MODELS)
 
+    # print timer
     total_end = time.time()
-    duration_seconds_total = total_end - total_start
-    duration_total = datetime.timedelta(seconds=duration_seconds_total)
+    duration_total = datetime.timedelta(seconds=(total_end - total_start))
     print(f"Total tuning time: {duration_total}")
-
-
-def tune_models(x_train, y_train):
-    # data scaler and generic pipeleine
-    scaler = MinMaxScaler()
-    for model in MODELS:
-        start = time.time()
-        # try except to prevent long training runs failing because of an issue
-        try:
-            clf = model["model"]
-            params = model["params"]
-
-            pipe = Pipeline(steps=[("scaler", scaler), ("model", clf)])
-
-            # grid search to return results for a range of metrics and refit on accuracy
-            grid_search = GridSearchCV(
-                pipe, params, n_jobs=-1, scoring=SCORING, refit="accuracy", cv=CV
-            )
-            grid_search.fit(x_train, y_train)
-
-            # model tuning time
-            end = time.time()
-            duration_seconds = end - start
-            duration = datetime.timedelta(seconds=duration_seconds)
-
-            print(f"Model Name: {pipe.named_steps["model"].__class__.__name__}")
-            print_tuning_results(grid_search, duration)
-        except Exception as e:
-            print(e)
 
 
 if __name__ == "__main__":

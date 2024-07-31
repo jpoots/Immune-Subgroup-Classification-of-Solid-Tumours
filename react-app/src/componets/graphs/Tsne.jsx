@@ -115,7 +115,7 @@ const Tsne = ({ results, graphData, setGraphData }) => {
               tooltipLink={tooltipLink}
             />
             <div className="block">
-              <h1 className="has-text-weight-bold mt-5">Perplexity</h1>
+              <h1 className="has-text-weight-bold mt-">Perplexity</h1>
               <input
                 type="range"
                 min={MIN_PERPLEXITY}

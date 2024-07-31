@@ -6,36 +6,29 @@ from sklearn.ensemble import (
     RandomForestClassifier,
     GradientBoostingClassifier,
 )
-from sklearn.model_selection import GridSearchCV
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.preprocessing import normalize, scale, MinMaxScaler
-from sklearn.model_selection import cross_val_score, cross_validate
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection import cross_validate
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from sklearn.preprocessing import StandardScaler
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
 from sklearn.metrics import (
     f1_score,
-    balanced_accuracy_score,
-    roc_auc_score,
     recall_score,
-    precision_score,
-    accuracy_score,
-    classification_report,
     make_scorer,
 )
 from utils.utils import get_data, split_data
 from imblearn.over_sampling import SMOTE
-from collections import Counter
 from imblearn.pipeline import Pipeline as ImbPipeline
-import time
-from lightgbm import LGBMClassifier
 
-# A script to experiment with various data balancing ratios and techniques
+"""
+This is a short script attempting to explore the possibility of using a second classifier 
+to identify if a sample was class 6 or not. This was never complete and thus remain messy 
+but reamins in the repo as evidence of the experiment
+"""
 
 RANDOM_STATE = 42
 np.random.seed(RANDOM_STATE)
@@ -129,31 +122,3 @@ for model, ax in zip(models, axs.flatten()):
     print()
 
     y_test_copy = y_test
-
-    # fit and predict
-    # pipe.fit(x_train_val, y_train_val)
-    # predictions = pipe.predict(x_test)
-    # prediction_probs = pipe.predict_proba(x_test)
-
-    # to_remove = []
-    # for i, prob in enumerate(prediction_probs):
-    #   if (prob.max() < 0.72):
-    #      to_remove.append(i)
-
-# print("Removed: " + str(len(to_remove)))
-
-# predictions = np.delete(predictions, to_remove, axis=0)
-# y_test_copy = np.delete(y_test_copy, to_remove)
-# disp = ConfusionMatrixDisplay.from_predictions(
-# y_test_copy, predictions, ax=ax
-# )
-
-# ax.set_title(model.__class__.__name__)
-# disp = ConfusionMatrixDisplay.from_predictions(y_test_copy, predictions,  ax=ax)
-# ax.set_title(model.__class__.__name__)
-# print("Accuracy on test set: " + str(accuracy_score(y_test_copy, predictions)))
-# print()
-
-
-# plt.tight_layout()
-# plt.show()

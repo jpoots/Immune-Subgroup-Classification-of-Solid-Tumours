@@ -1,48 +1,78 @@
 import joblib
 import os
 import numpy as np
+import pandas
+
+"""
+Functions for using the trained ML model (and bootstrap models) to attain predictions, probabilties and confidence intervals
+"""
 
 # Get the absolute path of the current directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
+# the location of the trained mdeol
 MODEL_LOCATION = os.path.join(current_dir, "model.pkl")
 BOOTSTRAP_LOCATION = os.path.join(current_dir, "bootstrap_models.pkl")
 
 # load models
-model = joblib.load(MODEL_LOCATION)
-bootstrap_models = joblib.load(BOOTSTRAP_LOCATION)
+MODEL = joblib.load(MODEL_LOCATION)
+BOOTSTRAP_MODELS = joblib.load(BOOTSTRAP_LOCATION)
+
+# the classification confident prediction limit
+QC_THRESHOLD = 0.89
 
 
 def predict(features):
+    """
+    Forms predictions and probailties given features as input
+    Args:
+    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
+
+    Returns:
+        predictions: a list of predictions
+        prediction_probs: a list of prediction probs for each sample
+        invalid: the number of invalid samples
+    """
 
     # get probabilites and mark those below QC
-    qc_threshold = 0.98
-    prediction_probs = model.predict_proba(features)
+    prediction_probs = MODEL.predict_proba(features)
     nc_indicies = [
         index
         for index, prob in enumerate(prediction_probs)
-        if np.amax(prob) < qc_threshold
+        if np.amax(prob) < QC_THRESHOLD
     ]
 
     # make prediction
-    predictions = model.predict(features).tolist()
+    predictions = MODEL.predict(features).tolist()
+
+    # filter out NC probs
     predictions = [
         prediction + 1 if index not in nc_indicies else "NC"
         for index, prediction in enumerate(predictions)
     ]
 
-    return predictions, prediction_probs.tolist(), len(nc_indicies)
+    invalid = len(nc_indicies)
+    return predictions, prediction_probs.tolist(), invalid
 
 
 def confidence_intervals(features, interval):
-    bound = 100 - interval
+    """
+    Calculates prediction intervals given an interval and feature set
+    Args:
+    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
+    interval: the percentage confidence interval (e.g 95)
 
+    Returns:
+        intervals: a list as [min, lower percentile, median, upper percentile, max]
+    """
+
+    # calcuate upper and lower percentiel values
+    bound = 100 - interval
     upper = 100 - bound / 2
     lower = bound / 2
 
     all_classified = []
-
-    for model in bootstrap_models:
+    for model in BOOTSTRAP_MODELS:
         all_probs = model.predict_proba(features)
 
         classified_probs = []
@@ -60,4 +90,13 @@ def confidence_intervals(features, interval):
 
 
 def probability(features):
-    return model.predict_proba(features).tolist
+    """
+    Calculates probabilites of each sub group given a list of featues
+    Args:
+    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
+    interval: the percentage confidence interval (e.g 95)
+
+    Returns:
+        intervals: a list as [min, lower percentile, median, upper percentile, max]
+    """
+    return MODEL.predict_proba(features).tolist
