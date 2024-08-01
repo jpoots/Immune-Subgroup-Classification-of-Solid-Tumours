@@ -6,7 +6,7 @@ import { useEffect } from "react";
  * @param {function} resetErrorBoundary - the function to reset the error
  * @returns
  */
-const FallbackError = ({ error, resetErrorBoundary }) => {
+const FallbackError = ({ resetErrorBoundary }) => {
   useEffect(() => {
     resetErrorBoundary();
   });
