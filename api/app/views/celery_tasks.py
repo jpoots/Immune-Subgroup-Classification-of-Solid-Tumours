@@ -1,7 +1,7 @@
 from ..ml_models.predictions import predict, confidence_intervals, probability
 from .. import celery
 from ..errors.BadRequest import BadRequest
-from ..utils import parse_csv, parse_json
+from ..utils import parse_csv, parse_json, delete_file_on_return
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
@@ -9,17 +9,6 @@ from sklearn.manifold import TSNE
 import os
 
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
-
-
-def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
-    """
-    Takes args from a celery task given a file name as input and deletes the file on return.
-
-    Args:
-    See the celery on_return documentation
-    """
-    os.remove(args[0])
-    return
 
 
 @celery.task(

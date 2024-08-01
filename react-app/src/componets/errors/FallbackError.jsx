@@ -1,5 +1,11 @@
 import { useEffect } from "react";
 
+/**
+ * shows a fallbakc page when error boundary is triggered
+ * @param {boolean} error - the error boolean
+ * @param {function} resetErrorBoundary - the function to reset the error
+ * @returns
+ */
 const FallbackError = ({ error, resetErrorBoundary }) => {
   useEffect(() => {
     resetErrorBoundary();

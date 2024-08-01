@@ -127,7 +127,7 @@ def parse_json(data):
         A dict including the features dataframe, type IDs and the number of invlaid samples
 
     Raises:
-        BadRequest: The JSON is invalid
+        BadRequest: The JSON is invalid or missing
     """
     # validate jsona and raise exception if invalid
     perplexity = None
@@ -163,161 +163,36 @@ def parse_json(data):
     }
 
 
-"""TSNE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "data": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "sampleID": {"type": "string"},
-                    "tsne": {
-                        "type": "array",
-                        "items": [
-                            {"type": "number"},
-                        ],
-                        "example": [1, 2, 3],
-                    },
-                },
-            },
-        },
-        "status": {"type": "string"},
-    },
-}
+def validate_csv_upload(request):
+    """
+    Takes a request and validates for samples file and delimiter
+
+    Args:
+    request: the request object
+
+    Returns:
+    file: the samples file
+    delimiter: the file delimiter
+    """
+    if "samples" not in request.files:
+        raise exceptions.BadRequest("File missing")
+    try:
+        delimiter = request.form["delimiter"]
+        if len(delimiter) == 0:
+            raise Exception()
+    except Exception as e:
+        raise exceptions.BadRequest("Missing delimiter")
+
+    file = request.files["samples"]
+    return file, delimiter
 
 
-CONFIDENCE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "data": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "lower": {"type": "number"},
-                    "max": {"type": "number"},
-                    "median": {"type": "number"},
-                    "min": {"type": "number"},
-                    "sampleID": {"type": "string"},
-                    "upper": {"type": "number"},
-                },
-            },
-        },
-        "status": {"type": "string"},
-    },
-}
+def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
+    """
+    Takes args from a celery task given a file name as input and deletes the file on return.
 
-ANALYSIS_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "object",
-    "properties": {
-        "data": {
-            "type": "object",
-            "properties": {
-                "invalid": {"type": "integer"},
-                "nc": {"type": "integer"},
-                "samples": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "genes": {
-                                "type": "object",
-                                "properties": {
-                                    "gene_name": {"type": "number"},
-                                },
-                            },
-                            "pca": {
-                                "type": "array",
-                                "items": {"type": "number", "example": [1, 2, 3]},
-                            },
-                            "prediction": {"type": "integer"},
-                            "probs": {
-                                "type": "array",
-                                "items": {
-                                    "type": "number",
-                                    "example": [1, 2, 3, 4, 5, 6],
-                                },
-                            },
-                            "sampleID": {"type": "string"},
-                            "typeid": {"type": "string"},
-                        },
-                    },
-                },
-            },
-        },
-        "status": {"type": "string"},
-    },
-}
-
-INPUT_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "samples": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "sampleID": {
-                        "type": "string",
-                    },
-                    "genes": {
-                        "type": "object",
-                        "properties": {
-                            "gene_name": {"type": "number"},
-                        },
-                    },
-                },
-            },
-        },
-        "interval": {"type": "integer", "minimum": 0, "maximum": 100},
-        "perplexity": {"type": "integer"},
-    },
-    "required": ["samples"],
-}
-"""
-
-"""def generate_get_results_schema(return_schema):
-    return {
-        "tags": ["Get results"],
-        "summary": "Get analysis results",
-        "produces": ["application/json"],
-        "responses": {
-            200: {
-                "description": "The current request is ongoing",
-                "schema": {
-                    "type": "object",
-                    "properties": {"status": {"type": "string", "example": "PENDING"}},
-                },
-            },
-            201: {
-                "description": "Analysis successfully completed",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "data": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "lower": {"type": "number"},
-                                    "max": {"type": "number"},
-                                    "median": {"type": "number"},
-                                    "min": {"type": "number"},
-                                    "sampleID": {"type": "string"},
-                                    "upper": {"type": "number"},
-                                },
-                            },
-                        },
-                        "status": {"type": "string"},
-                    },
-                },
-            },
-            400: {
-                "description": "Task failed due to an issue with client input",
-            },
-            500: {"description": "An interval server error has occured"},
-        },
-        http://python-tool.net/transform/to-yaml/
-    }"""
+    Args:
+    See the celery on_return documentation
+    """
+    os.remove(args[0])
+    return

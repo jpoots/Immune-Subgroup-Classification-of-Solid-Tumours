@@ -6,7 +6,7 @@ from flask import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from ..utils import parse_csv, parse_json
+from ..utils import parse_csv, parse_json, validate_csv_upload
 from werkzeug import exceptions
 from ..ml_models.predictions import predict, probability
 import uuid
@@ -33,9 +33,6 @@ LIMIT_MESSAGE = "Request are limited to 5 per minute"
 main = Blueprint("main", __name__)
 
 
-print(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
-
-
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
 @main.route("/parsesamples", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
@@ -60,14 +57,8 @@ def parse_samples():
     Raises:
         BadRequest: The file is missing from the request or the sample file is invalid
     """
-    try:
-        file = request.files["samples"]
-    except Exception as e:
-        raise exceptions.BadRequest("Missing file")
-    try:
-        delimiter = request.form["delimiter"]
-    except Exception as e:
-        raise exceptions.BadRequest("Missing delimiter")
+
+    file, delimiter = validate_csv_upload(request)
 
     data = parse_csv(file, delimiter)
 
@@ -204,14 +195,7 @@ def analyse_async():
         BadRequest: The file is missing from the request or the sample file is invalid
     """
     # is file in request and is it a valid CSV
-    try:
-        file = request.files["samples"]
-    except Exception as e:
-        raise exceptions.BadRequest("Missing file")
-    try:
-        delimiter = request.form["delimiter"]
-    except Exception as e:
-        raise exceptions.BadRequest("Missing delimiter")
+    file, delimiter = validate_csv_upload(request)
 
     filename = f"{uuid.uuid4()}"
     file.save("./temp/" + filename)
@@ -231,7 +215,7 @@ def tsne_async():
         "resultURL": "localhost:3000/getresults/tsne/123-abc
 
     Raises:
-        BadRequest: JSON is missing
+        BadRequest: The JSON sent is missing or invalid
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
@@ -251,9 +235,10 @@ def confidence_async():
         "resultURL": "localhost:3000/confidence/tsne/123-abc
 
     Raises:
-        BadRequest: JSON is missing
+        BadRequest: The JSON sent is missing or invalid
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
+
     task = confidence_celery.apply_async(args=[data])
     return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202
