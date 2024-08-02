@@ -1,5 +1,5 @@
-import { TitleAndSearch } from "../tableComponents/TitleAndSearch";
-import { useState, useMemo } from "react";
+import { TitleAndSearch } from "../shared/TitleAndSearch";
+import { useState, useMemo, useContext } from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -7,18 +7,18 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { Table } from "../tableComponents/Table";
+import { Table } from "../shared/Table";
 
 import { CSVLink } from "react-csv";
 import NothingToDisplay from "../../errors/NothingToDisplay";
-import { PaginationBar } from "../tableComponents/PaginationBar";
+import { PaginationBar } from "../shared/PaginationBar";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * the gene expression page where the extracted genes can be viewed
- * @param {Object} results - the results of the analysis
  * @returns - the gene expression results page
  */
-const GeneExpression = ({ results }) => {
+const GeneExpression = () => {
   // defining state
   const [sorting, setSorting] = useState([]);
   const [download, setDownload] = useState([]);
@@ -28,6 +28,7 @@ const GeneExpression = ({ results }) => {
     pageSize: 5,
   });
 
+  const results = useContext(ResultsContext)[0];
   const samples = results["samples"];
   const geneNameList = Object.keys(samples[0]["genes"]);
 

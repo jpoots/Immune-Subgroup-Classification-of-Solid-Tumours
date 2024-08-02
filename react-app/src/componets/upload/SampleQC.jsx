@@ -1,9 +1,12 @@
+import { useContext } from "react";
+import { ResultsContext } from "../context/ResultsContext";
+
 /**
  * given a resutls object returns a QC summary
- * @param {Object} results - the resutls of the analysis
  * @returns - a summary of the QC results
  */
-const SampleQC = ({ results }) => {
+const SampleQC = () => {
+  const results = useContext(ResultsContext)[0];
   return (
     <div className="box">
       <h1 className="block has-text-weight-bold">Gene QC</h1>

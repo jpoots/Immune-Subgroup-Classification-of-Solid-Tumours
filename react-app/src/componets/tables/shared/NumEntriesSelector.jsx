@@ -13,16 +13,13 @@ const NumEntriesSelector = ({ table }) => {
       </div>
 
       <div className="block mb-5 select is-danger is-small is-rounded ">
-        <select onChange={(e) => table.setPageSize(e.target.value)}>
-          <option value="5" selected={pageSize === 5}>
-            5
-          </option>
-          <option value="10" selected={pageSize === 10}>
-            10
-          </option>
-          <option value="20" selected={pageSize === 20}>
-            20
-          </option>
+        <select
+          onChange={(e) => table.setPageSize(e.target.value)}
+          defaultValue={pageSize}
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
         </select>
       </div>
     </div>

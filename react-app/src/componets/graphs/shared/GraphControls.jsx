@@ -51,7 +51,7 @@ export function GraphControls({
             type="radio"
             name="dim"
             value="2"
-            checked={dimension === 2}
+            defaultChecked={dimension}
             className="queens-radio mr-2"
           />
           2D
@@ -62,7 +62,6 @@ export function GraphControls({
             type="radio"
             name="dim"
             value="3"
-            checked={dimension === 3}
             className="queens-radio mr-2"
           />
           3D

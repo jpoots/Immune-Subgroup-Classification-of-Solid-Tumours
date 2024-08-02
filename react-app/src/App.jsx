@@ -3,21 +3,22 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "bulma/css/bulma.min.css";
 import Header from "./componets/general/Header";
 import Upload from "./componets/upload/Upload";
-import Prediction from "./componets/tables/tablePages/Prediction";
+import Prediction from "./componets/tables/pages/Prediction";
 import "./index.css";
-import GeneExpression from "./componets/tables/tablePages/GeneExpression";
-import Probability from "./componets/tables/tablePages/Probability";
-import Confidence from "./componets/graphs/Confidence";
+import GeneExpression from "./componets/tables/pages/GeneExpression";
+import Probability from "./componets/tables/pages/Probability";
+import Confidence from "./componets/graphs/pages/Confidence";
 import Help from "./componets/general/Help";
-import Tsne from "./componets/graphs/Tsne";
-import Pca from "./componets/graphs/Pca";
+import Tsne from "./componets/graphs/pages/Tsne";
+import Pca from "./componets/graphs/pages/Pca";
 import ProtectedRoute from "./componets/general/ProtectedRoute";
 import NothingToDisplay from "./componets/errors/NothingToDisplay";
 import NotFound from "./componets/errors/NotFound";
-import ClassificationByType from "./componets/graphs/ClassificationByType";
+import ClassificationByType from "./componets/graphs/pages/ClassificationByType";
 import Footer from "./componets/general/Footer";
 import { ErrorBoundary } from "react-error-boundary";
 import FallbackError from "./componets/errors/FallbackError";
+import { ResultsContext } from "./componets/context/ResultsContext";
 
 /**
  * the main app component that contains shared app state and contains a SPA header with the below switched by a router
@@ -25,7 +26,6 @@ import FallbackError from "./componets/errors/FallbackError";
  */
 function App() {
   // state for the app
-  const [predictions, setPredictions] = useState([]);
   const [fileName, setFileName] = useState("Upload File...");
   const [results, setResults] = useState();
   const [summary, setSummary] = useState();
@@ -33,7 +33,6 @@ function App() {
   const [confidenceGraphData, setConfidenceGraphData] = useState();
 
   const resetApp = () => {
-    setPredictions([]);
     setFileName("Upload files...");
     setResults();
     setSummary();
@@ -45,92 +44,47 @@ function App() {
     <Router>
       <Header />
       <ErrorBoundary FallbackComponent={FallbackError} onError={resetApp}>
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={
-              <Upload
-                setPredictions={setPredictions}
-                setResults={setResults}
-                results={results}
-                summary={summary}
-                setSummary={setSummary}
-                filename={fileName}
-                setFileName={setFileName}
-                setTsneGraphData={setTsneGraphData}
-                setConfidenceGraphData={setConfidenceGraphData}
+        <ResultsContext.Provider value={[results, setResults]}>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/geneexpression" element={<GeneExpression />} />
+              <Route path="/prediction" element={<Prediction />} />
+              <Route path="/probability" element={<Probability />} />
+              <Route path="/pca" element={<Pca />} />
+              <Route
+                path="/tsne"
+                element={<Tsne graphState={[tsneGrahData, setTsneGraphData]} />}
               />
-            }
-          />
-          <Route
-            path="/geneexpression"
-            element={
-              <ProtectedRoute results={results}>
-                <GeneExpression results={results} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/prediction"
-            element={
-              <ProtectedRoute results={results}>
-                <Prediction predictions={predictions} results={results} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/probability"
-            element={
-              <ProtectedRoute results={results}>
-                <Probability samples={predictions} results={results} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pca"
-            element={
-              <ProtectedRoute results={results}>
-                <Pca results={results} />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/tsne"
-            element={
-              <ProtectedRoute results={results}>
-                <Tsne
-                  results={results}
-                  graphData={tsneGrahData}
-                  setGraphData={setTsneGraphData}
+              <Route
+                path="/confidence"
+                element={
+                  <Confidence
+                    graphState={[confidenceGraphData, setConfidenceGraphData]}
+                  />
+                }
+              />
+              <Route path="/bytype" element={<ClassificationByType />} />
+            </Route>
+
+            <Route
+              exact
+              path="/"
+              element={
+                <Upload
+                  summary={summary}
+                  setSummary={setSummary}
+                  filename={fileName}
+                  setFileName={setFileName}
+                  setTsneGraphData={setTsneGraphData}
+                  setConfidenceGraphData={setConfidenceGraphData}
                 />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/confidence"
-            element={
-              <ProtectedRoute results={results}>
-                <Confidence
-                  results={results}
-                  graphData={confidenceGraphData}
-                  setGraphData={setConfidenceGraphData}
-                />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/bytype"
-            element={
-              <ProtectedRoute results={results}>
-                <ClassificationByType results={results} />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/help" element={<Help />} />
-          <Route path="/empty" element={<NothingToDisplay />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+              }
+            />
+            <Route path="/help" element={<Help />} />
+            <Route path="/empty" element={<NothingToDisplay />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </ResultsContext.Provider>
       </ErrorBoundary>
 
       <Footer />

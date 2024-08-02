@@ -1,11 +1,13 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import Plot from "react-plotly.js";
-import TitleSetter from "./TitleSetter";
+import TitleSetter from "../shared/TitleSetter";
 import { CSVLink } from "react-csv";
+import { ResultsContext } from "../../context/ResultsContext";
 
-const ClassificationByType = ({ results }) => {
+const ClassificationByType = () => {
   const [title, setTitle] = useState("Class label by type");
   const [download, setDownload] = useState([]);
+  const results = useContext(ResultsContext)[0];
 
   // useMemo used for these calcualtions as could be expensive and rereun too much
   // unique type ids extracted

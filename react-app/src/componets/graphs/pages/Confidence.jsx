@@ -1,22 +1,22 @@
 import Plot from "react-plotly.js";
-import { useRef, useMemo, useState } from "react";
-import TitleSetter from "./TitleSetter";
+import { useContext, useRef, useState } from "react";
+import TitleSetter from "../shared/TitleSetter";
 import { CSVLink } from "react-csv";
-import { getData, callAsyncApi } from "../../../utils/asyncAPI";
-import ErrorModal from "../errors/ErrorModal";
-import { API_ROOT } from "../../../utils/constants";
-import { openWarningModal } from "../../../utils/openWarningModal";
+import { callAsyncApi } from "../../../../utils/asyncAPI";
+import ErrorModal from "../../errors/ErrorModal";
+import { API_ROOT } from "../../../../utils/constants";
+import EmptyGraph from "../shared/EmptyGraph";
+import { ResultsContext } from "../../context/ResultsContext";
 
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
 const API_URL = `${API_ROOT}/confidence`;
 
 /**
- * generates the 95% confidence interval box plot from the results
- * @param {Object} results - the analysis results
- * @returns - the box plotted 95% confidence interval
+ * generates the confidence interval box plot from the results
+ * @returns - the box plotted confidence interval
  */
-const Confidence = ({ results, graphData, setGraphData }) => {
+const Confidence = ({ graphState }) => {
   const slider = useRef();
   const [download, setDownload] = useState([]);
   const [title, setTitle] = useState();
@@ -25,6 +25,8 @@ const Confidence = ({ results, graphData, setGraphData }) => {
   const [loading, setLoading] = useState(false);
   const [modalMessage, setModalMessage] = useState();
   const [openModal, setOpenModal] = useState(false);
+  const results = useContext(ResultsContext)[0];
+  const [graphData, setGraphData] = graphState;
 
   const handleDownload = () => {
     let toDownload = results.samples.map((sample) => ({
@@ -158,7 +160,7 @@ const Confidence = ({ results, graphData, setGraphData }) => {
           </div>
         </div>
         <div className="column">
-          {graphData && (
+          {graphData ? (
             <Plot
               data={Object.keys(graphData.upper).map((key) => ({
                 q1: graphData.lower[key],
@@ -184,6 +186,8 @@ const Confidence = ({ results, graphData, setGraphData }) => {
                 },
               }}
             />
+          ) : (
+            <EmptyGraph />
           )}
         </div>
       </div>

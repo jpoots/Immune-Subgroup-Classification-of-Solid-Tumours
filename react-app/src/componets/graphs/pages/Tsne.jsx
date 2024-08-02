@@ -1,13 +1,14 @@
-import { GraphControls } from "./GraphControls";
-import { useRef, useState } from "react";
+import { GraphControls } from "../shared/GraphControls";
+import { useContext, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import NothingToDisplay from "../errors/NothingToDisplay";
+import NothingToDisplay from "../../errors/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
-import ErrorModal from "../errors/ErrorModal";
-import { getData, callAsyncApi } from "../../../utils/asyncAPI";
-import { API_ROOT } from "../../../utils/constants";
-import { openWarningModal } from "../../../utils/openWarningModal";
+import ErrorModal from "../../errors/ErrorModal";
+import { callAsyncApi } from "../../../../utils/asyncAPI";
+import { API_ROOT } from "../../../../utils/constants";
+import EmptyGraph from "../shared/EmptyGraph";
+import { ResultsContext } from "../../context/ResultsContext";
 
 // tnse api url and perplexity setting
 const API_URL = `${API_ROOT}/tsne`;
@@ -15,12 +16,12 @@ const MIN_PERPLEXITY = 1;
 
 /**
  * this component contaisn the t-SNE visualisation page where analysis can be done with varying perplexities
- * @param {object} results
  * @returns the t-SNE visualisation page
  */
-const Tsne = ({ results, graphData, setGraphData }) => {
+const Tsne = ({ graphState }) => {
   // setting up to hold dom element and graph points
   const slider = useRef();
+  const results = useContext(ResultsContext)[0];
   const max_perplexity = results.samples.length - 1;
 
   // set app state
@@ -32,6 +33,7 @@ const Tsne = ({ results, graphData, setGraphData }) => {
   const [download, setDownload] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
+  const [graphData, setGraphData] = graphState;
 
   /**
    * generates an object of the tsne results for each sample to be given to csv link
@@ -189,9 +191,7 @@ const Tsne = ({ results, graphData, setGraphData }) => {
                 }}
               />
             ) : (
-              <div className="box has-text-centered">
-                Your graph will appear here when analysis is complete
-              </div>
+              <EmptyGraph />
             )}
           </div>
         </div>

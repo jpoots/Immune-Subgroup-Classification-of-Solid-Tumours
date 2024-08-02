@@ -1,7 +1,7 @@
-import { SearchByID } from "../tableComponents/SearchByID";
-import { Table } from "../tableComponents/Table";
-import { PaginationBar } from "../tableComponents/PaginationBar";
-import { useState, useMemo } from "react";
+import { SearchByID } from "../shared/SearchByID";
+import { Table } from "../shared/Table";
+import { PaginationBar } from "../shared/PaginationBar";
+import { useState, useMemo, useContext } from "react";
 import NothingToDisplay from "../../errors/NothingToDisplay";
 import {
   getCoreRowModel,
@@ -11,26 +11,26 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { CSVLink } from "react-csv";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * the report page showing the prediction table with confidence
- * @param {Object} results - the results of the analysis
  * @returns - a report on the predicitons
  */
-const Prediction = ({ results }) => {
-  let samples = results["samples"];
-
+const Prediction = () => {
   // setting state for the component
   const [sorting, setSorting] = useState([]);
   const [download, setDownload] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+  const results = useContext(ResultsContext)[0];
+  const samples = results["samples"];
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  // memo to build columns. Iterating over 440. Only do once
+  // memo to build columns. Iterating over 440. Only do once. Table building helped by documentation and
   let columns = useMemo(
     () => [
       {
@@ -109,6 +109,7 @@ const Prediction = ({ results }) => {
                         .getColumn("prediction")
                         .setFilterValue(e.target.value);
                     }}
+                    defaultValue={""}
                   >
                     <option value="">All</option>
                     <option value="1">1</option>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useContext } from "react";
 import {
   getCoreRowModel,
   useReactTable,
@@ -7,21 +7,23 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { TableWithBoldMax } from "../tableComponents/TableWithBoldMax";
+import { TableWithBoldMax } from "../shared/TableWithBoldMax";
 
 import { CSVLink } from "react-csv";
 import NothingToDisplay from "../../errors/NothingToDisplay";
-import { PaginationBar } from "../tableComponents/PaginationBar";
-import { TitleAndSearch } from "../tableComponents/TitleAndSearch";
+import { PaginationBar } from "../shared/PaginationBar";
+import { TitleAndSearch } from "../shared/TitleAndSearch";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * generates the probability page showing the probabiltiy of all subgroups
- * @param {Object} results - the results of the analysis
  * @returns a probabiltiy page
  */
-const Proability = ({ results }) => {
+const Probability = () => {
   // could add extra layer of protection here
-  let samples = results["samples"];
+  const results = useContext(ResultsContext)[0];
+
+  const samples = results["samples"];
 
   // state for the componet
   const [sorting, setSorting] = useState([]);
@@ -147,4 +149,4 @@ const Proability = ({ results }) => {
   );
 };
 
-export default Proability;
+export default Probability;

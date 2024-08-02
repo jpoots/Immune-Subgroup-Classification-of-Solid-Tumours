@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import uploadIcon from "/upload-solid.svg";
 import { Tooltip } from "react-tooltip";
 import SampleQC from "./SampleQC";
@@ -9,6 +9,7 @@ import ErrorModal from "../errors/ErrorModal";
 import { callAsyncApi } from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import { openWarningModal } from "../../../utils/openWarningModal";
+import { ResultsContext } from "../context/ResultsContext";
 
 /**
  * constants for managing the allowed file types to upload
@@ -22,14 +23,11 @@ const API_URL = `${API_ROOT}/analyse`;
 /**
  *  This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
  * @param {function} setResults - setter fir results
- * @param {Object} [results] - results from analysis
  * @param {Object.<number, number>} [summary] - summary of results
  * @param {function} setSummary - setter for summary
  * @returns
  */
 const Upload = ({
-  setResults,
-  results,
   summary,
   setSummary,
   filename,
@@ -47,6 +45,9 @@ const Upload = ({
   const [modalMessage, setModalMessage] = useState();
   const cancelled = useRef();
   const [delimiter, setDelimiter] = useState();
+
+  // pulling context
+  const [results, setResults] = useContext(ResultsContext);
 
   /**
    * sets the filename and file for the component after reset the current ones

@@ -1,20 +1,21 @@
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useState, useContext } from "react";
 import Plot from "react-plotly.js";
-import NothingToDisplay from "../errors/NothingToDisplay";
+import NothingToDisplay from "../../errors/NothingToDisplay";
 import { CSVLink } from "react-csv";
-import { GraphControls } from "./GraphControls";
+import { GraphControls } from "../shared/GraphControls";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * the pca visualisation page for viewing results in 2D and 3D
- * @param {Object} results
  * @returns the pca visualisation page
  */
-const Pca = ({ results }) => {
+const Pca = () => {
   const graphData = useRef();
   const [dimension, setDimensions] = useState(2);
   const [title, setTitle] = useState("PCA");
   const [download, setDownload] = useState([]);
+  const results = useContext(ResultsContext)[0];
 
   /**
    * generates the graph data object using the helper function from the results
