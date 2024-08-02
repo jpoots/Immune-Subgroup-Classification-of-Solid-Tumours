@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ResultsContext } from "../context/ResultsContext";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * given a resutls object returns a QC summary

@@ -1,8 +1,8 @@
-import { SearchByID } from "../shared/SearchByID";
-import { Table } from "../shared/Table";
-import { PaginationBar } from "../shared/PaginationBar";
+import { SearchByID } from "../../componets/tables/SearchByID";
+import { Table } from "../../componets/tables/Table";
+import { PaginationBar } from "../../componets/tables/PaginationBar";
 import { useState, useMemo, useContext } from "react";
-import NothingToDisplay from "../../errors/NothingToDisplay";
+import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import {
   getCoreRowModel,
   useReactTable,

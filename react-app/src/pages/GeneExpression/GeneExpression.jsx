@@ -1,4 +1,3 @@
-import { TitleAndSearch } from "../shared/TitleAndSearch";
 import { useState, useMemo, useContext } from "react";
 import {
   getCoreRowModel,
@@ -7,12 +6,11 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-import { Table } from "../shared/Table";
-
+import { Table } from "../../componets/tables/Table";
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "../../errors/NothingToDisplay";
-import { PaginationBar } from "../shared/PaginationBar";
+import { PaginationBar } from "../../componets/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
+import { TitleAndSearch } from "../../componets/tables/TitleAndSearch";
 
 /**
  * the gene expression page where the extracted genes can be viewed
@@ -95,25 +93,19 @@ const GeneExpression = () => {
 
   return (
     <div className="container">
-      {results ? (
-        <>
-          <div className="box">
-            <TitleAndSearch title={title} table={table} />
-            <Table table={table} />
-          </div>
-          <PaginationBar table={table} />
-          <CSVLink
-            data={download}
-            filename="data"
-            onClick={handleDownload}
-            className="button is-dark"
-          >
-            <button>Download Report</button>
-          </CSVLink>
-        </>
-      ) : (
-        <NothingToDisplay />
-      )}
+      <div className="box">
+        <TitleAndSearch title={title} table={table} />
+        <Table table={table} />
+      </div>
+      <PaginationBar table={table} />
+      <CSVLink
+        data={download}
+        filename="data"
+        onClick={handleDownload}
+        className="button is-dark"
+      >
+        <button>Download Report</button>
+      </CSVLink>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useState, useMemo, useContext } from "react";
 import Plot from "react-plotly.js";
-import TitleSetter from "../shared/TitleSetter";
+import TitleSetter from "../../componets/graphs/TitleSetter";
 import { CSVLink } from "react-csv";
 import { ResultsContext } from "../../context/ResultsContext";
 

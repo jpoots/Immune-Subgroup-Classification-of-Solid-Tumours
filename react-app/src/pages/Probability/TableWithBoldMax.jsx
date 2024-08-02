@@ -1,7 +1,6 @@
 import sortArrows from "/sort-solid.svg";
 import { flexRender } from "@tanstack/react-table";
-import NumEntriesSelector from "./NumEntriesSelector";
-
+import NumEntriesSelector from "../../componets/tables/NumEntriesSelector";
 /**
  * takes a tanstack table and displays it in the appropriate format with bold row maxs
  * @param {TableInstance} table - the tanstack table instance to display

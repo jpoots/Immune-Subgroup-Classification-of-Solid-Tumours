@@ -7,13 +7,12 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 
-import { TableWithBoldMax } from "../shared/TableWithBoldMax";
-
+import { TableWithBoldMax } from "./TableWithBoldMax";
 import { CSVLink } from "react-csv";
-import NothingToDisplay from "../../errors/NothingToDisplay";
-import { PaginationBar } from "../shared/PaginationBar";
-import { TitleAndSearch } from "../shared/TitleAndSearch";
+import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
+import { PaginationBar } from "../../componets/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
+import { TitleAndSearch } from "../../componets/tables/TitleAndSearch";
 
 /**
  * generates the probability page showing the probabiltiy of all subgroups

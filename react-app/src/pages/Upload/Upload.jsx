@@ -5,11 +5,11 @@ import SampleQC from "./SampleQC";
 import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
-import ErrorModal from "../errors/ErrorModal";
+import ErrorModal from "../../componets/errors/ErrorModal";
 import { callAsyncApi } from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import { openWarningModal } from "../../../utils/openWarningModal";
-import { ResultsContext } from "../context/ResultsContext";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * constants for managing the allowed file types to upload
