@@ -1,19 +1,28 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { API_ROOT } from "../../../utils/constants";
+import { openWarningModal } from "../../../utils/openWarningModal";
+import ErrorModal from "../../components/errors/ErrorModal";
 
 const Admin = () => {
   const [geneList, setGeneList] = useState();
+  const [loading, setLoading] = useState();
+  const [modalMessage, setModalMessage] = useState();
+  const [openModal, setOpenModal] = useState();
+  const [disabled, setDisabled] = useState(true);
 
   useEffect(() => {
     const getGeneList = async () => {
-      let result = await fetch(`${API_ROOT}/admin/genelist`);
-      result = await result.json();
-      setGeneList(result);
+      let response = await fetch(`${API_ROOT}/admin/genelist`);
+      response = await response.json();
+      let gene_name_list = response.results;
+      gene_name_list = gene_name_list.join(",");
+      setGeneList(gene_name_list);
     };
     getGeneList();
   }, []);
 
   const handleUpdate = async () => {
+    setLoading(true);
     const request = {
       method: "PUT",
       headers: {
@@ -21,11 +30,22 @@ const Admin = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        newContent: geneList,
+        geneList: geneList,
       }),
     };
 
-    let result = await fetch(`${API_ROOT}/admin/genelist`, request);
+    let response = await fetch(`${API_ROOT}/admin/genelist`, request);
+
+    if (response.ok) {
+      openWarningModal(setModalMessage, setOpenModal, "Success!");
+    } else {
+      response = await response.json();
+      let errorMessage = response.error.description;
+      setModalMessage(setModalMessage, setOpenModal, errorMessage);
+    }
+
+    setLoading(false);
+    setDisabled(true);
   };
 
   return (
@@ -37,16 +57,24 @@ const Admin = () => {
           rows="10"
           value={geneList}
           onChange={(e) => {
+            setDisabled(false);
             setGeneList(e.target.value);
           }}
         ></textarea>
         <button
-          className="button queens-branding queens-button"
+          className={`button queens-branding queens-button ${
+            loading ? "is-loading" : ""
+          }`}
+          disabled={disabled || loading}
           onClick={handleUpdate}
         >
           Change List
         </button>
       </div>
+
+      {openModal && (
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
+      )}
     </div>
   );
 };

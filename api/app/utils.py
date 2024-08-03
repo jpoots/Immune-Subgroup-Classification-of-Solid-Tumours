@@ -17,8 +17,12 @@ utility functions to be used throughout the project
 NUM_GENES = 440
 # current directory
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-# the path to the pickle file containing the gene names
-ORDERED_GENE_DF = joblib.load(os.path.join(CURRENT_DIR, "ordered_gene_names.pkl"))
+# gene list file
+GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
+
+gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
+
+var = 1
 
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
@@ -71,7 +75,7 @@ def parse_csv(filepath, delimiter):
         data = pd.read_csv(filepath, index_col=0, delimiter=delimiter)
         data = data.T
         # extract valid data
-        data = data[ORDERED_GENE_DF.columns.intersection(data.columns)]
+        data = data[gene_list_csv.columns.intersection(data.columns)]
     except Exception as e:
         # if file could not be succesfully read
         raise BadRequest(
@@ -196,3 +200,15 @@ def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
     """
     os.remove(args[0])
     return
+
+
+def reload_gene_list():
+    global gene_list_csv
+    gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
+    print(gene_list_csv.tail())
+    return
+
+
+def reload_var():
+    global var
+    var = 5

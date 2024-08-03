@@ -6,7 +6,7 @@ from flask import (
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
-from ..utils import parse_csv, parse_json, validate_csv_upload
+from .. import utils
 from werkzeug import exceptions
 from ..ml_models.predictions import predict, probability
 import uuid
@@ -16,6 +16,7 @@ from .celery_tasks import confidence_celery, tsne_celery, analyse
 from flasgger import swag_from
 from app import limiter
 import pandas as pd
+import time
 
 """
 The main api endpoints for the system to perform analysis
@@ -23,27 +24,27 @@ The main api endpoints for the system to perform analysis
 
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
-LIMIT_MESSAGE = "Request are limited to 5 per minute"
 
 admin = Blueprint("admin", __name__)
-
-# Get the absolute path of the current directory
-current_dir = os.path.dirname(os.path.abspath(__file__))
-
-# the location of the trained model
-FILE_LOCATION = os.path.join(current_dir, "gene_list.csv")
 
 
 @admin.route("/genelist", methods=["GET", "PUT"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
 def edit_gene_list():
     if request.method == "GET":
-        with open(FILE_LOCATION) as f:
-            s = f.read()
+        return jsonify({"results": utils.gene_list_csv.columns.tolist()})
     if request.method == "PUT":
-        content = request.get_json()["newContent"]
-        print(content)
-        with open(FILE_LOCATION, "w") as f:
-            s = f.write(content)
+        request_json = request.get_json()
 
-    return (jsonify(s), 200)
+        if "geneList" not in request_json:
+            raise exceptions.BadRequest("missing gene list")
+
+        new_gene_list = request_json["geneList"]
+        try:
+            with open(utils.GENE_LIST_FILE_LOCATION, "w") as f:
+                f.write(new_gene_list)
+            time.sleep(0.1)
+            utils.reload_gene_list()
+        except Exception as e:
+            raise exceptions.BadRequest("Error writing to file")
+        return jsonify({"done": "done"})
