@@ -20,14 +20,20 @@ from sklearn.metrics import (
     recall_score,
     make_scorer,
 )
-from utils.utils import get_data, split_data
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
+import sys
+
+sys.path.append("..")
+from utils.utils import get_data, split_data
+from xgboost import XGBClassifier
+from sklearn.metrics import ConfusionMatrixDisplay, classification_report
+
 
 """
 This is a short script attempting to explore the possibility of using a second classifier 
-to identify if a sample was class 6 or not. This was never complete and thus remain messy 
-but reamins in the repo as evidence of the experiment
+to identify if a sample was class 6 or not. This was never complete and thus remains messy 
+and with data leakage issues but reamins in the repo as evidence of the experiment
 """
 
 RANDOM_STATE = 42
@@ -42,7 +48,7 @@ knn = KNeighborsClassifier()
 nb = GaussianNB()
 lr = LogisticRegression(class_weight="balanced")
 
-models = [mlp, gb, svc, rfc, knn, nb, lr]
+models = [XGBClassifier(), mlp, gb, svc, rfc, knn, nb, lr]
 
 # import data using util
 data = get_data()
@@ -54,34 +60,36 @@ scaler = MinMaxScaler()
 # remove the test set and create a training and validation set
 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
 
+x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
+    x_train, y_train, test_size=0.20, stratify=y_train
+)
+
 # define sample strategy
 under_sample = {
-    0: 50,
-    1: 50,
-    2: 50,
-    3: 50,
-    4: 50,
+    0: 100,
+    1: 100,
+    2: 100,
+    3: 100,
+    4: 100,
 }
 
 over_sample = {
-    5: 250,
+    5: 1000,
 }
 
 # set up samplers and fit
 rus = RandomUnderSampler(sampling_strategy=under_sample)
 smt = SMOTE(sampling_strategy=over_sample)
-x_train, y_train = smt.fit_resample(x_train, y_train)
+
+# x_train, y_train = smt.fit_resample(x_train, y_train)
 x_train, y_train = rus.fit_resample(x_train, y_train)
 
-y[y < 5] = 0
-y[y == 5] = 1
+x_train_val, y_train_val = rus.fit_resample(x_train_val, y_train_val)
 
-x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-    x_train, y_train, test_size=0.20, stratify=y_train
-)
+y_train_binary = [0 if y < 5 else 1 for y in y_train]
+y_train_val_binary = [0 if y < 5 else 1 for y in y_train_val]
+y_test_val_binary = [0 if y < 5 else 1 for y in y_test_val]
 
-y_train[y_train < 5] = 0
-y_train[y_train == 5] = 1
 
 fig, axs = plt.subplots(nrows=2, ncols=4, figsize=(15, 10))
 
@@ -99,7 +107,9 @@ for model, ax in zip(models, axs.flatten()):
     pipe = ImbPipeline(steps=[("scaler", scaler), ("model", model)])
 
     # run cv and evaluate
-    cv = cross_validate(pipe, x_train, y_train, cv=10, n_jobs=-1, scoring=scoring)
+    cv = cross_validate(
+        pipe, x_train, y_train_binary, cv=10, n_jobs=-1, scoring=scoring
+    )
 
     # pulling out my performance metrics
     accuracy = np.average(cv["test_accuracy"])
@@ -121,4 +131,67 @@ for model, ax in zip(models, axs.flatten()):
     print(f"Group 6 Recall: {recall_group6}")
     print()
 
-    y_test_copy = y_test
+    pipe.fit(x_train_val, y_train_val_binary)
+
+    ax = ConfusionMatrixDisplay.from_estimator(
+        pipe, x_test_val, y_test_val_binary, ax=ax
+    )
+
+
+svc = svm.SVC(class_weight="balanced")
+svc = ImbPipeline(steps=[("scaler", MinMaxScaler()), ("model", svc)])
+svc.fit(x_train_val, y_train_val_binary)
+
+six_or_not = svc.predict(x_test_val)
+six_indicies = [i for i, value in enumerate(six_or_not) if value == 1]
+print(six_indicies)
+
+# import data using util
+data = get_data()
+idx, x, y, genes = split_data(data)
+
+# data scaler and generic pipeleine
+scaler = MinMaxScaler()
+
+# remove the test set and create a training and validation set
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
+
+x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
+    x_train, y_train, test_size=0.20, stratify=y_train
+)
+
+# define sample strategy
+under_sample = {
+    0: 1000,
+    1: 1000,
+    2: 1000,
+}
+
+over_sample = {
+    3: 1000,
+    4: 1000,
+    5: 1000,
+}
+
+# set up samplers and fit
+rus = RandomUnderSampler(sampling_strategy=under_sample)
+smt = SMOTE(sampling_strategy=over_sample)
+scaler = MinMaxScaler()
+booster = XGBClassifier()
+
+booster = ImbPipeline(
+    steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", booster)]
+)
+
+booster.fit(x_train_val, y_train_val)
+
+booster_predictions = booster.predict(x_test_val)
+# booster_predictions = [
+# prediction if i not in six_indicies else 5
+# for i, prediction in enumerate(booster_predictions)
+# ]
+
+print(classification_report(y_test_val, booster_predictions))
+ConfusionMatrixDisplay.from_predictions(y_test_val, booster_predictions)
+
+plt.show()

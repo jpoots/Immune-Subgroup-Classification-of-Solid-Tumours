@@ -1,4 +1,4 @@
-import ProtectedRoute from "./componets/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { Route, Routes } from "react-router-dom";
 import GeneExpression from "./pages/GeneExpression/GeneExpression";
 import Prediction from "./pages/Predictions/Prediction";
@@ -11,6 +11,7 @@ import Upload from "./pages/Upload/Upload";
 import Help from "./pages/Help/Help";
 import NothingToDisplay from "./pages/NothingToDisplay/NothingToDisplay";
 import NotFound from "./pages/NotFound/NotFound";
+import Admin from "./pages/Admin/Admin";
 
 /**
  * contains all the routes for the SPA
@@ -68,6 +69,9 @@ const AllRoutes = ({
           />
         }
       />
+
+      <Route path="/admin" element={<Admin />} />
+
       <Route path="/help" element={<Help />} />
       <Route path="/empty" element={<NothingToDisplay />} />
       <Route path="*" element={<NotFound />} />

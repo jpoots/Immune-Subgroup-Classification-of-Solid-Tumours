@@ -41,7 +41,6 @@ const callAsyncApi = async (url, request, setModalMessage, setOpenModal, cancell
     let errorMessage = "Sorry something went wrong! Please try agian later.";
     let results;
     let resultURL;
-    console.log(cancelled)
 
     try {
         apiResponse = await fetch(url, request);

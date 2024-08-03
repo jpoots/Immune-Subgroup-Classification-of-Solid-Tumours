@@ -103,12 +103,14 @@ def predictgroup():
     idx = data["ids"]
     features = data["features"]
 
-    predictions, prediction_probs = predict(features)
+    predictions, prediction_probs, invalid = predict(features)
 
     # prepare for response
     results = []
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
-        results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
+        results.append(
+            {"sampleID": id, "prediction": pred, "probs": prob_list, "invalid": invalid}
+        )
 
     return jsonify({"data": results})
 

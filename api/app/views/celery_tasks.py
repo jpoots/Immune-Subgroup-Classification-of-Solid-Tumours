@@ -37,12 +37,15 @@ def confidence_celery(data):
 
     Throws: BadRequest if invalid JSON data is input
     """
+    # extract data from JSON
     data = parse_json(data)
 
+    # divide features
     features = data["features"]
     sample_ids = data["ids"]
     interval = data["interval"]
 
+    # parcel for return
     results = []
     for interval, id in zip(confidence_intervals(features, interval), sample_ids):
 
@@ -79,12 +82,16 @@ def tsne_celery(data):
 
     Throws: BadRequest if invalid JSON data is input
     """
+
+    # extract data from JSON
     data = parse_json(data)
 
+    # seperate features
     idx = data["ids"]
     features = data["features"]
     perplexity = data["perplexity"]
 
+    # perform tSNE
     tsne_pipeline = Pipeline(
         steps=[
             ("scaler", MinMaxScaler()),
@@ -92,6 +99,7 @@ def tsne_celery(data):
         ]
     )
 
+    # parcel for return
     results = []
     tsne = tsne_pipeline.fit_transform(features).tolist()
     for id, tsne_result in zip(idx, tsne):
@@ -128,12 +136,17 @@ def analyse(filepath, delimiter):
 
     Throws: BadRequest if invalid JSON data is input
     """
+    # extract data from CSV
     data = parse_csv(filepath, delimiter)
+
+    # predict
     predictions, prediction_probs, num_nc = predict(data["features"])
+
+    # perform PCA
     pc = PCA_PIPE.fit_transform(data["features"]).tolist()
 
+    # parcel for return
     results = []
-
     for (
         sample_id,
         feature_list,
@@ -149,13 +162,13 @@ def analyse(filepath, delimiter):
         pc,
         data["type_ids"],
     ):
-        print(feature_list)
-        print(data["gene_names"])
+        # for each gene in sample extract expression
         genes = {
             gene_name: expression
             for gene_name, expression in zip(data["gene_names"], feature_list)
         }
 
+        # append for sample
         results.append(
             {
                 "sampleID": sample_id,

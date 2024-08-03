@@ -1,6 +1,6 @@
-import { SearchByID } from "../../componets/tables/SearchByID";
-import { Table } from "../../componets/tables/Table";
-import { PaginationBar } from "../../componets/tables/PaginationBar";
+import { SearchByID } from "../../components/tables/SearchByID";
+import { Table } from "../../components/tables/Table";
+import { PaginationBar } from "../../components/tables/PaginationBar";
 import { useState, useMemo, useContext } from "react";
 import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import {

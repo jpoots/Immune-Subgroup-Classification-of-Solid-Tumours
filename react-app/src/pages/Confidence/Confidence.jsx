@@ -1,11 +1,11 @@
 import Plot from "react-plotly.js";
 import { useContext, useRef, useState } from "react";
-import TitleSetter from "../../componets/graphs/TitleSetter";
+import TitleSetter from "../../components/graphs/TitleSetter";
 import { CSVLink } from "react-csv";
 import { callAsyncApi } from "../../../utils/asyncAPI";
-import ErrorModal from "../../componets/errors/ErrorModal";
+import ErrorModal from "../../components/errors/ErrorModal";
 import { API_ROOT } from "../../../utils/constants";
-import EmptyGraph from "../../componets/graphs/EmptyGraph";
+import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
 
 const MIN_INTERVAL = 0;

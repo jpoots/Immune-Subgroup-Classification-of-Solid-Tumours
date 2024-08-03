@@ -61,9 +61,11 @@ def create_app():
     # register routes
     from .views.main import main
     from .views.get_results import get_results
+    from .views.admin import admin
 
     app.register_blueprint(main, url_prefix="/")
     app.register_blueprint(get_results, url_prefix="/getresults")
+    app.register_blueprint(admin, url_prefix="/admin")
 
     celery.conf.update(app.config)
 

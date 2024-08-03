@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import "bulma/css/bulma.min.css";
-import Header from "./componets/Header";
+import Header from "./components/Header";
 import AllRoutes from "./AllRoutes";
 import { ErrorBoundary } from "react-error-boundary";
 import FallbackError from "./pages/FallbackError/FallbackError";
 import { ResultsContext } from "./context/ResultsContext";
-import Footer from "./componets/Footer";
+import Footer from "./components/Footer";
 import "./index.css";
 
 /**

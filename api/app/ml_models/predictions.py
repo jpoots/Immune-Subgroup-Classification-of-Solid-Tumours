@@ -73,15 +73,20 @@ def confidence_intervals(features, interval):
 
     all_classified = []
     for model in BOOTSTRAP_MODELS:
+        # predict
         all_probs = model.predict_proba(features)
 
+        # extract max prob for each prediction
         classified_probs = []
         for probs in all_probs:
             classified_prob = np.amax(probs)
             classified_probs.append(classified_prob)
         all_classified.append(classified_probs)
 
+    # transpose all classified as an array
     all_classified = np.transpose(np.array(all_classified))
+
+    # pull out interval data and append to intervals
     intervals = [
         np.percentile(classified, [0, lower, 50, upper, 100])
         for classified in all_classified

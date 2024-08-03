@@ -129,7 +129,7 @@ def parse_json(data):
     Raises:
         BadRequest: The JSON is invalid or missing
     """
-    # validate jsona and raise exception if invalid
+    # validate json and raise exception if invalid
     perplexity = None
     interval = None
 

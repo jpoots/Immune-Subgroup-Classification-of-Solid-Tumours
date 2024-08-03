@@ -1,13 +1,13 @@
-import { GraphControls } from "../../componets/graphs/GraphControls";
+import { GraphControls } from "../../components/graphs/GraphControls";
 import { useContext, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
-import ErrorModal from "../../componets/errors/ErrorModal";
+import ErrorModal from "../../components/errors/ErrorModal";
 import { callAsyncApi } from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
-import EmptyGraph from "../../componets/graphs/EmptyGraph";
+import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
 
 // tnse api url and perplexity setting
