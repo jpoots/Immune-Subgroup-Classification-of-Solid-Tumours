@@ -12,6 +12,7 @@ import Help from "./pages/Help/Help";
 import NothingToDisplay from "./pages/NothingToDisplay/NothingToDisplay";
 import NotFound from "./pages/NotFound/NotFound";
 import Admin from "./pages/Admin/Admin";
+import Login from "./pages/Login/Login";
 
 /**
  * contains all the routes for the SPA
@@ -70,6 +71,7 @@ const AllRoutes = ({
         }
       />
 
+      <Route path="/login" element={<Login />} />
       <Route path="/admin" element={<Admin />} />
 
       <Route path="/help" element={<Help />} />

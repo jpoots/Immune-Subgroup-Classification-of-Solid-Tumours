@@ -11,6 +11,8 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from dotenv import load_dotenv
 import os
+from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt
 
 """
 instantiates an instance of the flask app
@@ -32,6 +34,10 @@ limiter = Limiter(
     default_limits=[None],
 )
 
+db = SQLAlchemy()
+bycrypt = Bcrypt()
+cors = CORS()
+
 
 def create_app():
     """Creates an app object
@@ -41,10 +47,14 @@ def create_app():
     """
     # set up app and cross origin
     app = Flask(__name__)
-    CORS(app)
-    limiter.init_app(app)
-    # there are issues running this on a development server (see flask docs) but the file size limit should work properly on WSGI serve
+    # set up db
     app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE * 1024 * 1024
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///admins.db"
+
+    cors.init_app(app)
+    limiter.init_app(app)
+    db.init_app(app)
+    bycrypt.init_app(app)
 
     # set up swagger
     Swagger(
@@ -65,12 +75,17 @@ def create_app():
 
     app.register_blueprint(main, url_prefix="/")
     app.register_blueprint(get_results, url_prefix="/getresults")
-    app.register_blueprint(admin, url_prefix="/admin")
+    app.register_blueprint(admin, url_prefix="/")
 
     celery.conf.update(app.config)
 
     # Set result_expires to 1 hours
     celery.conf.result_expires = RESULTS_TIMEOUT
+
+    with app.app_context():
+        from . import models
+
+        db.create_all()
 
     # register error handlers
     app.register_error_handler(exceptions.HTTPException, handle_http_exception)

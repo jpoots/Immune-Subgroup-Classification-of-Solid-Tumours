@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_ROOT } from "../../../utils/constants";
 import { openWarningModal } from "../../../utils/openWarningModal";
 import ErrorModal from "../../components/errors/ErrorModal";
 
 const Admin = () => {
-  const [geneList, setGeneList] = useState();
   const [loading, setLoading] = useState();
   const [modalMessage, setModalMessage] = useState();
   const [openModal, setOpenModal] = useState();
   const [disabled, setDisabled] = useState(true);
+  const [imSure, setImsure] = useState(false);
+  const geneNameList = useRef();
 
   useEffect(() => {
     const getGeneList = async () => {
@@ -16,8 +17,13 @@ const Admin = () => {
       response = await response.json();
       let gene_name_list = response.results;
       gene_name_list = gene_name_list.join(",");
-      setGeneList(gene_name_list);
+      geneNameList.current.value = gene_name_list;
     };
+    openWarningModal(
+      setModalMessage,
+      setOpenModal,
+      "WARNING: EDITING THE GENE NAME LIST IS A DESTRUCTIVE ACTION AND SHOULD BE PERFORMED WITH EXTREME CAUTION"
+    );
     getGeneList();
   }, []);
 
@@ -30,7 +36,7 @@ const Admin = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        geneList: geneList,
+        geneList: geneNameList.current.value,
       }),
     };
 
@@ -48,6 +54,11 @@ const Admin = () => {
     setDisabled(true);
   };
 
+  const handleFirstClick = () => {
+    setDisabled(true);
+    setImsure(true);
+  };
+
   return (
     <div className="container">
       <div className="box">
@@ -55,10 +66,10 @@ const Admin = () => {
         <textarea
           className="textarea block queens-textfield"
           rows="10"
-          value={geneList}
-          onChange={(e) => {
+          ref={geneNameList}
+          onChange={() => {
             setDisabled(false);
-            setGeneList(e.target.value);
+            setImsure(false);
           }}
         ></textarea>
         <button
@@ -66,9 +77,18 @@ const Admin = () => {
             loading ? "is-loading" : ""
           }`}
           disabled={disabled || loading}
-          onClick={handleUpdate}
+          onClick={handleFirstClick}
         >
           Change List
+        </button>
+        <button
+          className={`button queens-branding queens-button ${
+            loading ? "is-loading" : ""
+          }`}
+          disabled={!imSure || loading}
+          onClick={handleUpdate}
+        >
+          I&apos;m sure
         </button>
       </div>
 
