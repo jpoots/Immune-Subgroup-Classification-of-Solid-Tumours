@@ -6,9 +6,14 @@ import useSignOut from "react-auth-kit/hooks/useSignOut";
 import { useNavigate } from "react-router-dom";
 import useAuthHeader from "react-auth-kit/hooks/useAuthHeader";
 import { Tooltip } from "react-tooltip";
-import { useAuth } from "react-auth-kit";
+import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 
+/**
+ * the admin page where the admin can edit the gene list, create a new admin or log out
+ * @returns
+ */
 const Admin = () => {
+  // set page state
   const [loading, setLoading] = useState();
   const [modalMessage, setModalMessage] = useState();
   const [openModal, setOpenModal] = useState();
@@ -19,24 +24,33 @@ const Admin = () => {
   const navigate = useNavigate();
   const authHeader = useAuthHeader();
   const [createAdminLoading, setCreateAdminLoading] = useState();
+  const isAuthenticated = useIsAuthenticated();
 
+  // only do this on first render
   useEffect(() => {
     const getGeneList = async () => {
+      // redirect to login if session has timed out
+      if (!isAuthenticated) {
+        navigate("/login");
+        return;
+      }
+
       try {
         let response = await fetch(`${API_ROOT}/genelist`, {
           headers: { Authorization: authHeader },
         });
 
-        if (response.status == 401) {
-          navigate("/login");
-        } else if (!response.ok) throw new Error();
+        //  if unknown error throw error to be caught
+        if (!response.ok) throw new Error();
         else {
+          // if all is good display the gene list
           response = await response.json();
-          let gene_name_list = response.results;
+          let gene_name_list = response.data.results;
           gene_name_list = gene_name_list.join("\n");
           geneNameList.current.value = gene_name_list;
         }
       } catch (err) {
+        // if an error has occured display
         openWarningModal(
           setModalMessage,
           setOpenModal,
@@ -44,28 +58,43 @@ const Admin = () => {
         );
       }
     };
+    // open with warning modal about danger
     openWarningModal(
       setModalMessage,
       setOpenModal,
       "WARNING: Editing the gene name list is a destructive action and should be performed with caution."
     );
     getGeneList();
-  }, [authHeader, navigate]);
+  }, [authHeader, isAuthenticated, navigate]);
 
+  /**
+   * handle the updating of the gene list
+   */
   const handleUpdate = async () => {
     setLoading(true);
+
+    // redirect to login if session has timed out
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    // init error message
     let errorMessage = "Invalid input";
 
     try {
-      // https://stackoverflow.com/questions/3871816/is-there-a-javascript-regular-expression-to-remove-all-whitespace-except-newline regex taken from herer
+      // https://stackoverflow.com/questions/3871816/is-there-a-javascript-regular-expression-to-remove-all-whitespace-except-newline regex taken from here
+      // clean data
       let geneList = geneNameList.current.value
         .replace(",", "")
         .replace(/[^\S\r\n]+/g, "")
         .split("\n");
 
       //https://stackoverflow.com/questions/281264/remove-empty-elements-from-an-array-in-javascript works because empty strings are false
+      // remove any empty token
       geneList.filter((name) => name);
 
+      // request to sends
       const request = {
         method: "PUT",
         headers: {
@@ -78,14 +107,15 @@ const Admin = () => {
         }),
       };
 
+      // validation
       if (geneList.length == 0) throw Error();
 
+      // if validation has passed, change error message, these structures avoid try catch hell
       errorMessage = "Something went wrong!";
       let response = await fetch(`${API_ROOT}/genelist`, request);
 
-      if (response.status == 401) {
-        navigate("/login");
-      } else if (response.ok) {
+      // if ok, notify user, otherwise get the error and display
+      if (response.ok) {
         openWarningModal(setModalMessage, setOpenModal, "Success!");
       } else {
         response = await response.json();
@@ -100,21 +130,31 @@ const Admin = () => {
     }
   };
 
+  /**
+   * shows the I'm sure button if the first submission click has been performed
+   */
   const handleFirstClick = () => {
     setDisabled(true);
     setImsure(true);
   };
 
+  /**
+   * logs the admin out
+   */
   const handleLogOut = () => {
     signOut();
     navigate("/login");
   };
 
+  /**
+   * reaches to api to create a new admin
+   */
   const handleNewAdmin = async () => {
     setCreateAdminLoading(true);
     try {
+      // request to send
       const request = {
-        method: "PUT",
+        method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -122,17 +162,25 @@ const Admin = () => {
         },
       };
 
+      // perform request
       let response = await fetch(`${API_ROOT}/admin`, request);
-      response = await response.json();
 
-      console.log(response);
-      let username = response.username;
-      let password = response.password;
-      let message = `A new account has been created with username ${username} and password ${password}\n Keep this safe. You will not have access to it again.`;
-      openWarningModal(setModalMessage, setOpenModal, message);
+      if (request.ok) {
+        response = await response.json();
+
+        // get the details and display message
+        let username = response.data.username;
+        let password = response.data.password;
+        let message = `A new account has been created with username: ${username} and password: ${password}\n Keep this safe. You will not have access to it again.`;
+        openWarningModal(setModalMessage, setOpenModal, message);
+      } else {
+        // if request not ok, throw error to be caught
+        throw new Error();
+      }
     } catch (err) {
       openWarningModal(setModalMessage, setOpenModal, "Something went wrong!");
     } finally {
+      // always reset buttons
       setLoading(false);
       setDisabled(true);
       setCreateAdminLoading(false);

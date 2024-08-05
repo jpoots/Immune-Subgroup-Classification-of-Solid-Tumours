@@ -54,7 +54,7 @@ const callAsyncApi = async (url, request, setModalMessage, setOpenModal, cancell
 
         // use the async getData to poll for result
         apiResponse = await apiResponse.json();
-        resultURL = apiResponse.resultURL;
+        resultURL = apiResponse.data.resultURL;
         results = await getData(resultURL, cancelled);
 
         // if results not ok

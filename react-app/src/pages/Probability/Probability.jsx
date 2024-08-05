@@ -13,7 +13,6 @@ import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
 import { TitleAndSearch } from "../../components/tables/TitleAndSearch";
 import { TableWithBoldMax } from "./TableWithBoldMax";
-
 /**
  * generates the probability page showing the probabiltiy of all subgroups
  * @returns a probabiltiy page

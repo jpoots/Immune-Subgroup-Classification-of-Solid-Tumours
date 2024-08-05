@@ -18,9 +18,11 @@ responses:
     description: background task started
     schema:
       properties:
-        resultURL:
-          example: http://127.0.0.1:3000/getresults/analyse/123-abc-456-def
-          type: string
+        data:
+          properties:
+            resultURL:
+              example: http://127.0.0.1:3000/getresults/analyse/123-abc-456-def
+              type: string
       type: object
   400:
     description: There was an issue with the file sent

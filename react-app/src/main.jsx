@@ -6,6 +6,7 @@ import AuthProvider from "react-auth-kit/AuthProvider";
 import createStore from "react-auth-kit/createStore";
 
 // https://authkit.arkadip.dev/getting_started/integration/react-app/#usage
+// store for react-auth-kit
 const store = createStore({
   authName: "_auth",
   authType: "cookie",

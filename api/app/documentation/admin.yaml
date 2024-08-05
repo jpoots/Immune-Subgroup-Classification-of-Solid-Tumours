@@ -1,0 +1,35 @@
+consumes:
+  - application/json
+parameters:
+  - description: The admin's username
+    in: body
+    name: username
+    required: true
+    type: string
+  - description: The admin's password
+    in: body
+    name: password
+    required: true
+    type: string
+produces:
+  - application/json
+responses:
+  200:
+    description: Successful login
+    schema:
+      properties:
+        data:
+          properties:
+            accessToken:
+              example: ABCSEFEFDFFSDSFGWDFG
+              type: string
+      type: object
+  400:
+    description: There was an issue with the request sent
+  401:
+    description: Credentials not found
+  500:
+    description: An interval server error has occured
+summary: Authenticate administrator
+tags:
+  - Admin

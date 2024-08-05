@@ -190,8 +190,10 @@ def analyse_async():
 
     Returns:
         A dict containing the location of the result
+        data: {
+            "resultURL": "localhost:3000/getresults/analyse/123-abc
+        }
 
-        "resultURL": "localhost:3000/getresults/analyse/123-abc
 
     Raises:
         BadRequest: The file is missing from the request or the sample file is invalid
@@ -202,7 +204,7 @@ def analyse_async():
     filename = f"{uuid.uuid4()}"
     file.save("./temp/" + filename)
     task = analyse.apply_async(args=[f"./temp/{filename}", delimiter])
-    return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
+    return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 
 
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
@@ -214,7 +216,7 @@ def tsne_async():
     Returns:
         A dict containing the location of the result
 
-        "resultURL": "localhost:3000/getresults/tsne/123-abc
+        data: {"resultURL": "localhost:3000/getresults/tsne/123-abc}
 
     Raises:
         BadRequest: The JSON sent is missing or invalid
@@ -222,7 +224,7 @@ def tsne_async():
     # handles error automatically if the request isn't JSON
     data = request.get_json()
     task = tsne_celery.apply_async(args=[data])
-    return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
+    return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
 
 
 @limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
@@ -234,7 +236,7 @@ def confidence_async():
     Returns:
         A dict containing the location of the result
 
-        "resultURL": "localhost:3000/confidence/tsne/123-abc
+        data: {"resultURL": "localhost:3000/confidence/tsne/123-abc}
 
     Raises:
         BadRequest: The JSON sent is missing or invalid
@@ -243,4 +245,4 @@ def confidence_async():
     data = request.get_json()
 
     task = confidence_celery.apply_async(args=[data])
-    return jsonify({"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202
+    return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202

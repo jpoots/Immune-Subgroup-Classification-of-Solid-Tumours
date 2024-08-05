@@ -4,7 +4,12 @@ import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 
+/**
+ * the login page for admin authentication
+ * @returns the admin page
+ */
 const Login = () => {
+  // settign app state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -14,14 +19,21 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState();
   const [loading, setLoading] = useState();
 
+  // redirect to admin if already logged in
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/admin");
     }
   });
 
+  /**
+   * handles the login process by reaching out to API and setting the access token
+   */
   const handleLogin = async () => {
+    // set loading for button
     setLoading(true);
+
+    // http request
     let request = {
       method: "POST",
       headers: {
@@ -34,15 +46,15 @@ const Login = () => {
     try {
       let response = await fetch(`${API_ROOT}/authenticate`, request);
 
+      // if response ok set the token and navigate to admin. If not authorised, show the error message
       if (response.ok) {
         response = await response.json();
-        console.log(response.refresh_token);
+        console.log(response);
         signIn({
           auth: {
-            token: response.access_token,
+            token: response.data.accessToken,
             type: "Bearer",
           },
-          refresh: response.refresh_token,
         });
         navigate("/admin");
       } else if (response.status === 401) {
@@ -52,9 +64,11 @@ const Login = () => {
         throw new Error();
       }
     } catch (err) {
+      // if unknown error, show general message
       setErrorMessage("Something went wrong!");
       setLoginFailed(true);
     } finally {
+      // reset button loading
       setLoading(false);
     }
   };

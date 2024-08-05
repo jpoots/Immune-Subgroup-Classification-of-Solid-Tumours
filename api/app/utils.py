@@ -203,12 +203,7 @@ def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
 
 
 def reload_gene_list():
+    """Reloads the in memory gene list from the CSV file"""
     global gene_list_csv
     gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
-    print(gene_list_csv.tail())
     return
-
-
-def reload_var():
-    global var
-    var = 5
