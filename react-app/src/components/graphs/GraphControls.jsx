@@ -32,7 +32,6 @@ export function GraphControls({
   return (
     <>
       <h1 className="has-text-weight-bold block mt-4">
-        {pageTitle}{" "}
         <a
           className="queens-branding-text"
           data-tooltip-html={`${tooltipHTML()}`}

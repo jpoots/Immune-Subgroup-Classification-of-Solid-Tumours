@@ -13,7 +13,7 @@ import NothingToDisplay from "./pages/NothingToDisplay/NothingToDisplay";
 import NotFound from "./pages/NotFound/NotFound";
 import Admin from "./pages/Admin/Admin";
 import Login from "./pages/Login/Login";
-
+import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
 /**
  * contains all the routes for the SPA
  * @param {[Object, function]} tsneState - array containing tsneGraphData and its setter
@@ -72,7 +72,10 @@ const AllRoutes = ({
       />
 
       <Route path="/login" element={<Login />} />
-      <Route path="/admin" element={<Admin />} />
+
+      <Route element={<AuthOutlet fallbackPath="/login" />}>
+        <Route path="/admin" element={<Admin />} />
+      </Route>
 
       <Route path="/help" element={<Help />} />
       <Route path="/empty" element={<NothingToDisplay />} />

@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager
 
 """
 instantiates an instance of the flask app
@@ -35,8 +36,9 @@ limiter = Limiter(
 )
 
 db = SQLAlchemy()
-bycrypt = Bcrypt()
+bcrypt = Bcrypt()
 cors = CORS()
+jwt = JWTManager()
 
 
 def create_app():
@@ -50,11 +52,14 @@ def create_app():
     # set up db
     app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE * 1024 * 1024
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///admins.db"
+    app.config["JWT_SECRET_KEY"] = "super-secret"  # move these to .envs
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 1800
 
     cors.init_app(app)
     limiter.init_app(app)
     db.init_app(app)
-    bycrypt.init_app(app)
+    bcrypt.init_app(app)
+    jwt.init_app(app)
 
     # set up swagger
     Swagger(
