@@ -267,7 +267,11 @@ const Upload = ({
           ICST is an open-access, open source software package which allows you
           to classify samples solid tumour samples into one of 6 immune
           subgroups using FPKM normalised RNA-Seq data. Please read the help
-          section before use.
+          section before use. By using the software you agree to be bound by the{" "}
+          <Link to="/help" className="queens-branding-text">
+            terms and conditions
+          </Link>
+          {""}.
         </div>
         <div className="block">
           <a

@@ -46,22 +46,68 @@ const Help = () => {
     <div className="container">
       <div className="box">
         <div className="block">
-          <h1 className="block has-text-weight-bold">What is ICST?</h1>
-          ICST (Immune Subgroup Classification of Solid Tumours) is a research
-          tool for cancer researchers and immunotherapy practitioners developed
-          as an MSc Software Development project by Jordan Poots in concert with
-          research performed by Dr Reza Rafiee at Queen&apos;s University
-          Belfast. It seeks to use FPKM normalised RNA-Seq data from 440 genes
-          to group solid tumour samples into one of the six immune sugroups
-          identified in the 2018 publication{" "}
-          <a
-            href="https://pubmed.ncbi.nlm.nih.gov/29628290/"
-            className="queens-branding-text"
-            target="_blank"
-          >
-            The Immune Landscape of Cancer
-          </a>
-          . The tool also provides useful visualisation tools for the data.
+          <div className="columns">
+            <div className="column block">
+              {" "}
+              <h1 className="block has-text-weight-bold">What is ICST?</h1>
+              ICST (Immune Subgroup Classification of Solid Tumours) is a
+              research tool for cancer researchers and immunotherapy
+              practitioners developed as an MSc Software Development project by
+              Jordan Poots in concert with research performed by Dr Reza Rafiee
+              at Queen&apos;s University Belfast. It seeks to use FPKM
+              normalised RNA-Seq data from 440 genes to group solid tumour
+              samples into one of the six immune sugroups identified in the 2018
+              publication{" "}
+              <a
+                href="https://pubmed.ncbi.nlm.nih.gov/29628290/"
+                className="queens-branding-text"
+                target="_blank"
+              >
+                The Immune Landscape of Cancer
+              </a>
+              . Full class names are listed below. More details about the
+              characterists along with therapeutic inights can be fodun in the
+              paper. The tool also provides useful visualisation tools for the
+              data.
+            </div>
+          </div>
+
+          <div className="columns is-centered">
+            <div className="column is-half">
+              <table className="table block">
+                <thead>
+                  <th className="has-text-centered">Subgroup Label</th>
+                  <th className="has-text-centered">Subgroup Name</th>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="has-text-centered">1</td>
+                    <td className="has-text-centered">Wound Healing</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">2</td>
+                    <td className="has-text-centered">IFN-&#947; Dominant</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">3</td>
+                    <td className="has-text-centered">Inflammatory</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">4</td>
+                    <td className="has-text-centered">Lymphocyte Depleted</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">5</td>
+                    <td className="has-text-centered">Immunologically Quiet</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">6</td>
+                    <td className="has-text-centered">TGF-β Dominant</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div className="block">
@@ -71,11 +117,12 @@ const Help = () => {
               ICST accepts FPKM normalised RNA-Seq data and extracts 440 key
               genes for the subgroup classification. Any missing genes are
               imputed using MICE (Multivariate Imputation by Chained Equations).
-              To ensure the quality of predictions samples with over 10 or more
-              missing genes will be rejected. Gene expression values are then
-              scaled between 0 and 1 using a Minmax scaling algorithm. These
-              &quot;features&quot; are fed to a supervised machine learning
-              model trained on over 7000 samples from PanCanAtlas using the{" "}
+              To ensure the quality of predictions all samples undergo Gene QC
+              and samples with 10 or more missing genes will be rejected. Gene
+              expression values are then scaled between 0 and 1 using a Minmax
+              scaling algorithm. These &quot;features&quot; are fed to a
+              supervised machine learning model trained on over 7000 samples
+              from PanCanAtlas using the{" "}
               <a
                 href="https://xgboost.readthedocs.io/en/stable/index.html"
                 className="queens-branding-text"
@@ -173,6 +220,22 @@ const Help = () => {
               here
             </a>
             . These can used to perform your own custom analysis .
+          </div>
+        </div>
+
+        <div className="block">
+          <h1 className="block has-text-weight-bold	">Terms and conditions</h1>
+          <div className="block">
+            All software including the API is provided on an &quot;as is&quot;
+            basis without warranties of any kind, either express or implied.
+            Software disclaims all warranties, express or implied, arising by
+            law or otherwise, with respect to any error, defect, deficiency,
+            infringement, or noncompliance in the services, technology, support,
+            or any other items provided by, through, or on behalf of Software
+            under this agreement. Data may be stored by the provider and used
+            anonymously for research purposes. This data may be shared with 3rd
+            parties. By using this software, including the API, you consent to
+            these terms and conditions.
           </div>
         </div>
       </div>

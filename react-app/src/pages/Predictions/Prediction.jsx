@@ -41,7 +41,7 @@ const Prediction = () => {
       },
       {
         accessorKey: "prediction",
-        header: "Class label",
+        header: "Subgroup",
         id: "prediction",
         cell: (props) => <p>{props.getValue()}</p>,
         enableSorting: false,

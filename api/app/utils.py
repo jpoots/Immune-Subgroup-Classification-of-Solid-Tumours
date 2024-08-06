@@ -22,8 +22,6 @@ GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
 
 gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
 
-var = 1
-
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
     "type": "object",
@@ -87,7 +85,7 @@ def parse_csv(filepath, delimiter):
 
     # extract type ids or set to none
     if "TYPEID" in data.columns:
-        data = data.fillna({"TYPEID": "None"})
+        data = data.fillna({"TYPEID": "Unknown"})
     else:
         data["TYPEID"] = "None"
     type_ids = data.pop("TYPEID").values
@@ -191,7 +189,7 @@ def validate_csv_upload(request):
     return file, delimiter
 
 
-def delete_file_on_return(self, status, retval, task_id, args, kwargs, einfo):
+def delete_file_on_failure(self, exc, task_id, args, kwargs, einfo):
     """
     Takes args from a celery task given a file name as input and deletes the file on return.
 

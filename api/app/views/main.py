@@ -1,8 +1,4 @@
-from flask import (
-    request,
-    jsonify,
-    Blueprint,
-)
+from flask import request, jsonify, Blueprint, current_app
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
@@ -55,13 +51,21 @@ def parse_samples():
         BadRequest: The file is missing from the request or the sample file is invalid
     """
 
+    # validate csv
     file, delimiter = validate_csv_upload(request)
 
+    # save for research
+    filename = f"{uuid.uuid4()}"
+    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+
+    # parse data
     data = parse_csv(file, delimiter)
 
+    # strucutre data for ease of surfing
     features = pd.DataFrame(data["features"], columns=data["gene_names"])
     features = features.T.to_dict()
 
+    # structure for return
     returnData = []
     for sample_id, feature_index, type_id in zip(
         data["ids"], features, data["type_ids"]
@@ -199,8 +203,10 @@ def analyse_async():
     file, delimiter = validate_csv_upload(request)
 
     filename = f"{uuid.uuid4()}"
-    file.save("./temp/" + filename)
-    task = analyse.apply_async(args=[f"./temp/{filename}", delimiter])
+    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
+    task = analyse.apply_async(
+        args=[os.path.join(current_app.config["UPLOAD_FOLDER"], filename), delimiter]
+    )
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 
 

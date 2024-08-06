@@ -1,7 +1,7 @@
 from ..ml_models.predictions import predict, confidence_intervals, probability
 from .. import celery
 from ..errors.BadRequest import BadRequest
-from ..utils import parse_csv, parse_json, delete_file_on_return
+from ..utils import parse_csv, parse_json, delete_file_on_failure
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
@@ -108,7 +108,7 @@ def tsne_celery(data):
     return results
 
 
-@celery.task(throws=(BadRequest,), after_return=delete_file_on_return)
+@celery.task(throws=(BadRequest,), on_failure=delete_file_on_failure)
 def analyse(filepath, delimiter):
     """
     Performs a full non-configurable analysis on a csv file

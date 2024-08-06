@@ -28,6 +28,7 @@ RESULTS_TIMEOUT = os.getenv("RESULTS_TIMEOUT")
 JWT_ACCESS_EXPIRY = int(os.getenv("JWT_ACCESS_EXPIRY"))
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 DATABASE_URI = os.getenv("DATABASE_URI")
+UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
@@ -59,13 +60,15 @@ def create_app():
     Returns:
         An app object
     """
-    # set up app and cross origin
+    # create app
     app = Flask(__name__)
-    # set up db
+
+    # config app
     app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE * 1024 * 1024
     app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
     app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = JWT_ACCESS_EXPIRY
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
     # init libraries with current app
     cors.init_app(app)
@@ -107,5 +110,5 @@ def create_app():
 
     # register error handlers
     app.register_error_handler(exceptions.HTTPException, handle_http_exception)
-    # app.register_error_handler(Exception, handle_generic_exception)
+    app.register_error_handler(Exception, handle_generic_exception)
     return app
