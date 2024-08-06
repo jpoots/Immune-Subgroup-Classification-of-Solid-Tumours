@@ -16,14 +16,18 @@ from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 
 """
-instantiates an instance of the flask app
+creates an instance of the flask app
 """
 
+# load config vars stored in .env
 load_dotenv()
 PORT = os.getenv("PORT")
 REDIS_URL = os.getenv("REDIS_URL")
 MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE"))
 RESULTS_TIMEOUT = os.getenv("RESULTS_TIMEOUT")
+JWT_ACCESS_EXPIRY = int(os.getenv("JWT_ACCESS_EXPIRY"))
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+DATABASE_URI = os.getenv("DATABASE_URI")
 
 # https://blog.miguelgrinberg.com/post/celery-and-the-flask-application-factory-pattern I used the code from here to add celery to a factory pattern application
 celery = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
@@ -35,6 +39,7 @@ limiter = Limiter(
     default_limits=[None],
 )
 
+# start libraries
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 cors = CORS()
@@ -51,10 +56,11 @@ def create_app():
     app = Flask(__name__)
     # set up db
     app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE * 1024 * 1024
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///admins.db"
-    app.config["JWT_SECRET_KEY"] = "super-secret"  # move these to .envs
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = 1800
+    app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+    app.config["JWT_SECRET_KEY"] = JWT_SECRET_KEY
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = JWT_ACCESS_EXPIRY
 
+    # init libraries with current app
     cors.init_app(app)
     limiter.init_app(app)
     db.init_app(app)

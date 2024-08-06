@@ -94,6 +94,10 @@ const Admin = () => {
       // remove any empty token
       geneList.filter((name) => name);
 
+      // convert to set and back to remove duplicates
+      geneList = new Set(geneList);
+      geneList = [...geneList];
+
       // request to sends
       const request = {
         method: "PUT",
@@ -117,6 +121,7 @@ const Admin = () => {
       // if ok, notify user, otherwise get the error and display
       if (response.ok) {
         openWarningModal(setModalMessage, setOpenModal, "Success!");
+        setImsure(false);
       } else {
         response = await response.json();
         errorMessage = response.error.description;
@@ -165,13 +170,12 @@ const Admin = () => {
       // perform request
       let response = await fetch(`${API_ROOT}/admin`, request);
 
-      if (request.ok) {
+      if (response.ok) {
         response = await response.json();
-
         // get the details and display message
         let username = response.data.username;
         let password = response.data.password;
-        let message = `A new account has been created with username: ${username} and password: ${password}\n Keep this safe. You will not have access to it again.`;
+        let message = `A new account has been created with username: ${username} and password: ${password}. Keep this safe. You will not have access to it again.`;
         openWarningModal(setModalMessage, setOpenModal, message);
       } else {
         // if request not ok, throw error to be caught

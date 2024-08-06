@@ -38,7 +38,7 @@ const Help = () => {
               missing genes will be rejected. Gene expression values are then
               scaled between 0 and 1 using a Minmax scaling algorithm. These
               &quot;features&quot; are fed to a supervised machine learning
-              model trained on over 7000 samples from PanCanAtlas using the
+              model trained on over 7000 samples from PanCanAtlas using the{" "}
               <a
                 href="https://xgboost.readthedocs.io/en/stable/index.html"
                 className="queens-branding-text"
@@ -119,8 +119,7 @@ const Help = () => {
           <div className="block">
             In keeping with the open access nature of ICST, all APIs used to
             provide site functionality are open. Full Swagger documumentation
-            for these can be found. These can used to perform your own custom
-            analysis
+            for these can be found{" "}
             <a
               href={`${API_ROOT}/apidocs`}
               className="queens-branding-text"
@@ -128,7 +127,7 @@ const Help = () => {
             >
               here
             </a>
-            .
+            . These can used to perform your own custom analysis .
           </div>
         </div>
       </div>

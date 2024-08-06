@@ -137,7 +137,7 @@ const Tsne = ({ graphState }) => {
             <div className="has-text-centered">
               <button
                 className={
-                  "button queens-branding queens-button block " +
+                  "button queens-branding queens-button block mr-2 " +
                   (loading ? "is-loading" : "")
                 }
                 onClick={handleTsne}

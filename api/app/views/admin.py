@@ -126,13 +126,13 @@ def edit_gene_list():
         request_json = request.get_json()
         if "geneList" not in request_json:
             raise exceptions.BadRequest("missing gene list")
-        elif (
-            not isinstance(request_json["geneList"], list)
-            or len(request_json["geneList"]) == 0
-        ):
-            raise exceptions.BadRequest("bad gene list")
 
+        # removes duplicates https://stackoverflow.com/questions/1653970/does-python-have-an-ordered-set dict used as ordered set doesn't exist
         new_gene_list = request_json["geneList"]
+        new_gene_list = list(dict.fromkeys(new_gene_list))
+
+        if not isinstance(new_gene_list, list) or len(new_gene_list) == 0:
+            raise exceptions.BadRequest("bad gene list")
 
         # lock to prevent race condition
         lock = FileLock("file.lock")
