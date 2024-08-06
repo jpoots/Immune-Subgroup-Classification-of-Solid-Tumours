@@ -29,6 +29,9 @@ JWT_ACCESS_EXPIRY = int(os.getenv("JWT_ACCESS_EXPIRY"))
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 DATABASE_URI = os.getenv("DATABASE_URI")
 
+# file path to documentation
+DOCUMENTATION_PATH = "../documentation"
+
 # https://blog.miguelgrinberg.com/post/celery-and-the-flask-application-factory-pattern I used the code from here to add celery to a factory pattern application
 celery = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
 
@@ -36,8 +39,11 @@ celery = Celery(__name__, broker=REDIS_URL, backend=REDIS_URL)
 limiter = Limiter(
     get_remote_address,
     storage_uri=REDIS_URL,
-    default_limits=[None],
+    default_limits=["40 per minute"],
 )
+
+LOW_LIMIT = "5 per minute"
+LOW_LIMIT_MESSAGE = "Request are limited to 5 per minute"
 
 # start libraries
 db = SQLAlchemy()

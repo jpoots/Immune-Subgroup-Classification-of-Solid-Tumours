@@ -16,6 +16,7 @@ from .celery_tasks import confidence_celery, tsne_celery, analyse
 from flasgger import swag_from
 from app import limiter
 import pandas as pd
+from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE
 
 """
 The main api endpoints for the system to perform analysis
@@ -24,16 +25,12 @@ The main api endpoints for the system to perform analysis
 # the pca pipeline to be used
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
 # the endpoint to get async results
-RESULTS_ENDPOINT = "http://127.0.0.1:3000/getresults"
-# file path to documentation
-DOCUMENTATION_PATH = "../documentation"
-LIMIT = "1000 per minute"
-LIMIT_MESSAGE = "Request are limited to 5 per minute"
+RESULTS_ENDPOINT = f"http://127.0.0.1:{PORT}/getresults"
 
 main = Blueprint("main", __name__)
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/parsesamples", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "parsesamples.yaml"))
 def parse_samples():
@@ -76,7 +73,7 @@ def parse_samples():
     return (jsonify({"data": {"samples": returnData, "invalid": data["invalid"]}}), 200)
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/predict", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "predict.yaml"))
 def predictgroup():
@@ -115,7 +112,7 @@ def predictgroup():
     return jsonify({"data": results})
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @swag_from(os.path.join(DOCUMENTATION_PATH, "probability.yaml"))
 @main.route("/probability", methods=["POST"])
 def probaility():
@@ -154,7 +151,7 @@ def probaility():
     return jsonify({"data": results})
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/pca", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "pca.yaml"))
 def pca():
@@ -182,7 +179,7 @@ def pca():
     return jsonify({"data": pc})
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/analyse", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "analyse.yaml"))
 def analyse_async():
@@ -207,7 +204,7 @@ def analyse_async():
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/tsne", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "tsne.yaml"))
 def tsne_async():
@@ -227,7 +224,7 @@ def tsne_async():
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
 
 
-@limiter.limit(LIMIT, error_message=LIMIT_MESSAGE)
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @main.route("/confidence", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "confidence.yaml"))
 def confidence_async():

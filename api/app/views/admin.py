@@ -10,7 +10,7 @@ from flasgger import swag_from
 from app import limiter
 from filelock import FileLock
 from ..models import Admin
-from .. import db
+from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
@@ -21,12 +21,10 @@ from secrets import token_urlsafe
 Admin API endpoints for setting the gene lists
 """
 
-# file path to documentation
-DOCUMENTATION_PATH = "../documentation"
-
 admin = Blueprint("admin", __name__)
 
 
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @admin.route("/authenticate", methods=["POST"])
 @swag_from(os.path.join(DOCUMENTATION_PATH, "authenticate.yaml"))
 def authenticate():
@@ -65,6 +63,7 @@ def authenticate():
     raise exceptions.Unauthorized()
 
 
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @admin.route("/admin", methods=["POST"])
 @jwt_required()
 @swag_from(os.path.join(DOCUMENTATION_PATH, "admin.yaml"))
@@ -94,6 +93,7 @@ def admins():
     return jsonify(data={"username": username, "password": password}), 200
 
 
+@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
 @admin.route("/genelist", methods=["GET", "PUT"])
 @jwt_required(optional=True)
 @swag_from(os.path.join(DOCUMENTATION_PATH, "genelist_get.yaml"), methods=["GET"])
