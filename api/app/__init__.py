@@ -42,6 +42,7 @@ limiter = Limiter(
     default_limits=["40 per minute"],
 )
 
+# the low limit (not for async results routes)
 LOW_LIMIT = "5 per minute"
 LOW_LIMIT_MESSAGE = "Request are limited to 5 per minute"
 
@@ -80,7 +81,7 @@ def create_app():
             "info": {
                 "title": "ICST",
                 "version": "1.0",
-                "description": f"API endpoints for ICST which can be found at http://localhost:{PORT}. All requests are limited t0 {MAX_FILE_SIZE}MB",
+                "description": f"API endpoints for ICST which can be found at http://localhost:{PORT}. All requests are limited to {MAX_FILE_SIZE}MB",
             }
         },
     )
@@ -94,11 +95,11 @@ def create_app():
     app.register_blueprint(get_results, url_prefix="/getresults")
     app.register_blueprint(admin, url_prefix="/")
 
+    # configure celery
     celery.conf.update(app.config)
-
-    # Set result_expires to 1 hours
     celery.conf.result_expires = RESULTS_TIMEOUT
 
+    # start db
     with app.app_context():
         from . import models
 

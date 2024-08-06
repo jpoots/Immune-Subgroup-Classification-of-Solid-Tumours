@@ -36,9 +36,7 @@ const Admin = () => {
       }
 
       try {
-        let response = await fetch(`${API_ROOT}/genelist`, {
-          headers: { Authorization: authHeader },
-        });
+        let response = await fetch(`${API_ROOT}/genelist`);
 
         //  if unknown error throw error to be caught
         if (!response.ok) throw new Error();
