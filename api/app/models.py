@@ -16,7 +16,7 @@ class Admin(db.Model):
         to_json(): returns ba json representation of the user
     """
 
-    __tablename__ = "admins"
+    __tablename__ = "admin"
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
