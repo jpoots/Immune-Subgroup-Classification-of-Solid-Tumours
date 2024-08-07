@@ -40,6 +40,9 @@ def confidence_celery(data):
     # extract data from JSON
     data = parse_json(data)
 
+    if not data["interval"]:
+        raise BadRequest(body="missing interval")
+
     # divide features
     features = data["features"]
     sample_ids = data["ids"]
@@ -85,6 +88,9 @@ def tsne_celery(data):
 
     # extract data from JSON
     data = parse_json(data)
+
+    if not data["interval"]:
+        raise BadRequest(body="missing perplexity")
 
     # seperate features
     idx = data["ids"]

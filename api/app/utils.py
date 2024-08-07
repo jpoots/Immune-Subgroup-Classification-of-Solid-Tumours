@@ -132,8 +132,8 @@ def parse_json(data):
         BadRequest: The JSON is invalid or missing
     """
     # validate json and raise exception if invalid
-    perplexity = None
-    interval = None
+    perplexity = False
+    interval = False
 
     try:
         VALIDATOR(data)

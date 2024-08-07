@@ -12,7 +12,7 @@ from .celery_tasks import confidence_celery, tsne_celery, analyse
 from flasgger import swag_from
 from app import limiter
 import pandas as pd
-from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE
+from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, RESULTS_ENDPOINT
 
 """
 The main api endpoints for the system to perform analysis
@@ -20,8 +20,7 @@ The main api endpoints for the system to perform analysis
 
 # the pca pipeline to be used
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
-# the endpoint to get async results
-RESULTS_ENDPOINT = f"http://127.0.0.1:{PORT}/getresults"
+
 
 main = Blueprint("main", __name__)
 
@@ -226,6 +225,9 @@ def tsne_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
+    data = parse_json(data)
+    if not data["perplexity"]:
+        raise exceptions.BadRequest("t-SNE requires perplexity")
     task = tsne_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
 
@@ -246,6 +248,7 @@ def confidence_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
+    data = parse_json(data)
 
     task = confidence_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202
