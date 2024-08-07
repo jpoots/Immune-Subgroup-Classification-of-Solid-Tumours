@@ -28,7 +28,7 @@ MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE"))
 RESULTS_TIMEOUT = os.getenv("RESULTS_TIMEOUT")
 JWT_ACCESS_EXPIRY = int(os.getenv("JWT_ACCESS_EXPIRY"))
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-DATABASE_URI = os.getenv("DATABASE_URI")
+DATABASE_URI = os.getenv("DATABASE_URI_MYSQL")
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 
 # file path to documentation
