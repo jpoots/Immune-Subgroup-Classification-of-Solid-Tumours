@@ -73,11 +73,8 @@ def main():
 
     # sanity check the save
     loaded_model = joblib.load(FILE_NAME)
-    loaded_model.predict(x_test)
-
-    print(f"Removed: {num_removed}")
-    analyse_prediction_results(predictions, true)
-    ConfusionMatrixDisplay.from_predictions(true, predictions)
+    preds_loaded = loaded_model.predict(x_test)
+    print(preds_loaded)
     plt.show()
 
 
@@ -97,6 +94,7 @@ def build_model(x, y):
         max_depth=7,
         min_child_weight=12,
         n_estimators=1500,
+        n_jobs=-1,
     )
 
     # data scaler and generic pipeleine

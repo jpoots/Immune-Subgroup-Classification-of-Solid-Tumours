@@ -163,6 +163,3 @@ cython_debug/
 
 # Mac OS
 .DS_STORE
-
-# models
-*.pkl

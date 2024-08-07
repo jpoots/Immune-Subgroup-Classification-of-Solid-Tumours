@@ -95,6 +95,7 @@ def train_bootstraps(x_train, y_train):
             max_depth=7,
             min_child_weight=12,
             n_estimators=1500,
+            n_jobs=-1,
         )
         pipe = ImbPipeline(
             steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]
