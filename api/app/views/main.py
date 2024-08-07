@@ -225,7 +225,6 @@ def tsne_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
-    data = parse_json(data)
     if not data["perplexity"]:
         raise exceptions.BadRequest("t-SNE requires perplexity")
     task = tsne_celery.apply_async(args=[data])
@@ -248,7 +247,6 @@ def confidence_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
-    data = parse_json(data)
 
     task = confidence_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202

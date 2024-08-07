@@ -89,7 +89,7 @@ def tsne_celery(data):
     # extract data from JSON
     data = parse_json(data)
 
-    if not data["interval"]:
+    if not data["perplexity"]:
         raise BadRequest(body="missing perplexity")
 
     # seperate features
