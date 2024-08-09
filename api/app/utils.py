@@ -134,7 +134,7 @@ def parse_json(data):
     # validate json and raise exception if invalid
     perplexity = False
     interval = False
-    num_components = False
+    num_dimensions = False
 
     try:
         VALIDATOR(data)
@@ -146,8 +146,8 @@ def parse_json(data):
             perplexity = int(data["perplexity"])
         if "interval" in data:
             interval = int(data["interval"])
-        if "numComponents" in data:
-            num_components = int(data["numComponents"])
+        if "numDimensions" in data:
+            num_dimensions = int(data["numDimensions"])
     except:
         raise BadRequest("Recieved invalid value for option")
 
@@ -165,7 +165,7 @@ def parse_json(data):
         "data": data,
         "perplexity": perplexity,
         "interval": interval,
-        "num_components": num_components,
+        "num_dimensions": num_dimensions,
     }
 
 

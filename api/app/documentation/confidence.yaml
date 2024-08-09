@@ -7,12 +7,6 @@ parameters:
     required: true
     schema:
       properties:
-        interval:
-          maximum: 100
-          minimum: 0
-          type: integer
-        perplexity:
-          type: integer
         samples:
           items:
             properties:
@@ -28,6 +22,15 @@ parameters:
       required:
         - samples
       type: object
+  - description: The percentage interval requested
+    in: body
+    name: interval
+    required: true
+    schema:
+      maximum: 100
+      minimum: 0
+      example: 95
+      type: integer
 produces:
   - application/json
 responses:

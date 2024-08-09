@@ -1,6 +1,11 @@
 consumes:
   - application/json
 parameters:
+  - description: The JWT for the requesting admin
+    in: header
+    name: Authorization
+    required: true
+    type: string
   - description: The gene list to set
     in: body
     name: geneList
@@ -29,6 +34,6 @@ responses:
       type: object
   500:
     description: An interval server error has occured
-summary:
+summary: Sets the accepted gene list
 tags:
   - Gene List

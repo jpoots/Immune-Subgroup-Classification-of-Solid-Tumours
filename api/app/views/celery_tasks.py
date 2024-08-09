@@ -89,20 +89,26 @@ def tsne_celery(data):
     # extract data from JSON
     data = parse_json(data)
 
-    if not data["perplexity"]:
-        raise BadRequest(body="missing perplexity")
-
     # seperate features
     idx = data["ids"]
     features = data["features"]
     perplexity = data["perplexity"]
-    num_componets = data["num_components"]
+    num_dimensions = data["num_dimensions"]
+
+    if (
+        perplexity > len(idx)
+        or perplexity < 1
+        or perplexity > 500
+        or num_dimensions < 2
+        or num_dimensions > 100
+    ):
+        raise BadRequest(body="Bad perplexity or number of dimensions.")
 
     # perform tSNE
     tsne_pipeline = Pipeline(
         steps=[
             ("scaler", MinMaxScaler()),
-            ("dr", TSNE(n_components=num_componets, perplexity=perplexity)),
+            ("dr", TSNE(n_components=num_dimensions, perplexity=perplexity)),
         ]
     )
 

@@ -1,7 +1,7 @@
 consumes:
   - application/json
 parameters:
-  - description: The samples to be analysed along with a perplexity
+  - description: The samples to be analysed
     in: body
     name: samples
     required: true
@@ -10,8 +10,6 @@ parameters:
         interval:
           maximum: 100
           minimum: 0
-          type: integer
-        perplexity:
           type: integer
         samples:
           items:
@@ -28,6 +26,20 @@ parameters:
       required:
         - samples
       type: object
+  - description: The perplexity. Values in the range 1, 500 or number of samples are accepted.
+    in: body
+    name: perplexity
+    required: true
+    schema:
+      type: integer
+      example: 10
+  - description: The number of dimensions to return. Values in the range 2, 100 are accepted.
+    in: body
+    name: numDimensions
+    required: true
+    schema:
+      type: integer
+      example: 2
 produces:
   - application/json
 responses:
@@ -42,7 +54,7 @@ responses:
               type: string
       type: object
   400:
-    description: There was an issue with the file sent
+    description: There was an issue with the json sent
   500:
     description: An interval server error has occured
 summary: Performs t-SNE analysis

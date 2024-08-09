@@ -16,6 +16,9 @@ const MIN_PERPLEXITY = 1;
 
 /**
  * this component contaisn the t-SNE visualisation page where analysis can be done with varying perplexities
+ * @param {Array} graph2D - the state array for the 2D tsne graph
+ * @param {Array} graph3D - the state array for the 3D tsne graph
+ * @param {Array} graphDim - the state array for the tsne dimensions
  * @returns the t-SNE visualisation page
  */
 const Tsne = ({ graph2D, graph3D, graphDim }) => {
@@ -96,7 +99,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
       body: JSON.stringify({
         samples: results.samples,
         perplexity: parseInt(perplexity),
-        numComponents: dimension,
+        numDimensions: dimension,
       }),
     };
 

@@ -225,8 +225,8 @@ def tsne_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
-    if not data["numComponents"]:
-        raise exceptions.BadRequest("t-SNE requires a number of components")
+    if not data["numDimensions"]:
+        raise exceptions.BadRequest("t-SNE requires a number of dimensions")
     if not data["perplexity"]:
         raise exceptions.BadRequest("t-SNE requires perplexity")
     task = tsne_celery.apply_async(args=[data])
