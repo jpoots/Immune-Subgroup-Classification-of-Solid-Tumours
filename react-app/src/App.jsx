@@ -18,7 +18,9 @@ function App() {
   const [fileName, setFileName] = useState("Upload File...");
   const [results, setResults] = useState();
   const [summary, setSummary] = useState();
-  const [tsneGrahData, setTsneGraphData] = useState();
+  const [tsneGraph2D, setTsneGraph2D] = useState();
+  const [tsneGraph3D, setTsneGraph3D] = useState();
+  const [tsneGraphDimensions, setTsneGraphDimensions] = useState(2);
   const [confidenceGraphData, setConfidenceGraphData] = useState();
 
   /**
@@ -28,7 +30,7 @@ function App() {
     setFileName("Upload files...");
     setResults();
     setSummary();
-    setTsneGraphData();
+    setTsneGraph2D();
     setConfidenceGraphData();
   };
 
@@ -38,7 +40,9 @@ function App() {
       <ErrorBoundary FallbackComponent={FallbackError} onError={resetApp}>
         <ResultsContext.Provider value={[results, setResults]}>
           <AllRoutes
-            tsneState={[tsneGrahData, setTsneGraphData]}
+            tsneGraph2DState={[tsneGraph2D, setTsneGraph2D]}
+            tsneGraph3DState={[tsneGraph3D, setTsneGraph3D]}
+            tsneGraphDimensions={[tsneGraphDimensions, setTsneGraphDimensions]}
             confidenceState={[confidenceGraphData, setConfidenceGraphData]}
             summaryState={[summary, setSummary]}
             fileNameState={[fileName, setFileName]}

@@ -96,12 +96,13 @@ def tsne_celery(data):
     idx = data["ids"]
     features = data["features"]
     perplexity = data["perplexity"]
+    num_componets = data["num_components"]
 
     # perform tSNE
     tsne_pipeline = Pipeline(
         steps=[
             ("scaler", MinMaxScaler()),
-            ("dr", TSNE(n_components=3, perplexity=perplexity)),
+            ("dr", TSNE(n_components=num_componets, perplexity=perplexity)),
         ]
     )
 

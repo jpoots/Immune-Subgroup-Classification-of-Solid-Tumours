@@ -25,7 +25,6 @@ const Pca = () => {
 
   const handleDownload = () => {
     let toDownload = [];
-    console.log(results.samples);
     results.samples.forEach((sample) => {
       toDownload.push({
         sampleID: sample.sampleID,

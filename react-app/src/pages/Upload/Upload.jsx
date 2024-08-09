@@ -32,7 +32,8 @@ const Upload = ({
   setSummary,
   filename,
   setFileName,
-  setTsneGraphData,
+  setTsneGraph2D,
+  setTsneGraph3D,
   setConfidenceGraphData,
 }) => {
   // defining state for the component
@@ -88,7 +89,8 @@ const Upload = ({
     setResults();
     setSummary();
     setConfidenceGraphData();
-    setTsneGraphData();
+    setTsneGraph2D();
+    setTsneGraph3D();
   };
 
   /**

@@ -23,13 +23,17 @@ import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
  * @returns - the routes objects
  */
 const AllRoutes = ({
-  tsneState,
+  tsneGraph2DState,
+  tsneGraph3DState,
+  tsneGraphDimensions,
   confidenceState,
   summaryState,
   fileNameState,
 }) => {
   // desctructure props
-  const [tsneGrahData, setTsneGraphData] = tsneState;
+  const [tsneGraph2D, setTsneGraph2D] = tsneGraph2DState;
+  const [tsneGraph3D, setTsneGraph3D] = tsneGraph3DState;
+  const [tsneDimensions, setTsneDimensions] = tsneGraphDimensions;
   const [confidenceGraphData, setConfidenceGraphData] = confidenceState;
   const [summary, setSummary] = summaryState;
   const [fileName, setFileName] = fileNameState;
@@ -43,7 +47,13 @@ const AllRoutes = ({
         <Route path="/pca" element={<Pca />} />
         <Route
           path="/tsne"
-          element={<Tsne graphState={[tsneGrahData, setTsneGraphData]} />}
+          element={
+            <Tsne
+              graph2D={[tsneGraph2D, setTsneGraph2D]}
+              graph3D={[tsneGraph3D, setTsneGraph3D]}
+              graphDim={[tsneDimensions, setTsneDimensions]}
+            />
+          }
         />
         <Route
           path="/confidence"
@@ -65,7 +75,8 @@ const AllRoutes = ({
             setSummary={setSummary}
             filename={fileName}
             setFileName={setFileName}
-            setTsneGraphData={setTsneGraphData}
+            setTsneGraph2D={setTsneGraph2D}
+            setTsneGraph3D={setTsneGraph3D}
             setConfidenceGraphData={setConfidenceGraphData}
           />
         }

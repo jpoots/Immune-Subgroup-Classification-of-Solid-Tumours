@@ -1,5 +1,5 @@
 import { GraphControls } from "../../components/graphs/GraphControls";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import { CSVLink } from "react-csv";
@@ -18,7 +18,7 @@ const MIN_PERPLEXITY = 1;
  * this component contaisn the t-SNE visualisation page where analysis can be done with varying perplexities
  * @returns the t-SNE visualisation page
  */
-const Tsne = ({ graphState }) => {
+const Tsne = ({ graph2D, graph3D, graphDim }) => {
   // setting up to hold dom element and graph points
   const slider = useRef();
   const results = useContext(ResultsContext)[0];
@@ -27,13 +27,29 @@ const Tsne = ({ graphState }) => {
   // set app state
   const [perplexity, setPerplexity] = useState(max_perplexity);
   const [loading, setLoading] = useState(false);
-  const [dimension, setDimensions] = useState(2);
+  const [dimension, setDimensions] = graphDim;
   const [disabled, setDisabled] = useState(false);
   const [title, setTitle] = useState("t-SNE");
   const [download, setDownload] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
-  const [graphData, setGraphData] = graphState;
+  const [graphData2D, setGraphData2D] = graph2D;
+  const [graphData3D, setGraphData3D] = graph3D;
+  const [graphData, setGraphData] = useState();
+
+  /**
+   * any time to graph dimension changes, change the graph data
+   */
+  useEffect(() => {
+    setGraphData(dimension == 2 ? graphData2D : graphData3D);
+  }, [dimension, graphData2D, graphData3D]);
+
+  /**
+   * any time the graph dimension changes, alter disabled to either display or hide the button depending on if its there
+   */
+  useEffect(() => {
+    setDisabled(graphData ? true : false);
+  }, [dimension, graphData]);
 
   /**
    * generates an object of the tsne results for each sample to be given to csv link
@@ -53,12 +69,14 @@ const Tsne = ({ graphState }) => {
       tsne3 = graphData.z[key];
 
       id.forEach((id, index) => {
-        toDownload.push({
+        let listToPush = {
           sampleID: id,
           tsne1: tsne1[index],
           tsne2: tsne2[index],
-          tsne3: tsne3[index],
-        });
+        };
+
+        if (dimension == 3) listToPush["tsne3"] = tsne3[index];
+        toDownload.push(listToPush);
       });
     });
     setDownload(toDownload);
@@ -78,6 +96,7 @@ const Tsne = ({ graphState }) => {
       body: JSON.stringify({
         samples: results.samples,
         perplexity: parseInt(perplexity),
+        numComponents: dimension,
       }),
     };
 
@@ -89,7 +108,16 @@ const Tsne = ({ graphState }) => {
     );
 
     if (tsneResults.success) {
-      setGraphData(generateGraphData(results, tsneResults.results, "tsne"));
+      if (dimension == 2) {
+        setGraphData2D(
+          generateGraphData(results, tsneResults.results, "tsne", dimension)
+        );
+      } else {
+        setGraphData3D(
+          generateGraphData(results, tsneResults.results, "tsne", dimension)
+        );
+      }
+
       setDisabled(true);
     }
 
@@ -116,6 +144,7 @@ const Tsne = ({ graphState }) => {
               fullName={fullName}
               tooltipLink={tooltipLink}
             />
+
             <div className="block">
               <h1 className="has-text-weight-bold mt-">Perplexity</h1>
               <input

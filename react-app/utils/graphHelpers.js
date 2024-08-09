@@ -33,7 +33,7 @@ const getPlotlyData = (graphData, dimension) => {
  * @param {string} accessorKey - the key to access the required array in graphResponse
  * @returns 
  */
-const generateGraphData = (results, graphResponse, accessorKey) => {
+const generateGraphData = (results, graphResponse, accessorKey, dimensions) => {
     let x  = {
         1: [],
         2: [],
@@ -52,6 +52,7 @@ const generateGraphData = (results, graphResponse, accessorKey) => {
   
       // create an array of numbers for each grpah value and subgroup
       graphResponse.forEach((sample, index) => {
+        console.log(sample)
         let prediction = results.samples[index].prediction;
         x[prediction].push(sample[accessorKey][0]);
         y[prediction].push(sample[accessorKey][1]);
@@ -64,9 +65,10 @@ const generateGraphData = (results, graphResponse, accessorKey) => {
       return ({
         x: x,
         y: y,
-        z: x,
+        z: z,
         ids: idx,
         predictions: preds,
+        dim: dimensions
       });
 }
 
