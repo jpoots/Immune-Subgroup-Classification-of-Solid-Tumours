@@ -89,6 +89,12 @@ def tsne_celery(data):
     # extract data from JSON
     data = parse_json(data)
 
+    if not perplexity:
+        raise BadRequest(body="Missing perplexity")
+
+    if not num_dimensions:
+        raise BadRequest(body="Missing dimension")
+
     # seperate features
     idx = data["ids"]
     features = data["features"]

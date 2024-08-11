@@ -9,7 +9,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_validate
 import numpy as np
-from xgboost import XGBClassifier
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from imblearn.under_sampling import RandomUnderSampler
@@ -19,8 +18,10 @@ from sklearn.metrics import (
     recall_score,
     make_scorer,
 )
+from sklearn.neural_network import MLPClassifier
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
+from xgboost import XGBClassifier
 import sys
 
 # append the path of the parent (taken from chatGPT)
@@ -29,19 +30,19 @@ from utils.utils import (
     get_data,
     split_data,
     print_cv_results,
-    predict_with_qc,
-    analyse_prediction_results,
+    RANDOM_STATE,
 )
 
-RANDOM_STATE = 42
 # define potential models
 MODELS = [
-    HistGradientBoostingClassifier(),
-    XGBClassifier(),
-    RandomForestClassifier(max_depth=50, max_features="sqrt", n_estimators=2000),
-    KNeighborsClassifier(),
+    XGBClassifier(random_state=RANDOM_STATE),
+    HistGradientBoostingClassifier(random_state=RANDOM_STATE),
+    MLPClassifier(random_state=RANDOM_STATE),
+    svm.SVC(random_state=RANDOM_STATE),
+    RandomForestClassifier(n_jobs=-1, random_state=RANDOM_STATE),
+    KNeighborsClassifier(n_jobs=-1),
     GaussianNB(),
-    LogisticRegression(class_weight="balanced"),
+    LogisticRegression(n_jobs=-1, random_state=RANDOM_STATE),
 ]
 # scaler to use
 SCALER = MinMaxScaler()
@@ -60,8 +61,8 @@ OVER_SAMPLE = {
 }
 
 # set up samplers and fit
-RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
-SMT = SMOTE(sampling_strategy=OVER_SAMPLE)
+RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
+SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
 SCORING = {
     "accuracy": "accuracy",
@@ -81,7 +82,6 @@ def main():
     """
     tests a range of models with default parameters with various data balances
     """
-    np.random.seed(RANDOM_STATE)
 
     # import data using util
     data = get_data()
@@ -104,11 +104,15 @@ def analyse_models(x, y, axs):
     """
     # remove the test set and create a training and validation set
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-        x_train, y_train, test_size=TEST_SIZE, stratify=y_train
+        x_train,
+        y_train,
+        test_size=TEST_SIZE,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
     )
     for model, ax in zip(MODELS, axs.flatten()):
         pipe = ImbPipeline(
@@ -120,6 +124,7 @@ def analyse_models(x, y, axs):
         print("Model Name: " + model.__class__.__name__)
         print_cv_results(cv)
 
+        """"
         # fit and predict
         pipe.fit(x_train_val, y_train_val)
 
@@ -134,6 +139,7 @@ def analyse_models(x, y, axs):
         print(f"QC Threshold: {QC_THRESHOLD}")
         print("Removed: " + str(num_removed))
         analyse_prediction_results(predictions, y_test_val)
+        """
 
 
 if __name__ == "__main__":

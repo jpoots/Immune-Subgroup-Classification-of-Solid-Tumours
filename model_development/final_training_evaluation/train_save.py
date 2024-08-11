@@ -25,10 +25,10 @@ from utils.utils import (
     split_data,
     analyse_prediction_results,
     predict_with_qc,
+    RANDOM_STATE,
 )
 
 FILE_NAME = "./trained_models/model.pkl"
-RANDOM_STATE = 42
 
 TEST_SIZE = 0.2
 
@@ -47,17 +47,15 @@ OVER_SAMPLE = {
 
 
 def main():
-    np.random.seed(RANDOM_STATE)
-
     data = get_data()
     _idx, x, y, _genes = split_data(data)
 
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     x_train, x_test, y_train, y_test = train_test_split(
-        x_train, y_train, test_size=0.2, stratify=y_train
+        x_train, y_train, test_size=0.2, stratify=y_train, random_state=RANDOM_STATE
     )
 
     pipe = build_model(x_train, y_train)
@@ -65,17 +63,17 @@ def main():
     # get prediction probs for test
     predictions, true, num_removed = predict_with_qc(pipe, 0, x_test, y_test)
 
-    print("TRAINING COMPLETE SAVING")
-
     # saving and testing save successful
     joblib.dump(pipe, FILE_NAME)
     print("SAVE SUCCESSFUL")
 
     # sanity check the save
     loaded_model = joblib.load(FILE_NAME)
-    preds_loaded = loaded_model.predict(x_test)
-    print(preds_loaded)
-    plt.show()
+    loaded_model.predict(x_test)
+
+    print(f"Removed: {num_removed}")
+    analyse_prediction_results(predictions, true)
+    ConfusionMatrixDisplay.from_predictions(true, predictions)
 
 
 def build_model(x, y):
@@ -88,21 +86,21 @@ def build_model(x, y):
     pipe: a trained model
     """
     # define model to train
-    model = XGBClassifier(
-        nthread=1,
+    model = HistGradientBoostingClassifier(
+        max_iter=2000,
         learning_rate=0.1,
-        max_depth=7,
-        min_child_weight=12,
-        n_estimators=1500,
-        n_jobs=-1,
+        max_depth=50,
+        max_leaf_nodes=31,
+        min_samples_leaf=30,
+        random_state=RANDOM_STATE,
     )
 
     # data scaler and generic pipeleine
     scaler = MinMaxScaler()
 
     # set up samplers and fit
-    rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
-    smt = SMOTE(sampling_strategy=OVER_SAMPLE)
+    rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
+    smt = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
     # set up pipeline and fit
     pipe = ImbPipeline(

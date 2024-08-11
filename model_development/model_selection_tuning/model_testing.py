@@ -28,9 +28,8 @@ from utils.utils import (
     print_cv_results,
     analyse_prediction_results,
     predict_with_qc,
+    RANDOM_STATE,
 )
-
-RANDOM_STATE = 42
 
 # set up scoring metrics to report
 SCORING = {
@@ -59,10 +58,12 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
+RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
+SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
+
 # scaler and samplers
 SCALER = MinMaxScaler()
-RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
-SMT = SMOTE(sampling_strategy=OVER_SAMPLE)
+
 
 # define models to test
 RF = ImbPipeline(
@@ -73,7 +74,11 @@ RF = ImbPipeline(
         (
             "model",
             RandomForestClassifier(
-                max_depth=50, max_features="sqrt", n_estimators=1000, n_jobs=-1
+                max_depth=50,
+                max_features="sqrt",
+                n_estimators=1000,
+                n_jobs=-1,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -88,7 +93,11 @@ XGBOOST = ImbPipeline(
         (
             "model",
             XGBClassifier(
-                learning_rate=0.3, max_depth=3, min_child_weight=None, n_estimators=1000
+                learning_rate=0.3,
+                max_depth=3,
+                min_child_weight=None,
+                n_estimators=1000,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -102,7 +111,7 @@ XGBOOST1 = ImbPipeline(
         ("scaler", SCALER),
         (
             "model",
-            XGBClassifier(),
+            XGBClassifier(random_state=RANDOM_STATE),
         ),
     ]
 )
@@ -116,7 +125,11 @@ XGBOOST2 = ImbPipeline(
         (
             "model",
             XGBClassifier(
-                learning_rate=0.1, max_depth=7, min_child_weight=12, n_estimators=1500
+                learning_rate=0.1,
+                max_depth=7,
+                min_child_weight=12,
+                n_estimators=1500,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -130,7 +143,10 @@ GB_AC = ImbPipeline(
         (
             "model",
             HistGradientBoostingClassifier(
-                max_iter=1000, learning_rate=0.1, max_depth=None
+                max_iter=1000,
+                learning_rate=0.1,
+                max_depth=None,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -148,6 +164,7 @@ GB_AC_FINE = ImbPipeline(
                 max_depth=75,
                 max_leaf_nodes=41,
                 min_samples_leaf=20,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -165,6 +182,7 @@ GB_F1_FINE = ImbPipeline(
                 max_depth=50,
                 max_leaf_nodes=31,
                 min_samples_leaf=30,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -178,7 +196,10 @@ GB_BA = ImbPipeline(
         (
             "model",
             HistGradientBoostingClassifier(
-                max_iter=1000, learning_rate=0.1, max_depth=75
+                max_iter=1000,
+                learning_rate=0.1,
+                max_depth=75,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -196,6 +217,7 @@ GB_BA_FINE = ImbPipeline(
                 max_depth=50,
                 max_leaf_nodes=31,
                 min_samples_leaf=30,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
@@ -208,24 +230,27 @@ GB_F1 = ImbPipeline(
         (
             "model",
             HistGradientBoostingClassifier(
-                max_iter=1000, learning_rate=0.1, max_depth=50
+                max_iter=1000,
+                learning_rate=0.1,
+                max_depth=50,
+                random_state=RANDOM_STATE,
             ),
         ),
     ]
 )
 
 MODELS = [
-    XGBOOST,
-    XGBOOST1,
-    XGBOOST2,
     GB_F1,
     GB_F1_FINE,
-    XGBOOST,
-    RF,
     GB_AC,
     GB_AC_FINE,
     GB_BA,
     GB_BA_FINE,
+    XGBOOST,
+    XGBOOST1,
+    XGBOOST2,
+    XGBOOST,
+    RF,
 ]
 # the number of cross validation splits
 CV = 10
@@ -235,7 +260,6 @@ def main():
     """
     gets data, trains models on the test data and analyses the results
     """
-    np.random.seed(RANDOM_STATE)
 
     # import data using util
     data = get_data()
@@ -264,9 +288,19 @@ def analyse_models(x, y, axs_test, axs_train):
     """
 
     # split train test
-    x_train, _, y_train, __ = train_test_split(x, y, test_size=0.20, stratify=y)
+    x_train, _, y_train, __ = train_test_split(
+        x,
+        y,
+        test_size=0.20,
+        stratify=y,
+        random_state=RANDOM_STATE,
+    )
     x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-        x, y, test_size=0.20, stratify=y
+        x_train,
+        y_train,
+        test_size=0.20,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
     )
 
     for pipe, ax_test, ax_train in zip(MODELS, axs_test.flatten(), axs_train.flatten()):

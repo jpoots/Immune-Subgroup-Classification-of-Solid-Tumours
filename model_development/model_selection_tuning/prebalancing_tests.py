@@ -18,6 +18,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 import sys
 import math
+from xgboost import XGBClassifier
 
 """
 Inital testing of models with default parameters before any form of tuning or data balancing occurred
@@ -25,9 +26,8 @@ Inital testing of models with default parameters before any form of tuning or da
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, print_cv_results
+from utils.utils import get_data, split_data, print_cv_results, RANDOM_STATE
 
-RANDOM_STATE = 42
 # scoring metrics to use
 SCORING = {
     "accuracy": "accuracy",
@@ -40,13 +40,14 @@ SCORING = {
 }
 # models to test
 MODELS = [
-    HistGradientBoostingClassifier(),
-    MLPClassifier(),
-    svm.SVC(),
-    RandomForestClassifier(n_jobs=-1),
+    XGBClassifier(random_state=RANDOM_STATE),
+    HistGradientBoostingClassifier(random_state=RANDOM_STATE),
+    MLPClassifier(random_state=RANDOM_STATE),
+    svm.SVC(random_state=RANDOM_STATE),
+    RandomForestClassifier(n_jobs=-1, random_state=RANDOM_STATE),
     KNeighborsClassifier(n_jobs=-1),
     GaussianNB(),
-    LogisticRegression(n_jobs=-1),
+    LogisticRegression(n_jobs=-1, random_state=RANDOM_STATE),
 ]
 # n_cols on confusion matrix
 N_COLS = 4
@@ -58,7 +59,6 @@ def main():
     """
     splits data, trains all models and evaultes their performance, printing them to console. Confusion matricies are plotted.
     """
-    np.random.seed(RANDOM_STATE)
 
     # import data using util
     data = get_data()
@@ -66,12 +66,12 @@ def main():
 
     # remove test set
     x_train, _x_test, y_train, _y_test = train_test_split(
-        x, y, test_size=0.2, stratify=y
+        x, y, test_size=0.2, stratify=y, random_state=RANDOM_STATE
     )
 
     # split data into train validate
     x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-        x_train, y_train, test_size=0.2, stratify=y_train
+        x_train, y_train, test_size=0.2, stratify=y_train, random_state=RANDOM_STATE
     )
 
     fig, axs = plt.subplots(

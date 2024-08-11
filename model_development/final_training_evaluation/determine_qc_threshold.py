@@ -20,33 +20,34 @@ from utils.utils import (
     split_data,
     predict_with_qc,
     analyse_prediction_results,
+    RANDOM_STATE,
 )
 
 """
 A script for running the trained model with a variety of QC thresholds on a validation set
 """
-
-RANDOM_STATE = 42
 TEST_SIZE = 0.2
 MODEL_FILE_NAME = "./trained_models/model.pkl"
-QC_THRESHOLD = 0.87
+QC_THRESHOLD = 0.99
 
 
 def main():
     """
     Splits data, loads model, predicts and evaulates performance
     """
-    np.random.seed(RANDOM_STATE)
-
     data = get_data()
     idx, x, y, _genes = split_data(data)
 
     # remove test set and get validtion set
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
     x_train, x_val, y_train, y_val = train_test_split(
-        x_train, y_train, test_size=TEST_SIZE, stratify=y_train
+        x_train,
+        y_train,
+        test_size=TEST_SIZE,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
     )
 
     # pulls the model in

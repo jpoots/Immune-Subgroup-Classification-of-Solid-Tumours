@@ -9,10 +9,10 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data
+from utils.utils import get_data, split_data, RANDOM_STATE
 
 """
-Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished
+Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished. t-SNE 2d and 3d should be performed seperately
 """
 
 # all variables are self explanitory by na,e
@@ -21,14 +21,13 @@ PERPLEXITY = 1
 OUTPUT_FOLDER = "data_plots/"
 N_COMPONENTS_PCA = 3
 N_COMPONENTS_TSNE = 3
-RANDOM_STATE = 42
 
 
 def main():
     """
     generates an output folder if doesn't exist, gets and splits data and generates and opens plots
     """
-    np.random.seed(RANDOM_STATE)
+
     check_folder()
     data = get_data()
     id_list, features, classification_list, _genes = split_data(data)
@@ -55,7 +54,7 @@ def perform_pca(features, id_list, classification_list):
     features = StandardScaler().fit_transform(features)
 
     # perform
-    pca_canc = PCA(n_components=N_COMPONENTS_PCA)
+    pca_canc = PCA(n_components=N_COMPONENTS_PCA, random_state=RANDOM_STATE)
     principle_components = pca_canc.fit_transform(features)
 
     # load into pd dataframe
@@ -84,7 +83,7 @@ def perform_tsne(features, id_list, classification_list):
 
     # perform
     tsne_canc = TSNE(
-        n_components=N_COMPONENTS_TSNE, perplexity=PERPLEXITY, random_state=42
+        n_components=N_COMPONENTS_TSNE, perplexity=PERPLEXITY, random_state=RANDOM_STATE
     )
     tsne_components = tsne_canc.fit_transform(features)
 

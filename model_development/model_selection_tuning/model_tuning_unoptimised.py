@@ -23,13 +23,11 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, tune_models
+from utils.utils import get_data, split_data, tune_models, RANDOM_STATE
 
 """
 Takes a range of models and tunes them on a hyperparameter grid on the unbalanced dataset
 """
-
-RANDOM_STATE = 42
 # size of test split
 TEST_SIZE = 0.2
 # number of crossvalidation runs
@@ -38,43 +36,35 @@ CV = 10
 # models to tune and parameters
 MODELS = [
     {
-        "model": SVC(),
+        "model": SVC(random_state=RANDOM_STATE),
         "params": {
-            "model__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-            "model__kernel": ["rbf", "poly", "sigmoid"],
-            "model__gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1, 10, 100],
-            "model__degree": [2, 3, 4, 5],
+            "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+            "kernel": ["rbf", "poly", "sigmoid"],
+            "gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1, 10, 100],
+            "degree": [2, 3, 4, 5],
         },
     },
     {
-        "model": RandomForestClassifier(n_jobs=-1),
-        "params": {  # top two are the most important
-            "model__n_estimators": [100, 500, 1000, 2000],
-            "model__max_features": ["sqrt", "log2", None, 100, 220],
-            "model__max_depth": [10, 20, 50, 100, None],
-        },
-    },
-    {
-        "model": HistGradientBoostingClassifier(),
+        "model": HistGradientBoostingClassifier(random_state=RANDOM_STATE),
         "params": {
-            "model__learning_rate": [0.001, 0.01, 0.1, 1],
-            "model__max_depth": [25, 50, 75, None],
-            "model__max_iter": [100, 500, 1000],
+            "learning_rate": [0.001, 0.01, 0.1, 1],
+            "max_depth": [25, 50, 75, None],
+            "max_iter": [100, 500, 1000],
         },
     },
     {
         "model": LogisticRegression(n_jobs=-1),
         "params": {
-            "model__C": np.logspace(-4, 4, 20),
-            "model__solver": ["lbfgs", "newton-cg", "liblinear", "sag", "saga"],
-            "model__penalty": ["l1", "l2", "elasticnet", "None"],
-            "model__max_iter": [100, 500, 1000],
+            "C": np.logspace(-4, 4, 20),
+            "solver": ["lbfgs", "newton-cg", "liblinear", "sag", "saga"],
+            "penalty": ["l1", "l2", "elasticnet", "None"],
+            "max_iter": [100, 500, 1000],
         },
     },
     {
-        "model": MLPClassifier(),
+        "model": MLPClassifier(random_state=RANDOM_STATE),
         "params": {
-            "model__hidden_layer_sizes": [
+            "hidden_layer_sizes": [
                 (100,),
                 (300,),
                 (
@@ -82,9 +72,9 @@ MODELS = [
                     200,
                 ),
             ],
-            "model__alpha": [0.0001, 0.001, 0.01, 0.1],
-            "model__learning_rate": ["constant", "adaptive"],
-            "model__max_iter": [200, 500, 1000],
+            "alpha": [0.0001, 0.001, 0.01, 0.1],
+            "learning_rate": ["constant", "adaptive"],
+            "max_iter": [200, 500, 1000],
         },
     },
 ]
@@ -94,7 +84,6 @@ def main():
     """
     gets data, splits it into train and test and tunes all miodels
     """
-    np.random.seed(RANDOM_STATE)
 
     # import data using util
     data = get_data()
@@ -102,7 +91,7 @@ def main():
 
     # get rid of test data
     x_train, _x_test, y_train, _y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     # timer for model tuning

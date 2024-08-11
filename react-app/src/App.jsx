@@ -31,6 +31,8 @@ function App() {
     setResults();
     setSummary();
     setTsneGraph2D();
+    setTsneGraph3D();
+    setTsneGraphDimensions(2);
     setConfidenceGraphData();
   };
 

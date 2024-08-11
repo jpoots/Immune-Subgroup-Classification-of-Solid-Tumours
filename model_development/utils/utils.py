@@ -21,6 +21,11 @@ A number of utility functions that are used across the model development pipelin
 CURRENT = os.path.dirname(os.path.abspath(__file__))
 FILE_LOCATION = os.path.join(CURRENT, "data.csv")
 
+# random state was set manually in each function as imblearn was not behaving as expected with np.random.seed. Manuals etting ensured reproduability.
+# random state to use for the project, according to hitchikers guide, 42 is the meaning of life the universe and everything
+# some fun facts about the number 42 https://grsahagian.medium.com/what-is-random-state-42-d803402ee76b
+RANDOM_STATE = 42
+
 # how to score
 SCORING = {
     "accuracy": "accuracy",
@@ -199,7 +204,12 @@ def tune_models(x_train, y_train, models):
 
             # grid search to return results for a range of metrics and refit on accuracy
             grid_search = GridSearchCV(
-                pipe, params, n_jobs=-1, scoring=SCORING, refit="accuracy", cv=CV
+                pipe,
+                params,
+                n_jobs=-1,
+                scoring=SCORING,
+                refit="accuracy",
+                cv=CV,
             )
             grid_search.fit(x_train, y_train)
 

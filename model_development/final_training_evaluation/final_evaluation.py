@@ -24,13 +24,13 @@ from utils.utils import (
     split_data,
     analyse_prediction_results,
     predict_with_qc,
+    RANDOM_STATE,
 )
 
 """
 Performs a final evaulation on the test set of the saved modek
 """
 
-RANDOM_STATE = 42
 # the size of the test set
 TEST_SIZE = 0.2
 # the location if the model
@@ -38,20 +38,18 @@ MODEL_FILE_NAME = "./trained_models/model.pkl"
 # the location to store the probability analysis
 PROBS_FOLDER_NAME = "./prob_analysis/"
 # the QC threshold to use
-QC_THRESHOLD = 0.87
+QC_THRESHOLD = 0.99
 
 
 def main():
     """
     Loads the model and test data, splits it appropriately, performs predictiosn on the test set and analyses performance including NC and missmatch results
     """
-    np.random.seed(RANDOM_STATE)
-
     data = get_data()
     idx, x, y, _genes = split_data(data)
 
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     # making and x and y with sample ID linked for analysis of probs
@@ -59,7 +57,11 @@ def main():
     x = [(sample_id, features) for sample_id, features in zip(idx, x)]
 
     x_train, x_test_labelled, y_train, y_test_labelled = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=[label for _id, label in y]
+        x,
+        y,
+        test_size=TEST_SIZE,
+        stratify=[label for _id, label in y],
+        random_state=RANDOM_STATE,
     )
 
     loaded_model = joblib.load(MODEL_FILE_NAME)

@@ -25,7 +25,7 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 import sys
 
 sys.path.append("..")
-from utils.utils import get_data, split_data
+from utils.utils import get_data, split_data, RANDOM_STATE
 from xgboost import XGBClassifier
 from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
@@ -36,19 +36,16 @@ to identify if a sample was class 6 or not. This was never complete and thus rem
 and with data leakage issues but reamins in the repo as evidence of the experiment
 """
 
-RANDOM_STATE = 42
-np.random.seed(RANDOM_STATE)
-
 # define potential models
-gb = HistGradientBoostingClassifier()
-mlp = MLPClassifier()
-svc = svm.SVC(class_weight="balanced")
-rfc = RandomForestClassifier(class_weight="balanced")
+gb = HistGradientBoostingClassifier(random_state=RANDOM_STATE)
+mlp = MLPClassifier(random_state=RANDOM_STATE)
+svc = svm.SVC(class_weight="balanced", random_state=RANDOM_STATE)
+rfc = RandomForestClassifier(class_weight="balanced", random_state=RANDOM_STATE)
 knn = KNeighborsClassifier()
 nb = GaussianNB()
-lr = LogisticRegression(class_weight="balanced")
+lr = LogisticRegression(class_weight="balanced", random_state=RANDOM_STATE)
 
-models = [XGBClassifier(), mlp, gb, svc, rfc, knn, nb, lr]
+models = [XGBClassifier(random_state=RANDOM_STATE), mlp, gb, svc, rfc, knn, nb, lr]
 
 # import data using util
 data = get_data()
@@ -58,10 +55,12 @@ idx, x, y, genes = split_data(data)
 scaler = MinMaxScaler()
 
 # remove the test set and create a training and validation set
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, stratify=y)
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y, test_size=0.20, stratify=y, random_state=RANDOM_STATE
+)
 
 x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-    x_train, y_train, test_size=0.20, stratify=y_train
+    x_train, y_train, test_size=0.20, stratify=y_train, random_state=RANDOM_STATE
 )
 
 # define sample strategy
@@ -78,8 +77,8 @@ over_sample = {
 }
 
 # set up samplers and fit
-rus = RandomUnderSampler(sampling_strategy=under_sample)
-smt = SMOTE(sampling_strategy=over_sample)
+rus = RandomUnderSampler(sampling_strategy=under_sample, random_state=RANDOM_STATE)
+smt = SMOTE(sampling_strategy=over_sample, random_state=RANDOM_STATE)
 
 # x_train, y_train = smt.fit_resample(x_train, y_train)
 x_train, y_train = rus.fit_resample(x_train, y_train)
@@ -138,7 +137,7 @@ for model, ax in zip(models, axs.flatten()):
     )
 
 
-svc = svm.SVC(class_weight="balanced")
+svc = svm.SVC(class_weight="balanced", random_state=RANDOM_STATE)
 svc = ImbPipeline(steps=[("scaler", MinMaxScaler()), ("model", svc)])
 svc.fit(x_train_val, y_train_val_binary)
 
@@ -174,10 +173,10 @@ over_sample = {
 }
 
 # set up samplers and fit
-rus = RandomUnderSampler(sampling_strategy=under_sample)
-smt = SMOTE(sampling_strategy=over_sample)
+rus = RandomUnderSampler(sampling_strategy=under_sample, random_state=RANDOM_STATE)
+smt = SMOTE(sampling_strategy=over_sample, random_state=RANDOM_STATE)
 scaler = MinMaxScaler()
-booster = XGBClassifier()
+booster = XGBClassifier(random_state=RANDOM_STATE)
 
 booster = ImbPipeline(
     steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", booster)]

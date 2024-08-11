@@ -12,7 +12,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data
+from utils.utils import get_data, split_data, RANDOM_STATE
 
 """
 Trains N_BOOSTRAPS number of models on a bootstrap resample of the dataset and saves to a file to be used for confidence predictions
@@ -20,8 +20,6 @@ Trains N_BOOSTRAPS number of models on a bootstrap resample of the dataset and s
 
 # location to save
 FILE_NAME = "./trained_models/bootstrap_models.pkl"
-
-RANDOM_STATE = 42
 
 # define sample strategy
 UNDER_SAMPLE = {
@@ -45,20 +43,22 @@ def main():
     """
     Splits data, trains the bootstrap models and saves to disk
     """
-    np.random.seed(RANDOM_STATE)
-
     # import data using util
     data = get_data()
     idx, x, y, genes = split_data(data)
 
     # remove the test set
     x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     # remove the validation
     x_train, x_test, y_train, y_test = train_test_split(
-        x_train, y_train, test_size=TEST_SIZE, stratify=y_train
+        x_train,
+        y_train,
+        test_size=TEST_SIZE,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
     )
 
     models = train_bootstraps(x_train, y_train)
@@ -83,8 +83,8 @@ def train_bootstraps(x_train, y_train):
     scaler = MinMaxScaler()
 
     # set up samplers and fit
-    rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
-    smt = SMOTE(sampling_strategy=OVER_SAMPLE)
+    rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
+    smt = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
     # set up pipeline and fit
     models = []
@@ -96,6 +96,7 @@ def train_bootstraps(x_train, y_train):
             min_child_weight=12,
             n_estimators=1500,
             n_jobs=-1,
+            random_state=RANDOM_STATE,
         )
         pipe = ImbPipeline(
             steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]

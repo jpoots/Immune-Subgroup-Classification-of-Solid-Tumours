@@ -28,14 +28,13 @@ from utils.utils import (
     get_data,
     split_data,
     tune_models,
+    RANDOM_STATE,
 )  # append the path of the parent (taken from chatGPT)
 
 
 """
 Tuning hyperparamets of models on their best data balance as attained in balancing_tests.py
 """
-
-RANDOM_STATE = 42
 
 # define sample strategy
 UNDER_SAMPLE = {
@@ -51,8 +50,8 @@ OVER_SAMPLE = {
 }
 
 # set up samplers and scaler
-RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE)
-SMT = SMOTE(sampling_strategy=OVER_SAMPLE)
+RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
+SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 SCALER = MinMaxScaler()
 
 # models to train
@@ -63,22 +62,7 @@ MODELS = [
                 ("rus", RUS),
                 ("smt", SMT),
                 ("scaler", SCALER),
-                ("model", RandomForestClassifier(n_jobs=-1)),
-            ]
-        ),
-        "params": {
-            "model__n_estimators": [100, 500, 1000, 2000],
-            "model__max_features": ["sqrt", "log2", None, 100, 220],
-            "model__max_depth": [10, 20, 50, 100, None],
-        },
-    },
-    {
-        "model": ImbPipeline(
-            steps=[
-                ("rus", RUS),
-                ("smt", SMT),
-                ("scaler", SCALER),
-                ("model", HistGradientBoostingClassifier()),
+                ("model", HistGradientBoostingClassifier(random_state=RANDOM_STATE)),
             ]
         ),
         "params": {
@@ -91,7 +75,12 @@ MODELS = [
         "model": Pipeline(
             steps=[
                 ("scaler", SCALER),
-                ("model", LogisticRegression(n_jobs=-1, class_weight="balanced")),
+                (
+                    "model",
+                    LogisticRegression(
+                        n_jobs=-1, class_weight="balanced", random_state=RANDOM_STATE
+                    ),
+                ),
             ]
         ),
         "params": {
@@ -103,7 +92,11 @@ MODELS = [
     },
     {
         "model": ImbPipeline(
-            steps=[("rus", RUS), ("scaler", SCALER), ("model", MLPClassifier())]
+            steps=[
+                ("rus", RUS),
+                ("scaler", SCALER),
+                ("model", MLPClassifier(random_state=RANDOM_STATE)),
+            ]
         ),
         "params": {
             "model__hidden_layer_sizes": [(300,), (300, 200), (300, 200, 100)],
@@ -114,7 +107,10 @@ MODELS = [
     },
     {
         "model": Pipeline(
-            steps=[("scaler", SCALER), ("model", SVC(class_weight="balanced"))]
+            steps=[
+                ("scaler", SCALER),
+                ("model", SVC(class_weight="balanced", random_state=RANDOM_STATE)),
+            ]
         ),
         "params": {
             "model__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
@@ -143,7 +139,6 @@ def main():
     """
     takes all models, tunes them over a hyperparmeter grid and evaluates their performance
     """
-    np.random.seed(RANDOM_STATE)
 
     # data scaler and generic pipeleine
     scaler = MinMaxScaler()
@@ -154,7 +149,7 @@ def main():
 
     # get rid of test data
     x_train, _x_test, y_train, _y_test = train_test_split(
-        x, y, test_size=TEST_SIZE, stratify=y
+        x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
     total_start = time.time()
