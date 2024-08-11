@@ -1,5 +1,5 @@
 import Plot from "react-plotly.js";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import TitleSetter from "../../components/graphs/TitleSetter";
 import { CSVLink } from "react-csv";
 import { callAsyncApi } from "../../../utils/asyncAPI";
@@ -27,7 +27,22 @@ const Confidence = ({ graphState }) => {
   const [openModal, setOpenModal] = useState(false);
   const results = useContext(ResultsContext)[0];
   const [graphData, setGraphData] = graphState;
+  const cancelled = useRef();
 
+  /**
+   * useLayoutEffect returns a function which is performed on unmount to cancel analysis
+   * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
+   */
+  useEffect(() => {
+    const cancelAnalysis = () => {
+      cancelled.current = true;
+    };
+    return cancelAnalysis;
+  }, []);
+
+  /**
+   * handles the confidence interval download info
+   */
   const handleDownload = () => {
     let toDownload = results.samples.map((sample) => ({
       sampleID: sample.sampleID,
@@ -41,6 +56,11 @@ const Confidence = ({ graphState }) => {
     setDownload(toDownload);
   };
 
+  /**
+   * Generates plotly graph data from confidence
+   * @param {object} confidenceResults  -  the results from the confidence API
+   * @returns
+   */
   const generateConfidenceData = (confidenceResults) => {
     let upper = {
       1: [],
@@ -58,7 +78,7 @@ const Confidence = ({ graphState }) => {
     let preds = structuredClone(upper);
     let id = structuredClone(upper);
 
-    // could add protection here
+    // extracts relevant data from each sample and pushes it to relevant array
     results.samples.forEach((sample, index) => {
       let prediction = sample.prediction;
       upper[prediction].push(confidenceResults[index].upper);
@@ -72,6 +92,7 @@ const Confidence = ({ graphState }) => {
       preds[prediction].push(sample.prediction);
     });
 
+    // retunrns the data
     return {
       upper: upper,
       lower: lower,
@@ -83,6 +104,9 @@ const Confidence = ({ graphState }) => {
     };
   };
 
+  /**
+   * calls the confidence api
+   */
   const handleConfidenceInterval = async () => {
     setLoading(true);
     let request = {
@@ -101,7 +125,8 @@ const Confidence = ({ graphState }) => {
       API_URL,
       request,
       setModalMessage,
-      setOpenModal
+      setOpenModal,
+      cancelled
     );
     if (confidenceResults.success) {
       setTitle(`${interval}% Confidence Interval`);

@@ -39,6 +39,18 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
   const [graphData2D, setGraphData2D] = graph2D;
   const [graphData3D, setGraphData3D] = graph3D;
   const [graphData, setGraphData] = useState();
+  const cancelled = useRef();
+
+  /**
+   * useLayoutEffect returns a function which is performed on unmount
+   * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
+   */
+  useEffect(() => {
+    const cancelAnalysis = () => {
+      cancelled.current = true;
+    };
+    return cancelAnalysis;
+  }, []);
 
   /**
    * any time to graph dimension changes, change the graph data
@@ -107,7 +119,8 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
       API_URL,
       request,
       setModalMessage,
-      setOpenModal
+      setOpenModal,
+      cancelled
     );
 
     if (tsneResults.success) {

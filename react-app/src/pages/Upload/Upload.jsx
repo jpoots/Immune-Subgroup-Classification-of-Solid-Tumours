@@ -1,4 +1,4 @@
-import { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext, useEffect } from "react";
 import uploadIcon from "/upload-solid.svg";
 import { Tooltip } from "react-tooltip";
 import SampleQC from "./SampleQC";
@@ -44,18 +44,29 @@ const Upload = ({
   const [allDownload, setAllDownload] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
-  const cancelled = useRef();
+  const cancelled = useRef(false);
   const [delimiter, setDelimiter] = useState();
 
   // pulling context
   const [results, setResults] = useContext(ResultsContext);
 
   /**
+   * useLayoutEffect returns a function which is performed on unmount to cancel analysis
+   * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
+   */
+  useEffect(() => {
+    const cancelAnalysis = () => {
+      setFileName("Upload File...");
+      cancelled.current = true;
+    };
+    return cancelAnalysis;
+  }, [setFileName]);
+
+  /**
    * sets the filename and file for the component after reset the current ones
    * @param {event} event - the onChange event from the file input
    */
   const handleFile = (event) => {
-    cancelled.current = true;
     const file = event.target.files[0];
     handleReset(file.name);
     setFile(file);
@@ -78,7 +89,9 @@ const Upload = ({
    * @param {string} [fileName] - the name of the file to set, optional. If none is given, the filename is reset to default
    */
   const handleReset = (fileName) => {
+    cancelled.current = true;
     fileName = typeof fileName === "undefined" ? "Upload File..." : filename;
+
     // clear field
     fileInput.current.value = null;
 
@@ -91,6 +104,7 @@ const Upload = ({
     setConfidenceGraphData();
     setTsneGraph2D();
     setTsneGraph3D();
+    cancelled.current = true;
   };
 
   /**

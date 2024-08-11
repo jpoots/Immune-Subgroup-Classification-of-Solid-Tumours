@@ -6,7 +6,7 @@ import Probability from "./pages/Probability/Probability";
 import Pca from "./pages/Pca/Pca";
 import Tsne from "./pages/Tsne/Tsne";
 import Confidence from "./pages/Confidence/Confidence";
-import ClassificationByType from "./pages/ConfidenceByType/ClassificationByType";
+import ClassificationByType from "./pages/ClassificationByType/ClassificationByType";
 import Upload from "./pages/Upload/Upload";
 import Help from "./pages/Help/Help";
 import NothingToDisplay from "./pages/NothingToDisplay/NothingToDisplay";
