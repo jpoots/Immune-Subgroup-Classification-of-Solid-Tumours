@@ -15,7 +15,6 @@ from sklearn.metrics import (
     precision_score,
     make_scorer,
 )
-import matplotlib.pyplot as plt
 import numpy as np
 import time
 import datetime
@@ -23,7 +22,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, tune_models, RANDOM_STATE
+from utils import get_data, split_data, tune_models, RANDOM_STATE
 
 """
 Takes a range of models and tunes them on a hyperparameter grid on the unbalanced dataset
@@ -34,47 +33,67 @@ TEST_SIZE = 0.2
 CV = 10
 
 # models to tune and parameters
+# set up samplers and scaler
+SCALER = MinMaxScaler()
+
+# models to train
 MODELS = [
     {
-        "model": SVC(random_state=RANDOM_STATE),
+        "model": Pipeline(
+            steps=[
+                ("scaler", SCALER),
+                ("model", HistGradientBoostingClassifier(random_state=RANDOM_STATE)),
+            ]
+        ),
         "params": {
-            "C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
-            "kernel": ["rbf", "poly", "sigmoid"],
-            "gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1, 10, 100],
-            "degree": [2, 3, 4, 5],
+            "model__learning_rate": [0.001, 0.01, 0.1, 1],
+            "model__max_depth": [25, 50, 75, None],
+            "model__max_iter": [100, 500, 1000],
         },
     },
     {
-        "model": HistGradientBoostingClassifier(random_state=RANDOM_STATE),
-        "params": {
-            "learning_rate": [0.001, 0.01, 0.1, 1],
-            "max_depth": [25, 50, 75, None],
-            "max_iter": [100, 500, 1000],
-        },
-    },
-    {
-        "model": LogisticRegression(n_jobs=-1),
-        "params": {
-            "C": np.logspace(-4, 4, 20),
-            "solver": ["lbfgs", "newton-cg", "liblinear", "sag", "saga"],
-            "penalty": ["l1", "l2", "elasticnet", "None"],
-            "max_iter": [100, 500, 1000],
-        },
-    },
-    {
-        "model": MLPClassifier(random_state=RANDOM_STATE),
-        "params": {
-            "hidden_layer_sizes": [
-                (100,),
-                (300,),
+        "model": Pipeline(
+            steps=[
+                ("scaler", SCALER),
                 (
-                    300,
-                    200,
+                    "model",
+                    LogisticRegression(n_jobs=-1, random_state=RANDOM_STATE),
                 ),
-            ],
-            "alpha": [0.0001, 0.001, 0.01, 0.1],
-            "learning_rate": ["constant", "adaptive"],
-            "max_iter": [200, 500, 1000],
+            ]
+        ),
+        "params": {
+            "model__C": np.logspace(-4, 4, 20),
+            "model__solver": ["lbfgs", "newton-cg", "liblinear", "sag", "saga"],
+            "model__penalty": ["l1", "l2", "elasticnet", None],
+            "model__max_iter": [100, 500, 1000],
+        },
+    },
+    {
+        "model": Pipeline(
+            steps=[
+                ("scaler", SCALER),
+                ("model", MLPClassifier(random_state=RANDOM_STATE)),
+            ]
+        ),
+        "params": {
+            "model__hidden_layer_sizes": [(300,), (300, 200), (300, 200, 100)],
+            "model__alpha": [0.0001, 0.001, 0.01, 0.1],
+            "model__learning_rate": ["constant", "adaptive"],
+            "model__max_iter": [200, 500, 1000],
+        },
+    },
+    {
+        "model": Pipeline(
+            steps=[
+                ("scaler", SCALER),
+                ("model", SVC(class_weight="balanced", random_state=RANDOM_STATE)),
+            ]
+        ),
+        "params": {
+            "model__C": [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+            "model__kernel": ["rbf", "poly", "sigmoid"],
+            "model__gamma": ["scale", "auto", 0.001, 0.01, 0.1, 1, 10, 100],
+            "model__degree": [2, 3, 4, 5],
         },
     },
 ]

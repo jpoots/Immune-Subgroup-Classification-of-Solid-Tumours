@@ -22,7 +22,7 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 import sys
 
 sys.path.append("..")
-from utils.utils import (
+from utils import (
     get_data,
     split_data,
     print_cv_results,

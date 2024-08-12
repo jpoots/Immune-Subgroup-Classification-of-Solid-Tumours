@@ -25,7 +25,7 @@ import sys
 from xgboost import XGBClassifier
 
 sys.path.append("..")
-from utils.utils import (
+from utils import (
     get_data,
     split_data,
     tune_models,

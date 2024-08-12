@@ -20,7 +20,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import (
+from utils import (
     get_data,
     split_data,
     analyse_prediction_results,

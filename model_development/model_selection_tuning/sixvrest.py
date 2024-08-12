@@ -25,7 +25,7 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 import sys
 
 sys.path.append("..")
-from utils.utils import get_data, split_data, RANDOM_STATE
+from utils import get_data, split_data, RANDOM_STATE
 from xgboost import XGBClassifier
 from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 

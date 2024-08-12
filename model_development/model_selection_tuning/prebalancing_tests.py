@@ -26,7 +26,7 @@ Inital testing of models with default parameters before any form of tuning or da
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, print_cv_results, RANDOM_STATE
+from utils import get_data, split_data, print_cv_results, RANDOM_STATE
 
 # scoring metrics to use
 SCORING = {

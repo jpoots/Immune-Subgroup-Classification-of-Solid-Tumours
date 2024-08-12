@@ -9,7 +9,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, RANDOM_STATE
+from utils import get_data, split_data, RANDOM_STATE
 
 """
 Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished. t-SNE 2d and 3d should be performed seperately

@@ -23,7 +23,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, tune_models, RANDOM_STATE
+from utils import get_data, split_data, tune_models, RANDOM_STATE
 
 """
 Takes a range of models and tunes them on a hyperparameter grid on the unbalanced dataset
@@ -34,15 +34,21 @@ TEST_SIZE = 0.2
 # number of crossvalidation runs
 CV = 10
 
+SCALER = MinMaxScaler()
 
 # models to tune and parameters
 MODELS = [
     {
-        "model": HistGradientBoostingClassifier(random_state=RANDOM_STATE),
+        "model": Pipeline(
+            steps=[
+                ("scaler", SCALER),
+                ("model", RandomForestClassifier(n_jobs=-1, random_state=RANDOM_STATE)),
+            ]
+        ),
         "params": {
-            "model__learning_rate": [0.001, 0.01, 0.1, 1],
-            "model__max_depth": [25, 50, 75, None],
-            "model__max_iter": [100, 500, 1000],
+            "model__n_estimators": [100, 500, 1000, 2000],
+            "model__max_features": ["sqrt", "log2", None, 100, 220],
+            "model__max_depth": [10, 20, 50, 100, None],
         },
     },
 ]

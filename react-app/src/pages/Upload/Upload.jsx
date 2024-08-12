@@ -51,16 +51,24 @@ const Upload = ({
   const [results, setResults] = useContext(ResultsContext);
 
   /**
+   * if trying to render without results, ensure the file name is reset
+   */
+  useEffect(() => {
+    if (!results) {
+      setFileName("Upload file...");
+    }
+  }, [results, setFileName]);
+
+  /**
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
    */
   useEffect(() => {
     const cancelAnalysis = () => {
-      setFileName("Upload File...");
       cancelled.current = true;
     };
     return cancelAnalysis;
-  }, [setFileName]);
+  }, []);
 
   /**
    * sets the filename and file for the component after reset the current ones

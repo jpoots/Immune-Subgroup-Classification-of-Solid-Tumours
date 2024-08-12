@@ -12,7 +12,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils.utils import get_data, split_data, RANDOM_STATE
+from utils import get_data, split_data, RANDOM_STATE
 
 """
 Trains N_BOOSTRAPS number of models on a bootstrap resample of the dataset and saves to a file to be used for confidence predictions

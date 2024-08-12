@@ -10,19 +10,19 @@ const getData = (resultURL, cancelled) => {
 return new Promise((resolve, reject) => {
     const interval = setInterval(async () => {
 
-    if (cancelled && cancelled.current){
-        clearInterval(interval);}
 
     let result = await fetch(resultURL);
-    if (!result.ok){
+
+    if (cancelled && cancelled.current){
+        clearInterval(interval);
+    } else if (!result.ok) {
         clearInterval(interval);
         reject()
-    }
-
-    if (result.status !== 201) {
+    } else if (result.status !== 201){
         clearInterval(interval);
         resolve(result);
     }
+
     }, 2000);
 });
 };
