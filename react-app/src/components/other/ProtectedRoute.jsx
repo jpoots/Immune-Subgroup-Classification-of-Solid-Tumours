@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { ResultsContext } from "../context/ResultsContext";
+import { ResultsContext } from "../../context/ResultsContext";
 
 /**
  * https://medium.com/@dennisivy/creating-protected-routes-with-react-router-v6-2c4bbaf7bc1c

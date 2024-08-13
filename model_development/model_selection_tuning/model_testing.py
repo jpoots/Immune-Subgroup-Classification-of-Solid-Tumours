@@ -21,6 +21,7 @@ from imblearn.over_sampling import SMOTE, BorderlineSMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
 import sys
 
+
 sys.path.append("..")
 from utils import (
     get_data,
@@ -64,26 +65,6 @@ SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 # scaler and samplers
 SCALER = MinMaxScaler()
 
-
-# define models to test
-RF = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", MinMaxScaler()),
-        (
-            "model",
-            RandomForestClassifier(
-                max_depth=50,
-                max_features="sqrt",
-                n_estimators=1000,
-                n_jobs=-1,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-
 # define candidate models wiht best hyperparams
 XGBOOST = ImbPipeline(
     steps=[
@@ -96,39 +77,7 @@ XGBOOST = ImbPipeline(
                 learning_rate=0.3,
                 max_depth=3,
                 min_child_weight=None,
-                n_estimators=1000,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-
-# define candidate models wiht best hyperparams
-XGBOOST1 = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            XGBClassifier(random_state=RANDOM_STATE),
-        ),
-    ]
-)
-
-# define candidate models wiht best hyperparams
-XGBOOST2 = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            XGBClassifier(
-                learning_rate=0.1,
-                max_depth=7,
-                min_child_weight=12,
-                n_estimators=1500,
+                n_estimators=500,
                 random_state=RANDOM_STATE,
             ),
         ),
@@ -143,115 +92,16 @@ GB_AC = ImbPipeline(
         (
             "model",
             HistGradientBoostingClassifier(
-                max_iter=1000,
+                max_iter=500,
                 learning_rate=0.1,
-                max_depth=None,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-GB_AC_FINE = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=1000,
-                learning_rate=0.1,
-                max_depth=75,
-                max_leaf_nodes=41,
-                min_samples_leaf=20,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-GB_F1_FINE = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=2000,
-                learning_rate=0.1,
-                max_depth=50,
-                max_leaf_nodes=31,
-                min_samples_leaf=30,
+                max_depth=25,
                 random_state=RANDOM_STATE,
             ),
         ),
     ]
 )
 
-GB_BA = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=1000,
-                learning_rate=0.1,
-                max_depth=75,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-GB_BA_FINE = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=2000,
-                learning_rate=0.1,
-                max_depth=50,
-                max_leaf_nodes=31,
-                min_samples_leaf=30,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-GB_F1 = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=1000,
-                learning_rate=0.1,
-                max_depth=50,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
-)
-
-MODELS = [
-    GB_F1,
-    GB_F1_FINE,
-    GB_AC,
-    GB_AC_FINE,
-    GB_BA,
-    GB_BA_FINE,
-    XGBOOST,
-    XGBOOST1,
-    XGBOOST2,
-    XGBOOST,
-    RF,
-]
+MODELS = [GB_AC, XGBOOST]
 # the number of cross validation splits
 CV = 10
 

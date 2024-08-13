@@ -11,6 +11,7 @@ import { CSVLink } from "react-csv";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
 import { TitleAndSearch } from "../../components/tables/TitleAndSearch";
+import Box from "../../components/layout/Box";
 
 /**
  * the gene expression page where the extracted genes can be viewed
@@ -92,11 +93,11 @@ const GeneExpression = () => {
   const title = "Gene Expression Report";
 
   return (
-    <div className="container">
-      <div className="box">
+    <>
+      <Box>
         <TitleAndSearch title={title} table={table} />
         <Table table={table} />
-      </div>
+      </Box>
       <PaginationBar table={table} />
       <CSVLink
         data={download}
@@ -106,7 +107,7 @@ const GeneExpression = () => {
       >
         <button>Download Report</button>
       </CSVLink>
-    </div>
+    </>
   );
 };
 

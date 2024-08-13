@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import useAuthHeader from "react-auth-kit/hooks/useAuthHeader";
 import { Tooltip } from "react-tooltip";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
+import Box from "../../components/layout/Box";
 
 /**
  * the admin page where the admin can edit the gene list, create a new admin or log out
@@ -191,69 +192,67 @@ const Admin = () => {
 
   return (
     <>
-      <div className="container">
-        <div className="box">
-          <div className="columns">
-            <div className="column is-half">
-              <h1 className="has-text-weight-bold block">
-                Edit accepted genes{" "}
-                <a
-                  className="queens-branding-text"
-                  data-tooltip-id="visual-tooltip"
-                  data-tooltip-content="Gene aliases should be added on a new line above or below the current name. Whitespace and commas will be removed. Gene names are case sensitive."
-                >
-                  ?
-                </a>
-              </h1>
-            </div>
-
-            <div className="column is-half has-text-right">
-              <button
-                className={`button queens-branding queens-button mr-5 ${
-                  createAdminLoading ? "is-loading" : ""
-                }`}
-                onClick={handleNewAdmin}
-                disabled={createAdminLoading}
+      <Box>
+        <div className="columns">
+          <div className="column is-half">
+            <h1 className="has-text-weight-bold block">
+              Edit accepted genes{" "}
+              <a
+                className="queens-branding-text"
+                data-tooltip-id="visual-tooltip"
+                data-tooltip-content="Gene aliases should be added on a new line above or below the current name. Whitespace and commas will be removed. Gene names are case sensitive."
               >
-                Create New Admin
-              </button>
-              <button className="button is-dark" onClick={handleLogOut}>
-                Log Out
-              </button>
-            </div>
+                ?
+              </a>
+            </h1>
           </div>
 
-          <textarea
-            className="textarea block queens-textfield"
-            rows="10"
-            ref={geneNameList}
-            onChange={() => {
-              setDisabled(false);
-              setImsure(false);
-            }}
-          ></textarea>
-          <button
-            className={`button queens-branding queens-button mr-5 ${
-              loading ? "is-loading" : ""
-            }`}
-            disabled={disabled || loading}
-            onClick={handleFirstClick}
-          >
-            Change List
-          </button>
-          <button
-            className={`button is-dark ${loading ? "is-loading" : ""}`}
-            disabled={!imSure || loading}
-            onClick={handleUpdate}
-          >
-            I&apos;m sure
-          </button>
+          <div className="column is-half has-text-right">
+            <button
+              className={`button queens-branding queens-button mr-5 ${
+                createAdminLoading ? "is-loading" : ""
+              }`}
+              onClick={handleNewAdmin}
+              disabled={createAdminLoading}
+            >
+              Create New Admin
+            </button>
+            <button className="button is-dark" onClick={handleLogOut}>
+              Log Out
+            </button>
+          </div>
         </div>
 
-        {openModal && (
-          <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
-        )}
-      </div>
+        <textarea
+          className="textarea block queens-textfield"
+          rows="10"
+          ref={geneNameList}
+          onChange={() => {
+            setDisabled(false);
+            setImsure(false);
+          }}
+        ></textarea>
+        <button
+          className={`button queens-branding queens-button mr-5 ${
+            loading ? "is-loading" : ""
+          }`}
+          disabled={disabled || loading}
+          onClick={handleFirstClick}
+        >
+          Change List
+        </button>
+        <button
+          className={`button is-dark ${loading ? "is-loading" : ""}`}
+          disabled={!imSure || loading}
+          onClick={handleUpdate}
+        >
+          I&apos;m sure
+        </button>
+      </Box>
+
+      {openModal && (
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
+      )}
       <Tooltip id="visual-tooltip" place="right-end" className="tooltip" />
     </>
   );

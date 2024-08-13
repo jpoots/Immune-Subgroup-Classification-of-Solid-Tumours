@@ -37,8 +37,8 @@ TEST_SIZE = 0.2
 MODEL_FILE_NAME = "./trained_models/model.pkl"
 # the location to store the probability analysis
 PROBS_FOLDER_NAME = "./prob_analysis/"
-# the QC threshold to use
-QC_THRESHOLD = 0.99
+# the QC threshold to u89
+QC_THRESHOLD = 0.915
 
 
 def main():

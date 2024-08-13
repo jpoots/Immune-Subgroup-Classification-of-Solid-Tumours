@@ -3,6 +3,7 @@ import Plot from "react-plotly.js";
 import TitleSetter from "../../components/graphs/TitleSetter";
 import { CSVLink } from "react-csv";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 const ClassificationByType = () => {
   const [title, setTitle] = useState("Class label by type");
@@ -61,9 +62,9 @@ const ClassificationByType = () => {
   };
 
   return (
-    <div className="container">
+    <>
       <div className="columns">
-        <div className="column is-one-quarter box">
+        <Box className="column is-one-quarter">
           <h1 className="mt-4 block has-text-weight-bold">
             Classification by Type
           </h1>
@@ -78,7 +79,7 @@ const ClassificationByType = () => {
           >
             <button>Download Report</button>
           </CSVLink>
-        </div>
+        </Box>
 
         <div className="column is-fullheight">
           <Plot
@@ -104,7 +105,7 @@ const ClassificationByType = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

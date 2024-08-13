@@ -4,6 +4,7 @@ import { CSVLink } from "react-csv";
 import { GraphControls } from "../../components/graphs/GraphControls";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 /**
  * the pca visualisation page for viewing results in 2D and 3D
@@ -45,9 +46,9 @@ const Pca = () => {
     "https://builtin.com/data-science/step-step-explanation-principal-component-analysis#:~:text=necessary%20for%20context.-,What%20Is%20Principal%20Component%20Analysis%3F,information%20in%20the%20large%20set.";
 
   return (
-    <div className="container">
+    <>
       <div className="columns">
-        <div className="column is-one-quarter box">
+        <Box className="column is-one-quarter">
           <GraphControls
             setDimensions={setDimensions}
             dimension={dimension}
@@ -66,7 +67,7 @@ const Pca = () => {
           >
             <button>Download Report</button>
           </CSVLink>
-        </div>
+        </Box>
 
         <div className="column is-fullheight">
           <Plot
@@ -102,7 +103,7 @@ const Pca = () => {
           />
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

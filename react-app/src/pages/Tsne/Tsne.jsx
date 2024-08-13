@@ -9,6 +9,7 @@ import { callAsyncApi } from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 // tnse api url and perplexity setting
 const API_URL = `${API_ROOT}/tsne`;
@@ -147,10 +148,10 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
   const tooltipLink = "https://www.datacamp.com/tutorial/introduction-t-sne";
 
   return (
-    <div className="container">
+    <>
       {results ? (
         <div className="columns">
-          <div className="column is-one-quarter box">
+          <Box className="column is-one-quarter">
             <GraphControls
               setDimensions={setDimensions}
               dimension={dimension}
@@ -200,7 +201,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
                 </CSVLink>
               )}
             </div>
-          </div>
+          </Box>
 
           <div className="column">
             {graphData ? (
@@ -247,7 +248,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
       {openModal && (
         <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
-    </div>
+    </>
   );
 };
 

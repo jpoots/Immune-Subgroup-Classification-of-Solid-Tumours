@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { CSVLink } from "react-csv";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 /**
  * the report page showing the prediction table with confidence
@@ -90,10 +91,10 @@ const Prediction = () => {
   };
 
   return (
-    <div className="container">
+    <>
       {results ? (
         <>
-          <div className="box">
+          <Box>
             <h1 className="block has-text-weight-bold">Prediction Report</h1>
 
             <div className="columns">
@@ -125,7 +126,7 @@ const Prediction = () => {
             </div>
 
             <Table table={table} />
-          </div>
+          </Box>
           <PaginationBar table={table} />
           <CSVLink
             data={download}
@@ -139,7 +140,7 @@ const Prediction = () => {
       ) : (
         <NothingToDisplay />
       )}
-    </div>
+    </>
   );
 };
 

@@ -11,6 +11,7 @@ import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
 )
+from scipy.stats import beta
 
 
 # append the path of the parent (taken from chatGPT)
@@ -28,7 +29,7 @@ A script for running the trained model with a variety of QC thresholds on a vali
 """
 TEST_SIZE = 0.2
 MODEL_FILE_NAME = "./trained_models/model.pkl"
-QC_THRESHOLD = 0.99
+QC_THRESHOLD = 0.915
 
 
 def main():
@@ -57,7 +58,8 @@ def main():
     predictions, true, num_removed = predict_with_qc(
         loaded_model, QC_THRESHOLD, x_val, y_val
     )
-    evaluate_performance(predictions, true, num_removed)
+
+    evaluate_performance(true, predictions, num_removed)
 
     plt.show()
 

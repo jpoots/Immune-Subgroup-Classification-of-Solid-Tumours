@@ -50,18 +50,22 @@ def main():
     data = get_data()
     _idx, x, y, _genes = split_data(data)
 
+    # remove test set and get validtion set
     x_train, x_test, y_train, y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
-
-    x_train, x_test, y_train, y_test = train_test_split(
-        x_train, y_train, test_size=0.2, stratify=y_train, random_state=RANDOM_STATE
+    x_train, x_val, y_train, y_val = train_test_split(
+        x_train,
+        y_train,
+        test_size=TEST_SIZE,
+        stratify=y_train,
+        random_state=RANDOM_STATE,
     )
 
     pipe = build_model(x_train, y_train)
 
     # get prediction probs for test
-    predictions, true, num_removed = predict_with_qc(pipe, 0, x_test, y_test)
+    predictions, true, num_removed = predict_with_qc(pipe, 0, x_val, y_val)
 
     # saving and testing save successful
     joblib.dump(pipe, FILE_NAME)
@@ -75,6 +79,8 @@ def main():
     analyse_prediction_results(predictions, true)
     ConfusionMatrixDisplay.from_predictions(true, predictions)
 
+    plt.show()
+
 
 def build_model(x, y):
     """Trains a gradient boosting model on the data using sampling
@@ -86,12 +92,11 @@ def build_model(x, y):
     pipe: a trained model
     """
     # define model to train
-    model = HistGradientBoostingClassifier(
-        max_iter=2000,
-        learning_rate=0.1,
-        max_depth=50,
-        max_leaf_nodes=31,
-        min_samples_leaf=30,
+    model = XGBClassifier(
+        learning_rate=0.3,
+        max_depth=3,
+        min_child_weight=None,
+        n_estimators=500,
         random_state=RANDOM_STATE,
     )
 

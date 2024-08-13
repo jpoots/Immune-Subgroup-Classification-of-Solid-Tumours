@@ -3,6 +3,7 @@ import { API_ROOT } from "../../../utils/constants";
 import { CSVLink } from "react-csv";
 import ErrorModal from "../../components/errors/ErrorModal";
 import { openWarningModal } from "../../../utils/openWarningModal";
+import Box from "../../components/layout/Box";
 
 /**
  * a help page for the app containing help text
@@ -43,8 +44,8 @@ const Help = () => {
   };
 
   return (
-    <div className="container">
-      <div className="box">
+    <>
+      <Box>
         <div className="block">
           <div className="columns">
             <div className="column block">
@@ -238,11 +239,11 @@ const Help = () => {
             these terms and conditions.
           </div>
         </div>
-      </div>
+      </Box>
       {openModal && (
         <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
-    </div>
+    </>
   );
 };
 

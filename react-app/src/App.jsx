@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import "bulma/css/bulma.min.css";
-import Header from "./components/Header";
+import Header from "./components/layout/Header";
 import AllRoutes from "./AllRoutes";
 import { ErrorBoundary } from "react-error-boundary";
 import FallbackError from "./pages/FallbackError/FallbackError";
 import { ResultsContext } from "./context/ResultsContext";
-import Footer from "./components/Footer";
+import Footer from "./components/layout/Footer";
+import Container from "./components/layout/Container";
 import "./index.css";
 
 /**
@@ -41,14 +42,19 @@ function App() {
       <Header />
       <ErrorBoundary FallbackComponent={FallbackError} onError={resetApp}>
         <ResultsContext.Provider value={[results, setResults]}>
-          <AllRoutes
-            tsneGraph2DState={[tsneGraph2D, setTsneGraph2D]}
-            tsneGraph3DState={[tsneGraph3D, setTsneGraph3D]}
-            tsneGraphDimensions={[tsneGraphDimensions, setTsneGraphDimensions]}
-            confidenceState={[confidenceGraphData, setConfidenceGraphData]}
-            summaryState={[summary, setSummary]}
-            fileNameState={[fileName, setFileName]}
-          />
+          <Container>
+            <AllRoutes
+              tsneGraph2DState={[tsneGraph2D, setTsneGraph2D]}
+              tsneGraph3DState={[tsneGraph3D, setTsneGraph3D]}
+              tsneGraphDimensions={[
+                tsneGraphDimensions,
+                setTsneGraphDimensions,
+              ]}
+              confidenceState={[confidenceGraphData, setConfidenceGraphData]}
+              summaryState={[summary, setSummary]}
+              fileNameState={[fileName, setFileName]}
+            />
+          </Container>
         </ResultsContext.Provider>
       </ErrorBoundary>
 

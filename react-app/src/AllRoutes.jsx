@@ -1,4 +1,4 @@
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/other/ProtectedRoute";
 import { Route, Routes } from "react-router-dom";
 import GeneExpression from "./pages/GeneExpression/GeneExpression";
 import Prediction from "./pages/Predictions/Prediction";

@@ -7,6 +7,7 @@ import ErrorModal from "../../components/errors/ErrorModal";
 import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
@@ -138,9 +139,9 @@ const Confidence = ({ graphState }) => {
   };
 
   return (
-    <div className="container">
+    <>
       <div className="columns">
-        <div className="column is-one-quarter box">
+        <Box className="column is-one-quarter">
           <h1 className="mt-4 block has-text-weight-bold">
             {" "}
             Confidence Interval
@@ -183,7 +184,7 @@ const Confidence = ({ graphState }) => {
               </CSVLink>
             )}
           </div>
-        </div>
+        </Box>
         <div className="column">
           {graphData ? (
             <Plot
@@ -219,7 +220,7 @@ const Confidence = ({ graphState }) => {
       {openModal && (
         <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
-    </div>
+    </>
   );
 };
 

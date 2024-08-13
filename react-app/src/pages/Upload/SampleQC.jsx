@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 /**
  * given a resutls object returns a QC summary
@@ -8,7 +9,7 @@ import { ResultsContext } from "../../context/ResultsContext";
 const SampleQC = () => {
   const results = useContext(ResultsContext)[0];
   return (
-    <div className="box">
+    <Box>
       <h1 className="block has-text-weight-bold">Gene QC</h1>
       <div className="block">
         {results["samples"].length} sample(s) passed gene QC
@@ -21,7 +22,7 @@ const SampleQC = () => {
         {results["invalid"]} sample(s) could not be processed due to a large
         number of mising genes
       </div>
-    </div>
+    </Box>
   );
 };
 

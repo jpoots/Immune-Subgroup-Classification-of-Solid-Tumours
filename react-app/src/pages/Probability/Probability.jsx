@@ -12,7 +12,9 @@ import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
 import { TitleAndSearch } from "../../components/tables/TitleAndSearch";
+import Box from "../../components/layout/Box";
 import { TableWithBoldMax } from "./TableWithBoldMax";
+
 /**
  * generates the probability page showing the probabiltiy of all subgroups
  * @returns a probabiltiy page
@@ -119,13 +121,13 @@ const Probability = () => {
 
   console.log(table.getRowModel().rows[0].original.probs);
   return (
-    <div className="container">
+    <>
       {results ? (
         <>
-          <div className="box">
+          <Box>
             <TitleAndSearch title={title} table={table} />
             <TableWithBoldMax table={table} accessor="probs" />
-          </div>
+          </Box>
           <PaginationBar
             table={table}
             download={download}
@@ -143,7 +145,7 @@ const Probability = () => {
       ) : (
         <NothingToDisplay />
       )}
-    </div>
+    </>
   );
 };
 

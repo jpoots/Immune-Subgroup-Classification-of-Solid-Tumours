@@ -10,6 +10,7 @@ import { callAsyncApi } from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import { openWarningModal } from "../../../utils/openWarningModal";
 import { ResultsContext } from "../../context/ResultsContext";
+import Box from "../../components/layout/Box";
 
 /**
  * constants for managing the allowed file types to upload
@@ -219,8 +220,8 @@ const Upload = ({
   };
 
   return (
-    <div className="container">
-      <div className="box">
+    <>
+      <Box>
         <div className="block">
           <h1 className="block has-text-weight-bold">
             RNA-Seq Upload{" "}
@@ -309,8 +310,9 @@ const Upload = ({
             Help
           </Link>
         </div>
-      </div>
-      {results && <SampleQC results={results} />}
+      </Box>
+
+      {results && <SampleQC />}
       {results && <Summary summary={summary} />}
 
       {results && (
@@ -340,7 +342,7 @@ const Upload = ({
       )}
 
       <Tooltip id="icst-tooltip" />
-    </div>
+    </>
   );
 };
 

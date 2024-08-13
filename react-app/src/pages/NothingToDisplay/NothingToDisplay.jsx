@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Box from "../../components/layout/Box";
 
 /**
  * a page to be returned when results are viewed but not set
@@ -6,8 +7,8 @@ import { Link } from "react-router-dom";
  */
 const NothingToDisplay = () => {
   return (
-    <div className="container">
-      <div className="box has-text-centered">
+    <>
+      <Box className="has-text-centered">
         <h1 className="has-text-weight-bold">Nothing to display!</h1>
         <h1>
           Begin your analysis{" "}
@@ -15,8 +16,8 @@ const NothingToDisplay = () => {
             here
           </Link>
         </h1>
-      </div>
-    </div>
+      </Box>
+    </>
   );
 };
 

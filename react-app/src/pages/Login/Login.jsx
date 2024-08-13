@@ -3,6 +3,7 @@ import { API_ROOT } from "../../../utils/constants";
 import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
+import Box from "../../components/layout/Box";
 
 /**
  * the login page for admin authentication
@@ -74,8 +75,8 @@ const Login = () => {
   };
 
   return (
-    <div className="container">
-      <div className="box">
+    <>
+      <Box>
         <div className="columns is-centered">
           <div className="column is-one-third has-text-centered">
             {loginFailed && (
@@ -119,8 +120,8 @@ const Login = () => {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </Box>
+    </>
   );
 };
 
