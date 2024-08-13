@@ -191,7 +191,7 @@ def analyse_async():
     Returns:
         A dict containing the location of the result
         data: {
-            "resultURL": "localhost:3000/getresults/analyse/123-abc
+            "resultURL": "localhost:3000/results/analyse/123-abc
         }
 
 
@@ -218,7 +218,7 @@ def tsne_async():
     Returns:
         A dict containing the location of the result
 
-        data: {"resultURL": "localhost:3000/getresults/tsne/123-abc}
+        data: {"resultURL": "localhost:3000/results/tsne/123-abc}
 
     Raises:
         BadRequest: The JSON sent is missing or invalid

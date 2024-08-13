@@ -50,7 +50,7 @@ responses:
         data:
           properties:
             resultURL:
-              example: http://127.0.0.1:3000/getresults/tsne/123-abc-456-def
+              example: http://127.0.0.1:3000/results/tsne/123-abc-456-def
               type: string
       type: object
   400:

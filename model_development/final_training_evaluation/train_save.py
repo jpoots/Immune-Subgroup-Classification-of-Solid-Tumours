@@ -28,6 +28,10 @@ from utils import (
     RANDOM_STATE,
 )
 
+"""
+This script trains a final model, evaluates it and saves it to a file
+"""
+
 FILE_NAME = "./trained_models/model.pkl"
 
 TEST_SIZE = 0.2
@@ -44,6 +48,10 @@ OVER_SAMPLE = {
     4: 1000,
     5: 1000,
 }
+
+"""
+Trains, evaluates and saves to file
+"""
 
 
 def main():
@@ -92,11 +100,10 @@ def build_model(x, y):
     pipe: a trained model
     """
     # define model to train
-    model = XGBClassifier(
-        learning_rate=0.3,
-        max_depth=3,
-        min_child_weight=None,
-        n_estimators=500,
+    model = HistGradientBoostingClassifier(
+        max_iter=500,
+        learning_rate=0.1,
+        max_depth=25,
         random_state=RANDOM_STATE,
     )
 
