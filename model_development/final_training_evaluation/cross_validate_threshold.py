@@ -34,8 +34,6 @@ from utils import (
 This script cross validates a models class 6 recall and accuracy with a QC threshold
 """
 
-FILE_NAME = "./trained_models/model.pkl"
-
 TEST_SIZE = 0.2
 
 CV = 10
@@ -137,6 +135,7 @@ def cross_validate(x_train, y_train):
 
         accuracy = accuracy_score(true, predictions)
         accuracy_score_list.append(accuracy)
+        print(f"Completed {i + 1}")
 
     avg_recall = np.mean(class_6_recall_list)
     avg_acc = np.mean(accuracy_score_list)
