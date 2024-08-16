@@ -65,9 +65,7 @@ def confidence_celery(data):
     return results
 
 
-@celery.task(
-    throws=(BadRequest,),
-)
+@celery.task(throws=(BadRequest,), time_limit=0.1)
 def tsne_celery(data):
     """
     Performs t-SNE analysis on input JSON data
@@ -127,7 +125,12 @@ def tsne_celery(data):
     return results
 
 
-@celery.task(throws=(BadRequest,), on_failure=delete_file_on_failure)
+@celery.task(
+    throws=(BadRequest,),
+    on_failure=delete_file_on_failure,
+    time_limit=1,
+    soft_time_limit=1,
+)
 def analyse(filepath, delimiter):
     """
     Performs a full non-configurable analysis on a csv file

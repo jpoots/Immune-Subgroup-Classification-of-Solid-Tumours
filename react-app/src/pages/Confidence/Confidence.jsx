@@ -109,6 +109,9 @@ const Confidence = ({ graphState }) => {
    * calls the confidence api
    */
   const handleConfidenceInterval = async () => {
+    // if the cancelled ref has been set to true it must be reset
+    cancelled.current = false;
+
     setLoading(true);
     let request = {
       method: "POST",

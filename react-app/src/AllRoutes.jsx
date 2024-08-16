@@ -29,6 +29,7 @@ const AllRoutes = ({
   confidenceState,
   summaryState,
   fileNameState,
+  resetApp,
 }) => {
   // desctructure props
   const [tsneGraph2D, setTsneGraph2D] = tsneGraph2DState;
@@ -75,9 +76,7 @@ const AllRoutes = ({
             setSummary={setSummary}
             filename={fileName}
             setFileName={setFileName}
-            setTsneGraph2D={setTsneGraph2D}
-            setTsneGraph3D={setTsneGraph3D}
-            setConfidenceGraphData={setConfidenceGraphData}
+            resetApp={resetApp}
           />
         }
       />

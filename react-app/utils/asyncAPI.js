@@ -7,7 +7,7 @@ import { openWarningModal } from "./openWarningModal";
  * @returns the result when the promise resolves
  */
 const getData = (resultURL, cancelled) => {
-return new Promise((resolve, reject) => {
+return new Promise((resolve) => {
     const interval = setInterval(async () => {
 
 
@@ -15,9 +15,6 @@ return new Promise((resolve, reject) => {
 
     if (cancelled && cancelled.current){
         clearInterval(interval);
-    } else if (!result.ok) {
-        clearInterval(interval);
-        reject()
     } else if (result.status !== 201){
         clearInterval(interval);
         resolve(result);

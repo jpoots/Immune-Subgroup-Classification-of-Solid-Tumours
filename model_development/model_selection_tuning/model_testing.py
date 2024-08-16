@@ -30,18 +30,8 @@ from utils import (
     analyse_prediction_results,
     predict_with_qc,
     RANDOM_STATE,
+    SCORING_CV,
 )
-
-# set up scoring metrics to report
-SCORING = {
-    "accuracy": "accuracy",
-    "f1_macro": "f1_macro",
-    "precision_macro": "precision_macro",
-    "recall_macro": "recall_macro",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1_group6": make_scorer(f1_score, average=None, labels=[5]),
-    "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
-}
 
 # the QC threshold to use in validation evaluation
 QC_THRESHOLD = 0
@@ -155,7 +145,9 @@ def analyse_models(x, y, axs_test, axs_train):
 
     for pipe, ax_test, ax_train in zip(MODELS, axs_test.flatten(), axs_train.flatten()):
         # run cv on all data and evaluate
-        cv = cross_validate(pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING)
+        cv = cross_validate(
+            pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING_CV
+        )
         # print scores
         print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
         print_cv_results(cv)

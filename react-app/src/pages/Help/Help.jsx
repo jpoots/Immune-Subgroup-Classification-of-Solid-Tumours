@@ -77,8 +77,10 @@ const Help = () => {
             <div className="column is-half">
               <table className="table block">
                 <thead>
-                  <th className="has-text-centered">Subgroup Label</th>
-                  <th className="has-text-centered">Subgroup Name</th>
+                  <tr>
+                    <th className="has-text-centered">Subgroup Label</th>
+                    <th className="has-text-centered">Subgroup Name</th>
+                  </tr>
                 </thead>
                 <tbody>
                   <tr>

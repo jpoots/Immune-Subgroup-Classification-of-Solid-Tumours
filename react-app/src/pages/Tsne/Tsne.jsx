@@ -1,7 +1,12 @@
 import { GraphControls } from "../../components/graphs/GraphControls";
-import { useContext, useEffect, useRef, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Plot from "react-plotly.js";
-import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import ErrorModal from "../../components/errors/ErrorModal";
@@ -26,7 +31,10 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
   // setting up to hold dom element and graph points
   const slider = useRef();
   const results = useContext(ResultsContext)[0];
-  const max_perplexity = results.samples.length - 1;
+
+  // perplexity musn't ever be greater than 500
+  const max_perplexity =
+    results.samples.length - 1 < 500 ? results.samples.length - 1 : 500;
 
   // set app state
   const [perplexity, setPerplexity] = useState(max_perplexity);
@@ -46,7 +54,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
    * useLayoutEffect returns a function which is performed on unmount
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
    */
-  useEffect(() => {
+  useLayoutEffect(() => {
     const cancelAnalysis = () => {
       cancelled.current = true;
     };
@@ -102,6 +110,9 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
    * reaches out to the data analysis endpoint, handles reponse
    */
   const handleTsne = async () => {
+    // if the cancelled ref has been set to true it must be reset
+    cancelled.current = false;
+
     setLoading(true);
     let request = {
       method: "POST",
@@ -149,102 +160,93 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
 
   return (
     <>
-      {results ? (
-        <div className="columns">
-          <Box className="column is-one-quarter">
-            <GraphControls
-              setDimensions={setDimensions}
-              dimension={dimension}
-              setTitle={setTitle}
-              pageTitle={pageTitle}
-              tooltipMessage={tooltip}
-              fullName={fullName}
-              tooltipLink={tooltipLink}
+      <div className="columns">
+        <Box className="column is-one-quarter">
+          <GraphControls
+            setDimensions={setDimensions}
+            dimension={dimension}
+            setTitle={setTitle}
+            pageTitle={pageTitle}
+            tooltipMessage={tooltip}
+            fullName={fullName}
+            tooltipLink={tooltipLink}
+          />
+
+          <div className="block">
+            <h1 className="has-text-weight-bold mt-">Perplexity</h1>
+            <input
+              type="range"
+              min={MIN_PERPLEXITY}
+              max={max_perplexity}
+              ref={slider}
+              value={perplexity}
+              onChange={(e) => {
+                setPerplexity(e.target.value);
+                setDisabled(false);
+              }}
+              className="queens-slider"
             />
-
-            <div className="block">
-              <h1 className="has-text-weight-bold mt-">Perplexity</h1>
-              <input
-                type="range"
-                min={MIN_PERPLEXITY}
-                max={max_perplexity}
-                ref={slider}
-                value={perplexity}
-                onChange={(e) => {
-                  setPerplexity(e.target.value);
-                  setDisabled(false);
-                }}
-                className="queens-slider"
-              />
-              <div className="has-text-weight-bold has-text-centered">
-                {perplexity}
-              </div>
+            <div className="has-text-weight-bold has-text-centered">
+              {perplexity}
             </div>
-            <div className="has-text-centered">
-              <button
-                className={
-                  "button queens-branding queens-button block mr-2 " +
-                  (loading ? "is-loading" : "")
-                }
-                onClick={handleTsne}
-                disabled={loading || disabled}
-              >
-                Analyse
-              </button>
-              {graphData && (
-                <CSVLink
-                  data={download}
-                  filename="data"
-                  onClick={handleDownload}
-                >
-                  <button className="button is-dark">Download Report</button>
-                </CSVLink>
-              )}
-            </div>
-          </Box>
-
-          <div className="column">
-            {graphData ? (
-              <Plot
-                data={getPlotlyData(graphData, dimension)}
-                layout={{
-                  title: {
-                    text: title,
-                  },
-                  height: 700,
-                  showlegend: true,
-                  legend: {
-                    title: { text: "Subgroup" },
-                  },
-                  xaxis: {
-                    title: { text: "t-SNE Component 1" },
-                  },
-                  yaxis: {
-                    title: { text: "t-SNE Component 2" },
-                  },
-                  scene: {
-                    xaxis: { title: "Component 1" },
-                    yaxis: { title: "Component 2" },
-                    zaxis: { title: "Component 3" },
-                    camera: {
-                      eye: {
-                        x: 1.25,
-                        y: 1.25,
-                        z: 2.25,
-                      },
-                    },
-                  },
-                }}
-              />
-            ) : (
-              <EmptyGraph />
+          </div>
+          <div className="has-text-centered">
+            <button
+              className={
+                "button queens-branding queens-button block mr-2 " +
+                (loading ? "is-loading" : "")
+              }
+              onClick={handleTsne}
+              disabled={loading || disabled}
+            >
+              Analyse
+            </button>
+            {graphData && (
+              <CSVLink data={download} filename="data" onClick={handleDownload}>
+                <button className="button is-dark">Download Report</button>
+              </CSVLink>
             )}
           </div>
-        </div>
-      ) : (
-        <NothingToDisplay />
-      )}
+        </Box>
 
+        <div className="column">
+          {graphData ? (
+            <Plot
+              data={getPlotlyData(graphData, dimension)}
+              layout={{
+                title: {
+                  text: title,
+                },
+                height: 700,
+                showlegend: true,
+                legend: {
+                  title: { text: "Subgroup" },
+                },
+                xaxis: {
+                  title: { text: "t-SNE Component 1" },
+                },
+                yaxis: {
+                  title: { text: "t-SNE Component 2" },
+                },
+                scene: {
+                  xaxis: { title: "Component 1" },
+                  yaxis: { title: "Component 2" },
+                  zaxis: { title: "Component 3" },
+                  camera: {
+                    eye: {
+                      x: 1.25,
+                      y: 1.25,
+                      z: 2.25,
+                    },
+                  },
+                },
+              }}
+            />
+          ) : (
+            <EmptyGraph />
+          )}
+        </div>
+      </div>
       {openModal && (
         <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}

@@ -27,12 +27,24 @@ FILE_LOCATION = os.path.join(CURRENT, "data.csv")
 RANDOM_STATE = 42
 
 # how to score
-SCORING = {
+SCORING_TUNING = {
     "accuracy": "accuracy",
     "balanced_accuracy": "balanced_accuracy",
     "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
     "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
     "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
+}
+
+SCORING_CV = {
+    "accuracy": "accuracy",
+    "balanced_accuracy": "balanced_accuracy",
+    "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
+    "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
+    "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
+    "f1_group6": make_scorer(f1_score, average=None, labels=[5], zero_division=np.nan),
+    "recall_group6": make_scorer(
+        recall_score, average=None, labels=[5], zero_division=np.nan
+    ),
 }
 # the number of cross validation splits to use
 CV = 10
@@ -100,9 +112,9 @@ def print_cv_results(cv):
     """
     # pulling out my performance metrics
     accuracy_cv = np.average(cv["test_accuracy"])
-    f1_cv = np.average(cv["test_f1_macro"])
-    precision_cv = np.average(cv["test_precision_macro"])
-    recall_cv = np.average(cv["test_recall_macro"])
+    f1_cv = np.average(cv["test_f1"])
+    precision_cv = np.average(cv["test_precision"])
+    recall_cv = np.average(cv["test_recall"])
     bal_accuracy_cv = np.average(cv["test_balanced_accuracy"])
     f1_group6 = np.average(cv["test_f1_group6"])
     recall_group6 = np.average(cv["test_recall_group6"])
@@ -207,7 +219,7 @@ def tune_models(x_train, y_train, models):
                 pipe,
                 params,
                 n_jobs=-1,
-                scoring=SCORING,
+                scoring=SCORING_TUNING,
                 refit="accuracy",
                 cv=CV,
             )

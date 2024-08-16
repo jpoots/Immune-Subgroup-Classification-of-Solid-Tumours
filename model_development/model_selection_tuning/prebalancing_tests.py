@@ -26,21 +26,10 @@ Inital testing of models with default parameters before any form of tuning or da
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils import get_data, split_data, print_cv_results, RANDOM_STATE
+from utils import get_data, split_data, print_cv_results, RANDOM_STATE, SCORING_CV
 
-# scoring metrics to use
-SCORING = {
-    "accuracy": "accuracy",
-    "f1_macro": "f1_macro",
-    "precision_macro": "precision_macro",
-    "recall_macro": "recall_macro",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1_group6": make_scorer(f1_score, average=None, labels=[5]),
-    "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
-}
 # models to test
 MODELS = [
-    XGBClassifier(random_state=RANDOM_STATE),
     HistGradientBoostingClassifier(random_state=RANDOM_STATE),
     MLPClassifier(random_state=RANDOM_STATE),
     svm.SVC(random_state=RANDOM_STATE),
@@ -106,7 +95,9 @@ def test_models(
         pipe = Pipeline(steps=[("scaler", scaler), ("model", model)])
 
         # run cv and evaluate
-        cv = cross_validate(pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING)
+        cv = cross_validate(
+            pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING_CV
+        )
 
         print("Model Name: " + model.__class__.__name__)
         print_cv_results(cv)

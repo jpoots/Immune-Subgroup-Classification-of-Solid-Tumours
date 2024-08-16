@@ -52,7 +52,6 @@ const generateGraphData = (results, graphResponse, accessorKey, dimensions) => {
   
       // create an array of numbers for each grpah value and subgroup
       graphResponse.forEach((sample, index) => {
-        console.log(sample)
         let prediction = results.samples[index].prediction;
         x[prediction].push(sample[accessorKey][0]);
         y[prediction].push(sample[accessorKey][1]);

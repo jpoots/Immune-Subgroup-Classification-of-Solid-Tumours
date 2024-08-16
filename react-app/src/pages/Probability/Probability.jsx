@@ -119,7 +119,6 @@ const Probability = () => {
 
   const title = "Prediction Probability by Subgroup";
 
-  console.log(table.getRowModel().rows[0].original.probs);
   return (
     <>
       {results ? (

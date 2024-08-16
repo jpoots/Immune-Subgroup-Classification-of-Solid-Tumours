@@ -121,6 +121,8 @@ def cross_validate(x_train, y_train):
     skf = StratifiedKFold(n_splits=CV, shuffle=True, random_state=RANDOM_STATE)
     accuracy_score_list = []
     class_6_recall_list = []
+
+    # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html
     for i, (train, test) in enumerate(skf.split(x_train, y_train)):
 
         pipe = build_model()

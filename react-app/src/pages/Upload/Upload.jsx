@@ -28,15 +28,7 @@ const API_URL = `${API_ROOT}/analyse`;
  * @param {function} setSummary - setter for summary
  * @returns
  */
-const Upload = ({
-  summary,
-  setSummary,
-  filename,
-  setFileName,
-  setTsneGraph2D,
-  setTsneGraph3D,
-  setConfidenceGraphData,
-}) => {
+const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
   // defining state for the component
   const [file, setFile] = useState();
   const [loading, setLoading] = useState(false);
@@ -58,7 +50,9 @@ const Upload = ({
     if (!results) {
       setFileName("Upload file...");
     }
-  }, [results, setFileName]);
+    // disables ESLint rule
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
@@ -105,14 +99,12 @@ const Upload = ({
     fileInput.current.value = null;
 
     // reset the app elements
+    resetApp();
+
+    // set local state
     setFile();
     setFileName(fileName);
     setLoading(false);
-    setResults();
-    setSummary();
-    setConfidenceGraphData();
-    setTsneGraph2D();
-    setTsneGraph3D();
     cancelled.current = true;
   };
 
@@ -174,14 +166,13 @@ const Upload = ({
 
     // if the cancelled ref has been set to true it must be reset
     cancelled.current = false;
+
     // loading true to make button change
     setLoading(true);
 
     // create a form and hit the api for predictions
     formData.append("samples", file);
     formData.append("delimiter", delimiter);
-
-    console.log(formData);
 
     let asyncResults = await callAsyncApi(
       API_URL,

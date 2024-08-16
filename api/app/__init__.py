@@ -4,6 +4,7 @@ from werkzeug import exceptions
 from .handlers import (
     handle_http_exception,
     handle_generic_exception,
+    handle_custom_bad_request,
 )
 from celery import Celery
 from flasgger import Swagger
@@ -15,6 +16,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+from .errors import BadRequest
 
 """
 creates an instance of the flask app
@@ -113,5 +115,6 @@ def create_app():
 
     # register error handlers
     app.register_error_handler(exceptions.HTTPException, handle_http_exception)
+    app.register_error_handler(BadRequest, handle_custom_bad_request)
     # app.register_error_handler(Exception, handle_generic_exception)
     return app

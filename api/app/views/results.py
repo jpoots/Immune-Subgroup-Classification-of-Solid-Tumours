@@ -36,16 +36,8 @@ def celery_task_results(task_id):
         result = jsonify({"status": "PENDING"})
     else:
         err = task.result
-        result = jsonify(
-            {
-                "error": {
-                    "code": err.status_code,
-                    "name": err.headers,
-                    "description": err.body,
-                }
-            },
-        )
-        status = err.status_code
+        raise err
+
     return result, status
 
 

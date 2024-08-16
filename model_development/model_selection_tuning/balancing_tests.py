@@ -26,12 +26,7 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils import (
-    get_data,
-    split_data,
-    print_cv_results,
-    RANDOM_STATE,
-)
+from utils import get_data, split_data, print_cv_results, RANDOM_STATE, SCORING_CV
 
 # define potential models
 MODELS = [
@@ -64,15 +59,6 @@ OVER_SAMPLE = {
 RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
 SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
-SCORING = {
-    "accuracy": "accuracy",
-    "f1_macro": "f1_macro",
-    "precision_macro": "precision_macro",
-    "recall_macro": "recall_macro",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1_group6": make_scorer(f1_score, average=None, labels=[5]),
-    "recall_group6": make_scorer(recall_score, average=None, labels=[5]),
-}
 QC_THRESHOLD = 0.989
 # the number of cross validation splits
 CV = 10
@@ -120,26 +106,11 @@ def analyse_models(x, y, axs):
         )
 
         # run cv and evaluate
-        cv = cross_validate(pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING)
+        cv = cross_validate(
+            pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING_CV
+        )
         print("Model Name: " + model.__class__.__name__)
         print_cv_results(cv)
-
-        """"
-        # fit and predict
-        pipe.fit(x_train_val, y_train_val)
-
-        predictions, y_test_val, num_removed = predict_with_qc(
-            pipe, QC_THRESHOLD, x_test_val, y_test_val
-        )
-
-        disp = ConfusionMatrixDisplay.from_predictions(y_test_val, predictions, ax=ax)
-        ax.set_title(model.__class__.__name__)
-
-        print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
-        print(f"QC Threshold: {QC_THRESHOLD}")
-        print("Removed: " + str(num_removed))
-        analyse_prediction_results(predictions, y_test_val)
-        """
 
 
 if __name__ == "__main__":

@@ -53,6 +53,7 @@ function App() {
               confidenceState={[confidenceGraphData, setConfidenceGraphData]}
               summaryState={[summary, setSummary]}
               fileNameState={[fileName, setFileName]}
+              resetApp={resetApp}
             />
           </Container>
         </ResultsContext.Provider>
