@@ -165,7 +165,10 @@ def analyse(filepath, delimiter):
     predictions, prediction_probs, num_nc = predict(data["features"])
 
     # perform PCA
-    pc = PCA_PIPE.fit_transform(data["features"]).tolist()
+    if len(predictions) < 3:
+        pc = [None] * len(predictions)
+    else:
+        pc = PCA_PIPE.fit_transform(data["features"]).tolist()
 
     # parcel for return
     results = []

@@ -36,7 +36,7 @@ OVER_SAMPLE = {
 
 # training params
 TEST_SIZE = 0.2
-N_BOOTSTRAPS = 2
+N_BOOTSTRAPS = 10
 
 
 def main():
@@ -90,13 +90,12 @@ def train_bootstraps(x_train, y_train):
     models = []
     for bootstrap in range(N_BOOTSTRAPS):
         model = XGBClassifier(
-            nthread=1,
-            learning_rate=0.1,
-            max_depth=7,
-            min_child_weight=12,
-            n_estimators=1500,
-            n_jobs=-1,
+            learning_rate=0.3,
+            max_depth=3,
+            min_child_weight=None,
+            n_estimators=500,
             random_state=RANDOM_STATE,
+            nthread=1,
         )
         pipe = ImbPipeline(
             steps=[("rus", rus), ("smt", smt), ("scaler", scaler), ("model", model)]

@@ -100,11 +100,13 @@ def build_model(x, y):
     pipe: a trained model
     """
     # define model to train
-    model = HistGradientBoostingClassifier(
-        max_iter=500,
-        learning_rate=0.1,
-        max_depth=25,
+    model = XGBClassifier(
+        learning_rate=0.3,
+        max_depth=3,
+        min_child_weight=None,
+        n_estimators=500,
         random_state=RANDOM_STATE,
+        nthread=1,
     )
 
     # data scaler and generic pipeleine

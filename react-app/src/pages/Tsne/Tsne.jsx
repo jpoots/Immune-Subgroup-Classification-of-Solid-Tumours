@@ -15,6 +15,7 @@ import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import DataTooSmall from "../../components/graphs/DataTooSmall";
 
 // tnse api url and perplexity setting
 const API_URL = `${API_ROOT}/tsne`;
@@ -160,95 +161,108 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
 
   return (
     <>
-      <div className="columns">
-        <Box className="column is-one-quarter">
-          <GraphControls
-            setDimensions={setDimensions}
-            dimension={dimension}
-            setTitle={setTitle}
-            pageTitle={pageTitle}
-            tooltipMessage={tooltip}
-            fullName={fullName}
-            tooltipLink={tooltipLink}
-          />
+      {results.samples.length >= 3 ? (
+        <>
+          <div className="columns">
+            <Box className="column is-one-quarter">
+              <GraphControls
+                setDimensions={setDimensions}
+                dimension={dimension}
+                setTitle={setTitle}
+                pageTitle={pageTitle}
+                tooltipMessage={tooltip}
+                fullName={fullName}
+                tooltipLink={tooltipLink}
+              />
 
-          <div className="block">
-            <h1 className="has-text-weight-bold mt-">Perplexity</h1>
-            <input
-              type="range"
-              min={MIN_PERPLEXITY}
-              max={max_perplexity}
-              ref={slider}
-              value={perplexity}
-              onChange={(e) => {
-                setPerplexity(e.target.value);
-                setDisabled(false);
-              }}
-              className="queens-slider"
-            />
-            <div className="has-text-weight-bold has-text-centered">
-              {perplexity}
+              <div className="block">
+                <h1 className="has-text-weight-bold mt-">Perplexity</h1>
+                <input
+                  type="range"
+                  min={MIN_PERPLEXITY}
+                  max={max_perplexity}
+                  ref={slider}
+                  value={perplexity}
+                  onChange={(e) => {
+                    setPerplexity(e.target.value);
+                    setDisabled(false);
+                  }}
+                  className="queens-slider"
+                />
+                <div className="has-text-weight-bold has-text-centered">
+                  {perplexity}
+                </div>
+              </div>
+              <div className="has-text-centered">
+                <button
+                  className={
+                    "button queens-branding queens-button block mr-2 " +
+                    (loading ? "is-loading" : "")
+                  }
+                  onClick={handleTsne}
+                  disabled={loading || disabled}
+                >
+                  Analyse
+                </button>
+                {graphData && (
+                  <CSVLink
+                    data={download}
+                    filename="data"
+                    onClick={handleDownload}
+                  >
+                    <button className="button is-dark">Download Report</button>
+                  </CSVLink>
+                )}
+              </div>
+            </Box>
+
+            <div className="column">
+              {graphData ? (
+                <Plot
+                  data={getPlotlyData(graphData, dimension)}
+                  layout={{
+                    title: {
+                      text: title,
+                    },
+                    height: 700,
+                    showlegend: true,
+                    legend: {
+                      title: { text: "Subgroup" },
+                    },
+                    xaxis: {
+                      title: { text: "t-SNE Component 1" },
+                    },
+                    yaxis: {
+                      title: { text: "t-SNE Component 2" },
+                    },
+                    scene: {
+                      xaxis: { title: "Component 1" },
+                      yaxis: { title: "Component 2" },
+                      zaxis: { title: "Component 3" },
+                      camera: {
+                        eye: {
+                          x: 1.25,
+                          y: 1.25,
+                          z: 2.25,
+                        },
+                      },
+                    },
+                  }}
+                />
+              ) : (
+                <EmptyGraph />
+              )}
             </div>
           </div>
-          <div className="has-text-centered">
-            <button
-              className={
-                "button queens-branding queens-button block mr-2 " +
-                (loading ? "is-loading" : "")
-              }
-              onClick={handleTsne}
-              disabled={loading || disabled}
-            >
-              Analyse
-            </button>
-            {graphData && (
-              <CSVLink data={download} filename="data" onClick={handleDownload}>
-                <button className="button is-dark">Download Report</button>
-              </CSVLink>
-            )}
-          </div>
-        </Box>
-
-        <div className="column">
-          {graphData ? (
-            <Plot
-              data={getPlotlyData(graphData, dimension)}
-              layout={{
-                title: {
-                  text: title,
-                },
-                height: 700,
-                showlegend: true,
-                legend: {
-                  title: { text: "Subgroup" },
-                },
-                xaxis: {
-                  title: { text: "t-SNE Component 1" },
-                },
-                yaxis: {
-                  title: { text: "t-SNE Component 2" },
-                },
-                scene: {
-                  xaxis: { title: "Component 1" },
-                  yaxis: { title: "Component 2" },
-                  zaxis: { title: "Component 3" },
-                  camera: {
-                    eye: {
-                      x: 1.25,
-                      y: 1.25,
-                      z: 2.25,
-                    },
-                  },
-                },
-              }}
+          {openModal && (
+            <ErrorModal
+              modalMessage={modalMessage}
+              setOpenModal={setOpenModal}
             />
-          ) : (
-            <EmptyGraph />
           )}
-        </div>
-      </div>
-      {openModal && (
-        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
+        </>
+      ) : (
+        <DataTooSmall />
       )}
     </>
   );

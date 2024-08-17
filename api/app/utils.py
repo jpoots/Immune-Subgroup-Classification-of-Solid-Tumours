@@ -8,6 +8,7 @@ from sklearn.impute import IterativeImputer
 import joblib
 import os
 from .errors.BadRequest import BadRequest
+import numpy as np
 
 """
 utility functions to be used throughout the project
@@ -90,10 +91,16 @@ def parse_csv(filepath, delimiter):
         data["TYPEID"] = "None"
     type_ids = data.pop("TYPEID").values
 
-    # drop rows with more than 2 empty genes, calculate diff
+    # drop rows with more than 10 empty genes, calculate diff
     original_size = data.shape[0]
-    data.dropna(thresh=438, inplace=True)
+    data.dropna(thresh=430, inplace=True)
     invalid = original_size - data.shape[0]
+
+    # ensure all data is numeric, e.g no strings or the like in feature columns
+    try:
+        data = data.astype("float64")
+    except Exception as e:
+        raise BadRequest(body="Gene columns should contain only numeric data")
 
     # is data of valid shape
     n_col, n_row = data.shape[0], data.shape[1]

@@ -5,6 +5,7 @@ import { GraphControls } from "../../components/graphs/GraphControls";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import DataTooSmall from "../../components/graphs/DataTooSmall";
 
 /**
  * the pca visualisation page for viewing results in 2D and 3D
@@ -17,11 +18,15 @@ const Pca = () => {
   const [download, setDownload] = useState([]);
   const results = useContext(ResultsContext)[0];
 
+  console.log(results.samples.length);
+
   /**
    * generates the graph data object using the helper function from the results
    */
   useMemo(() => {
-    graphData.current = generateGraphData(results, results.samples, "pca");
+    if (results.samples.length >= 3) {
+      graphData.current = generateGraphData(results, results.samples, "pca");
+    }
   }, [results]);
 
   const handleDownload = () => {
@@ -47,62 +52,65 @@ const Pca = () => {
 
   return (
     <>
-      <div className="columns">
-        <Box className="column is-one-quarter">
-          <GraphControls
-            setDimensions={setDimensions}
-            dimension={dimension}
-            setTitle={setTitle}
-            pageTitle={pageTitle}
-            tooltipMessage={tooltip}
-            fullName={fullName}
-            tooltipLink={tooltipLink}
-          />
+      {results.samples.length >= 3 ? (
+        <div className="columns">
+          <Box className="column is-one-quarter">
+            <GraphControls
+              setDimensions={setDimensions}
+              dimension={dimension}
+              setTitle={setTitle}
+              pageTitle={pageTitle}
+              tooltipMessage={tooltip}
+              fullName={fullName}
+              tooltipLink={tooltipLink}
+            />
 
-          <CSVLink
-            data={download}
-            filename="data"
-            onClick={handleDownload}
-            className="button is-dark"
-          >
-            <button>Download Report</button>
-          </CSVLink>
-        </Box>
-
-        <div className="column is-fullheight">
-          <Plot
-            data={getPlotlyData(graphData.current, dimension)}
-            layout={{
-              title: {
-                text: title,
-              },
-              height: 700,
-              showlegend: true,
-              legend: {
-                title: { text: "Subgroup" },
-              },
-              xaxis: {
-                title: { text: "Principle Component 1" },
-              },
-              yaxis: {
-                title: { text: "Principle Component 2" },
-              },
-              scene: {
-                xaxis: { title: "Component 1" },
-                yaxis: { title: "Component 2" },
-                zaxis: { title: "Component 3" },
-                camera: {
-                  eye: {
-                    x: 1.25,
-                    y: 1.25,
-                    z: 2.25,
+            <CSVLink
+              data={download}
+              filename="data"
+              onClick={handleDownload}
+              className="button is-dark"
+            >
+              <button>Download Report</button>
+            </CSVLink>
+          </Box>
+          <div className="column is-fullheight">
+            <Plot
+              data={getPlotlyData(graphData.current, dimension)}
+              layout={{
+                title: {
+                  text: title,
+                },
+                height: 700,
+                showlegend: true,
+                legend: {
+                  title: { text: "Subgroup" },
+                },
+                xaxis: {
+                  title: { text: "Principle Component 1" },
+                },
+                yaxis: {
+                  title: { text: "Principle Component 2" },
+                },
+                scene: {
+                  xaxis: { title: "Component 1" },
+                  yaxis: { title: "Component 2" },
+                  zaxis: { title: "Component 3" },
+                  camera: {
+                    eye: {
+                      x: 1.25,
+                      y: 1.25,
+                      z: 2.25,
+                    },
                   },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
-      </div>
+      ) : (
+        <DataTooSmall />
+      )}
     </>
   );
 };

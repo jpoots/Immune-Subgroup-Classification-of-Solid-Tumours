@@ -1,8 +1,9 @@
+import Box from "../layout/Box";
 const EmptyGraph = () => {
   return (
-    <div className="box has-text-centered">
+    <Box className="has-text-centered">
       Your graph will appear here when analysis is complete
-    </div>
+    </Box>
   );
 };
 
