@@ -177,9 +177,13 @@ def pca():
     data = request.get_json()
     data = parse_json(data)
 
-    pc = PCA_PIPE.fit_transform(data["features"]).tolist()
-
-    return jsonify({"data": pc})
+    if len(data["features"]) < 3:
+        raise exceptions.BadRequest(
+            "At least 3 samples is requried to perform PCA analysis"
+        )
+    else:
+        pc = PCA_PIPE.fit_transform(data["features"]).tolist()
+        return jsonify({"data": pc})
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)

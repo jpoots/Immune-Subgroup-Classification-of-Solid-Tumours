@@ -139,8 +139,9 @@ const Help = () => {
 
             <p className="block">
               The tool also uses the PCA (Principle Component Analysis)
-              algorithm with standard scaling and the t-SNE algorithm to
-              visualise the sample data and identify clustering.
+              algorithm with standard scaling and the t-SNE (t-distributed
+              Stochastic Neighbor Embedding) algorithm to visualise the sample
+              data and identify clustering.
             </p>
 
             <p className="block">
@@ -183,7 +184,7 @@ const Help = () => {
             440 required genes. A label row/column should be included for both
             axis. In addition, to maintain accuracy, any samples for which ICST
             cannot make a confident prediction will be deemed non-classifiable
-            (NC). The current threshold for this is 87%. Results and
+            (NC). The current threshold for this is 91.5%. Results and
             visualisations can be viewed using the navigation bar at the top of
             the screen. All data including graphs is available to download.
           </div>
@@ -201,10 +202,10 @@ const Help = () => {
 
           <div className="block">
             <ul>
-              <li>Accuracy: 95.02%</li>
-              <li>F1: 89.37%</li>
-              <li>Precision: 89.11%</li>
-              <li>Recall: 89.80%</li>
+              <li>Accuracy: 95.9%</li>
+              <li>F1: 90.6%</li>
+              <li>Precision: 89.0%</li>
+              <li>Recall: 93.%</li>
             </ul>
           </div>
         </div>

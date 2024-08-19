@@ -99,8 +99,11 @@ def tsne_celery(data):
     if not num_dimensions:
         raise BadRequest(body="Missing dimension")
 
+    if len(idx) < 3:
+        raise BadRequest(body="At least 3 samples is required for t-SNE analysis")
+
     if (
-        perplexity > len(idx)
+        perplexity >= len(idx)
         or perplexity < 1
         or perplexity > 500
         or num_dimensions < 2
@@ -125,12 +128,7 @@ def tsne_celery(data):
     return results
 
 
-@celery.task(
-    throws=(BadRequest,),
-    on_failure=delete_file_on_failure,
-    time_limit=1,
-    soft_time_limit=1,
-)
+@celery.task(throws=(BadRequest,), on_failure=delete_file_on_failure)
 def analyse(filepath, delimiter):
     """
     Performs a full non-configurable analysis on a csv file

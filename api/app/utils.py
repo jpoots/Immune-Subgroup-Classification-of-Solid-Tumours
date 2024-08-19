@@ -21,6 +21,8 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 # gene list file
 GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
 
+IMPUTER = joblib.load(os.path.join(CURRENT_DIR, "mice.pkl"))
+
 gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
 
 # defining as constants for json validation, much less code than manual validation
@@ -110,8 +112,7 @@ def parse_csv(filepath, delimiter):
         )
 
     # impute missing values - note, imputation could've been done in pipeline but seperation allows us to return the imputed gene expression values to the client
-    imp = IterativeImputer().set_output(transform="pandas")
-    data = imp.fit_transform(data)
+    data = IMPUTER.transform(data)
 
     gene_names = data.columns.tolist()
     ids = data.index.values.tolist()

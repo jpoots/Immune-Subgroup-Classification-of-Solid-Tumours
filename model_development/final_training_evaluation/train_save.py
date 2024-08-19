@@ -15,6 +15,8 @@ from imblearn.over_sampling import SMOTE
 from sklearn.calibration import CalibratedClassifierCV
 from imblearn.pipeline import Pipeline as ImbPipeline
 from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
 
 import sys
 
@@ -32,7 +34,8 @@ from utils import (
 This script trains a final model, evaluates it and saves it to a file
 """
 
-FILE_NAME = "./trained_models/model.pkl"
+MODEL_FILE_NAME = "./trained_models/model.pkl"
+IMPUTER_FILE_NAME = "./trained_models/mice.pkl"
 
 TEST_SIZE = 0.2
 
@@ -72,15 +75,19 @@ def main():
 
     pipe = build_model(x_train, y_train)
 
+    imp = IterativeImputer(max_iter=100).set_output(transform="pandas")
+    imp.fit(x_train)
+
     # get prediction probs for test
     predictions, true, num_removed = predict_with_qc(pipe, 0, x_val, y_val)
 
     # saving and testing save successful
-    joblib.dump(pipe, FILE_NAME)
+    joblib.dump(pipe, MODEL_FILE_NAME)
+    joblib.dump(imp, IMPUTER_FILE_NAME)
     print("SAVE SUCCESSFUL")
 
     # sanity check the save
-    loaded_model = joblib.load(FILE_NAME)
+    loaded_model = joblib.load(MODEL_FILE_NAME)
     loaded_model.predict(x_test)
 
     print(f"Removed: {num_removed}")
