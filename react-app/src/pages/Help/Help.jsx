@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { API_ROOT } from "../../../utils/constants";
 import { CSVLink } from "react-csv";
 import ErrorModal from "../../components/errors/ErrorModal";
@@ -14,6 +14,16 @@ const Help = () => {
   const [download, setDownload] = useState([]);
   const [openModal, setOpenModal] = useState();
   const [modalMessage, setModalMessage] = useState();
+  const csvLink = useRef();
+
+  /**
+   * use effect to trigger download once state is set
+   */
+  useEffect(() => {
+    if (download.length != 0) {
+      csvLink.current.link.click();
+    }
+  }, [download]);
 
   /**
    * gets the current gene name list and puts it into an array of arrays in down load to be handled by CSVLink
@@ -30,7 +40,6 @@ const Help = () => {
         let gene_name_list = response.data.results;
         gene_name_list = gene_name_list.map((name) => [name]);
 
-        console.log(gene_name_list);
         setDownload(gene_name_list);
       }
     } catch (err) {
@@ -172,15 +181,20 @@ const Help = () => {
             </a>{" "}
             with each column representing a sample and each row a gene. A list
             of the current accepted gene names can be found{" "}
+            <a
+              className="queens-branding-text"
+              onClick={handleDownloadGeneList}
+            >
+              here
+            </a>
+            .
             <CSVLink
               data={download}
               filename="data"
-              onClick={handleDownloadGeneList}
-              className="queens-branding-text"
-            >
-              here
-            </CSVLink>
-            . The genes may be in any order and a file may contain more than the
+              className="is-hidden"
+              ref={csvLink}
+            ></CSVLink>
+            The genes may be in any order and a file may contain more than the
             440 required genes. A label row/column should be included for both
             axis. In addition, to maintain accuracy, any samples for which ICST
             cannot make a confident prediction will be deemed non-classifiable

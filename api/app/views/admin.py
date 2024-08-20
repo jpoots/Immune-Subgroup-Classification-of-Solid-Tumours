@@ -116,7 +116,7 @@ def edit_gene_list():
         InternalServerError: there is some error writing to the file
     """
     if request.method == "GET":
-        return jsonify(data={"results": utils.gene_list_csv.columns.tolist()})
+        return jsonify(data={"results": utils.gene_list})
     if request.method == "PUT":
         # is not auth
         if not get_jwt_identity():

@@ -29,6 +29,7 @@ const Confidence = ({ graphState }) => {
   const results = useContext(ResultsContext)[0];
   const [graphData, setGraphData] = graphState;
   const cancelled = useRef();
+  const confidenceResults = useRef();
 
   /**
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
@@ -45,13 +46,14 @@ const Confidence = ({ graphState }) => {
    * handles the confidence interval download info
    */
   const handleDownload = () => {
-    let toDownload = results.samples.map((sample) => ({
+    console.log(confidenceResults.current);
+    let toDownload = confidenceResults.current.map((sample) => ({
       sampleID: sample.sampleID,
-      max: sample.confidence.max,
-      upper: sample.confidence.upper,
-      median: sample.confidence.median,
-      lower: sample.confidence.lower,
-      min: sample.confidence.min,
+      max: sample.max,
+      upper: sample.upper,
+      median: sample.median,
+      lower: sample.lower,
+      min: sample.min,
     }));
 
     setDownload(toDownload);
@@ -125,16 +127,17 @@ const Confidence = ({ graphState }) => {
       }),
     };
 
-    let confidenceResults = await callAsyncApi(
+    let confidenceAPIResults = await callAsyncApi(
       API_URL,
       request,
       setModalMessage,
       setOpenModal,
       cancelled
     );
-    if (confidenceResults.success) {
+    if (confidenceAPIResults.success) {
       setTitle(`${interval}% Confidence Interval`);
-      setGraphData(generateConfidenceData(confidenceResults.results));
+      setGraphData(generateConfidenceData(confidenceAPIResults.results));
+      confidenceResults.current = confidenceAPIResults.results;
       setDisabled(true);
     }
 
