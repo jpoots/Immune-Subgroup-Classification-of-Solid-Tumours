@@ -24,6 +24,9 @@ GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
 IMPUTER = joblib.load(os.path.join(CURRENT_DIR, "mice.pkl"))
 
 gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
+gene_list_csv.columns = [
+    str(column).strip().upper() for column in gene_list_csv.columns
+]
 
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
@@ -74,9 +77,15 @@ def parse_csv(filepath, delimiter):
     try:
         # is file in request and is it a valid CSV
         data = pd.read_csv(filepath, index_col=0, delimiter=delimiter)
+
         data = data.T
+
+        data.columns = data.columns.str.upper()
+        data.columns = data.columns.str.strip()
+
         # extract valid data
         data = data[gene_list_csv.columns.intersection(data.columns)]
+
     except Exception as e:
         # if file could not be succesfully read
         raise BadRequest(
@@ -106,7 +115,7 @@ def parse_csv(filepath, delimiter):
 
     # is data of valid shape
     n_col, n_row = data.shape[0], data.shape[1]
-
+    print(n_row)
     if n_row != 440 or n_col == 0:
         raise BadRequest(
             body="Sample files should contain 440 genes and at least 1 sample"
@@ -218,4 +227,7 @@ def reload_gene_list():
     """Reloads the in memory gene list from the CSV file"""
     global gene_list_csv
     gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
+    gene_list_csv.columns = [
+        str(column).strip().upper() for column in gene_list_csv.columns
+    ]
     return

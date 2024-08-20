@@ -38,7 +38,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router basename="/icst">
       <Header />
       <ErrorBoundary FallbackComponent={FallbackError} onError={resetApp}>
         <ResultsContext.Provider value={[results, setResults]}>
