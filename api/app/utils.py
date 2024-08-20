@@ -106,15 +106,17 @@ def parse_csv(filepath, delimiter):
 
     # is data of valid shape
     n_col, n_row = data.shape[0], data.shape[1]
+
     if n_row != 440 or n_col == 0:
         raise BadRequest(
             body="Sample files should contain 440 genes and at least 1 sample"
         )
 
+    gene_names = data.columns.tolist()
+
     # impute missing values - note, imputation could've been done in pipeline but seperation allows us to return the imputed gene expression values to the client
     data = IMPUTER.transform(data)
 
-    gene_names = data.columns.tolist()
     ids = data.index.values.tolist()
     features = data.to_numpy()
 

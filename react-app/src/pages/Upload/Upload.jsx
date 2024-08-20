@@ -17,7 +17,7 @@ import Box from "../../components/layout/Box";
  */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
-const MAX_FILE_SIZE_MB = 30;
+const MAX_FILE_SIZE_MB = 60;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1048576;
 const API_URL = `${API_ROOT}/analyse`;
 
