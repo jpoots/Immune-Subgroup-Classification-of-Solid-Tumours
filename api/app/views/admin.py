@@ -10,12 +10,13 @@ from flasgger import swag_from
 from app import limiter
 from filelock import FileLock
 from ..models import Admin
-from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE
+from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, jwt
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 import csv
 from secrets import token_urlsafe
+import json
 
 """
 Admin API endpoints for setting the gene lists
@@ -45,11 +46,11 @@ def authenticate():
     # validate json
     request_json = request.get_json()
     if "password" not in request_json or "username" not in request_json:
-        raise exceptions.BadRequest("Missing credentials")
+        raise exceptions.BadRequest("Username and password required")
 
     # get creds from request
-    password = request_json["password"]
-    username = request_json["username"]
+    password = str(request_json["password"])
+    username = str(request_json["username"])
 
     # get user
     user = Admin.query.filter_by(username=username).first()
@@ -129,9 +130,13 @@ def edit_gene_list():
 
         # removes duplicates https://stackoverflow.com/questions/1653970/does-python-have-an-ordered-set dict used as ordered set doesn't exist
         new_gene_list = request_json["geneList"]
+
+        if not isinstance(new_gene_list, list):
+            raise exceptions.BadRequest("bad gene list")
+
         new_gene_list = list(dict.fromkeys(new_gene_list))
 
-        if not isinstance(new_gene_list, list) or len(new_gene_list) == 0:
+        if len(new_gene_list) == 0:
             raise exceptions.BadRequest("bad gene list")
 
         # lock to prevent race condition

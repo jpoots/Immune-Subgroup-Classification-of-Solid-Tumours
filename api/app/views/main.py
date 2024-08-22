@@ -55,10 +55,10 @@ def parse_samples():
 
     # save for research
     filename = f"{uuid.uuid4()}"
-    file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
-
+    filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
+    file.save(filepath)
     # parse data
-    data = parse_csv(file, delimiter)
+    data = parse_csv(filepath, delimiter)
 
     # strucutre data for ease of surfing
     features = pd.DataFrame(data["features"], columns=data["gene_names"])
@@ -103,55 +103,14 @@ def predictgroup():
     idx = data["ids"]
     features = data["features"]
 
-    predictions, prediction_probs, invalid = predict(features)
+    predictions, prediction_probs, num_nc = predict(features)
 
     # prepare for response
     results = []
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
-        results.append(
-            {"sampleID": id, "prediction": pred, "probs": prob_list, "invalid": invalid}
-        )
+        results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
 
-    return jsonify({"data": results})
-
-
-@limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
-@swag_from(os.path.join(DOCUMENTATION_PATH, "probability.yaml"))
-@main.route("/probability", methods=["POST"])
-def probaility():
-    """Endpoint to get prediction probabilities from JSON. Full details of request input in swagger docs.
-
-    Returns:
-        A dict including the sample id and an array of the 6 probabilites for each subgroup.
-
-        "data": {
-            "invalid": 0,
-            "samples": [
-            {
-                "genes": {
-                "ACTL6A_S5": 745.567,
-                },
-                "sampleID": "TCGA.02.0047.GBM.C4",
-                "probs": [0.1,0.1,0.1,0.1,0.1,0.5]
-
-            },
-        }
-
-    Raises:
-        BadRequest: The JSON sent is missing or invalid
-    """
-    data = request.get_json()
-    data = parse_json(data)
-
-    # make prediction
-    probs = probability(data["features"])
-
-    # prepare for response
-    results = []
-    for pred, id in zip(probs, data["ids"]):
-        results.append({"sampleID": id, "probs": pred})
-
-    return jsonify({"data": results})
+    return jsonify({"data": {"results": results, "nc": num_nc}})
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
@@ -183,7 +142,13 @@ def pca():
         )
     else:
         pc = PCA_PIPE.fit_transform(data["features"]).tolist()
-        return jsonify({"data": pc})
+        idx = data["ids"]
+
+        results = [
+            {"sampleID": sample_id, "pca": pca} for sample_id, pca in zip(idx, pc)
+        ]
+
+        return jsonify({"data": results})
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
@@ -229,9 +194,9 @@ def tsne_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
-    if not data["numDimensions"]:
+    if "numDimensions" not in data:
         raise exceptions.BadRequest("t-SNE requires a number of dimensions")
-    if not data["perplexity"]:
+    if "perplexity" not in data:
         raise exceptions.BadRequest("t-SNE requires perplexity")
     task = tsne_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202

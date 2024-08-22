@@ -29,7 +29,7 @@ def celery_task_results(task_id):
     task = celery.AsyncResult(task_id)
 
     if task.status == "SUCCESS":
-        result = jsonify({"status": "SUCCESS", "data": task.result})
+        result = jsonify({"data": task.result})
         status = 200
     elif task.status == "PENDING":
         status = 201

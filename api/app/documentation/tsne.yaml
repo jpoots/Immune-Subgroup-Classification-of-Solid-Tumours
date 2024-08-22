@@ -7,10 +7,6 @@ parameters:
     required: true
     schema:
       properties:
-        interval:
-          maximum: 100
-          minimum: 0
-          type: integer
         samples:
           items:
             properties:
@@ -23,23 +19,12 @@ parameters:
                 type: string
             type: object
           type: array
-      required:
-        - samples
+        perplexity:
+          type: integer
+        numDimensions:
+          type: integer
+      required: true
       type: object
-  - description: The perplexity. Values in the range 1, 500 or number of samples are accepted.
-    in: body
-    name: perplexity
-    required: true
-    schema:
-      type: integer
-      example: 10
-  - description: The number of dimensions to return. Values in the range 2, 100 are accepted.
-    in: body
-    name: numDimensions
-    required: true
-    schema:
-      type: integer
-      example: 2
 produces:
   - application/json
 responses:
@@ -57,6 +42,6 @@ responses:
     description: There was an issue with the json sent
   500:
     description: An interval server error has occured
-summary: Performs t-SNE analysis
+summary: Performs t-SNE analysis on parsed samples
 tags:
   - t-SNE

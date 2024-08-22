@@ -1,5 +1,11 @@
 produces:
   - application/json
+parameters:
+  - description: The task ID
+    in: path
+    name: task_id
+    schema:
+      type: string
 responses:
   200:
     description: The current request is ongoing
@@ -29,25 +35,14 @@ responses:
                     type: object
                   pca:
                     items:
-                      example:
-                        - 1
-                        - 2
-                        - 3
                       type: number
                     type: array
                   prediction:
                     type: integer
                   probs:
                     items:
-                      example:
-                        - 1
-                        - 2
-                        - 3
-                        - 4
-                        - 5
-                        - 6
                       type: number
-                    type: array
+                  type: array
                   sampleID:
                     type: string
                   typeid:

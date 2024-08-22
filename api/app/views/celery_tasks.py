@@ -48,6 +48,9 @@ def confidence_celery(data):
     sample_ids = data["ids"]
     interval = data["interval"]
 
+    if interval > 100 or interval < 0:
+        raise BadRequest(body="invalid interval")
+
     # parcel for return
     results = []
     for interval, id in zip(confidence_intervals(features, interval), sample_ids):
@@ -65,7 +68,7 @@ def confidence_celery(data):
     return results
 
 
-@celery.task(throws=(BadRequest,), time_limit=0.1)
+@celery.task(throws=(BadRequest,))
 def tsne_celery(data):
     """
     Performs t-SNE analysis on input JSON data

@@ -1,11 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
 from werkzeug import exceptions
-from .handlers import (
-    handle_http_exception,
-    handle_generic_exception,
-    handle_custom_bad_request,
-)
 from celery import Celery
 from flasgger import Swagger
 from flask_limiter import Limiter
@@ -89,7 +84,7 @@ def create_app():
             "info": {
                 "title": "ICST",
                 "version": "1.0",
-                "description": f"API endpoints for ICST which can be found at {API_ROOT}. All requests are limited to {MAX_FILE_SIZE}MB",
+                "description": f"API endpoints for ICST which can be found at {API_ROOT}. All requests are limited to {MAX_FILE_SIZE}MB. Asynchronous results will be deleted {RESULTS_TIMEOUT} seconds after completion",
             }
         },
     )
@@ -112,6 +107,12 @@ def create_app():
         from . import models
 
         db.create_all()
+
+    from .handlers import (
+        handle_http_exception,
+        handle_generic_exception,
+        handle_custom_bad_request,
+    )
 
     # register error handlers
     app.register_error_handler(exceptions.HTTPException, handle_http_exception)

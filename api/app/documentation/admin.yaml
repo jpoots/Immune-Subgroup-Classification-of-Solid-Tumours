@@ -6,16 +6,6 @@ parameters:
     name: Authorization
     required: true
     type: string
-  - description: The admin's username
-    in: body
-    name: username
-    required: true
-    type: string
-  - description: The admin's password
-    in: body
-    name: password
-    required: true
-    type: string
 produces:
   - application/json
 responses:

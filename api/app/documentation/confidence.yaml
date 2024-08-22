@@ -19,18 +19,15 @@ parameters:
                 type: string
             type: object
           type: array
-      required:
-        - samples
+        interval:
+          description: the confidence interval
+          maximum: 100
+          minimum: 0
+          example: 95
+          type: integer
+      required: true
       type: object
-  - description: The percentage interval requested
-    in: body
-    name: interval
-    required: true
-    schema:
-      maximum: 100
-      minimum: 0
-      example: 95
-      type: integer
+
 produces:
   - application/json
 responses:
@@ -48,6 +45,6 @@ responses:
     description: There was an issue with the file sent
   500:
     description: An interval server error has occured
-summary: Generate confidence interval box plot informatio
+summary: Generate confidence intervals for parsed samples
 tags:
   - Confidence interval

@@ -35,22 +35,16 @@ responses:
               sampleID:
                 type: string
               pca:
-                example:
-                  - 1
-                  - 2
-                  - 3
                 items:
-                  - type: number
+                  type: number
                 type: array
             type: object
           type: array
-        status:
-          type: string
       type: object
   400:
     description: Task failed due to an issue with client input
   500:
     description: An interval server error has occured
-summary: Get analysis results
+summary: Perform PCA analysis on parsed samples
 tags:
   - PCA

@@ -51,6 +51,7 @@ SCHEMA = {
         },
         "interval": {"type": "integer", "minimum": 0, "maximum": 100},
         "perplexity": {"type": "integer"},
+        "numDimensions": {"type": "integer"},
     },
     "required": ["samples"],
 }
@@ -87,7 +88,6 @@ def parse_csv(filepath, delimiter):
 
         # extract valid data
         data = data[gene_names_to_extract]
-
     except Exception as e:
         # if file could not be succesfully read
         raise BadRequest(

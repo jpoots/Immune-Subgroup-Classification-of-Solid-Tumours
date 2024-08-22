@@ -31,7 +31,7 @@ def predict(features):
     Returns:
         predictions: a list of predictions
         prediction_probs: a list of prediction probs for each sample
-        invalid: the number of invalid samples
+        num_nc: the number of non classifiable samples
     """
 
     # get probabilites and mark those below QC
@@ -51,8 +51,8 @@ def predict(features):
         for index, prediction in enumerate(predictions)
     ]
 
-    invalid = len(nc_indicies)
-    return predictions, prediction_probs.tolist(), invalid
+    num_nc = len(nc_indicies)
+    return predictions, prediction_probs.tolist(), num_nc
 
 
 def confidence_intervals(features, interval):

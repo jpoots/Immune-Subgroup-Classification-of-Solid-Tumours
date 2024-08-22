@@ -30,25 +30,30 @@ responses:
     schema:
       properties:
         data:
-          items:
-            properties:
-              sampleID:
-                type: string
-              prediction:
-                example:
-                  - 1
-                items:
-                  - type: number
-                type: array
-            type: object
-          type: array
-        status:
-          type: string
+          properties:
+            nc:
+              type: integer
+            results:
+              items:
+                properties:
+                  prediction:
+                    type: integer
+                  probs:
+                    items:
+                      type: number
+                  type: array
+                  sampleID:
+                    type: string
+                  typeid:
+                    type: string
+                type: object
+              type: array
+          type: object
       type: object
   400:
     description: Task failed due to an issue with client input
   500:
     description: An interval server error has occured
-summary: Get analysis results
+summary: Perform predictions on parsed samples
 tags:
   - Predict
