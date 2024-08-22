@@ -12,7 +12,7 @@ from .celery_tasks import confidence_celery, tsne_celery, analyse
 from flasgger import swag_from
 from app import limiter
 import pandas as pd
-from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, RESULTS_ENDPOINT
+from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, API_ROOT
 
 """
 The main api endpoints for the system to perform analysis
@@ -20,7 +20,7 @@ The main api endpoints for the system to perform analysis
 
 # the pca pipeline to be used
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
-
+RESULTS_ENDPOINT = f"{API_ROOT}/results"
 
 main = Blueprint("main", __name__)
 

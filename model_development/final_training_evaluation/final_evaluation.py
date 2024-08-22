@@ -38,7 +38,7 @@ MODEL_FILE_NAME = "./trained_models/model.pkl"
 # the location to store the probability analysis
 PROBS_FOLDER_NAME = "./prob_analysis/"
 # the QC threshold to u89
-QC_THRESHOLD = 0.915
+QC_THRESHOLD = 0.92
 
 
 def main():

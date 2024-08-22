@@ -17,7 +17,7 @@ import Box from "../../components/layout/Box";
  */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
-const MAX_FILE_SIZE_MB = 60;
+const MAX_FILE_SIZE_MB = 40;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1048576;
 const API_URL = `${API_ROOT}/analyse`;
 
@@ -291,7 +291,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
         </div>
         <div className="block">
           <a
-            href="/test_data.csv"
+            href="/icst/test_data.csv"
             className="queens-branding-text mr-5"
             download={true}
           >

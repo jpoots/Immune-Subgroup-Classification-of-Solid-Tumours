@@ -32,7 +32,7 @@ JWT_ACCESS_EXPIRY = int(os.getenv("JWT_ACCESS_EXPIRY"))
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 DATABASE_URI = os.getenv("DATABASE_URI_MYSQL")
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
-RESULTS_ENDPOINT = os.getenv("RESULTS_ENDPOINT")
+API_ROOT = os.getenv("API_ROOT")
 
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
@@ -89,7 +89,7 @@ def create_app():
             "info": {
                 "title": "ICST",
                 "version": "1.0",
-                "description": f"API endpoints for ICST which can be found at http://localhost:{PORT}. All requests are limited to {MAX_FILE_SIZE}MB",
+                "description": f"API endpoints for ICST which can be found at {API_ROOT}. All requests are limited to {MAX_FILE_SIZE}MB",
             }
         },
     )

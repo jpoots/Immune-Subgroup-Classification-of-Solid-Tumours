@@ -109,6 +109,10 @@ def parse_csv(filepath, delimiter):
     data.dropna(thresh=430, inplace=True)
     invalid = original_size - data.shape[0]
 
+    # if the request had at least 1 sample and all were removed
+    if invalid == original_size and original_size != 0:
+        raise BadRequest(body="All samples have been rejected due to missing genes")
+
     # ensure all data is numeric, e.g no strings or the like in feature columns
     try:
         data = data.astype("float64")

@@ -52,10 +52,11 @@ const ClassificationByType = () => {
   const handleDownload = () => {
     let results = traces.map((trace) => {
       let traceResults = { subgroup: trace.name };
+
       trace.x.forEach((type, index) => {
         traceResults[type] = trace.y[index];
       });
-      return results;
+      return traceResults;
     });
 
     setDownload(results);
@@ -66,7 +67,7 @@ const ClassificationByType = () => {
       <div className="columns">
         <Box className="column is-one-quarter">
           <h1 className="mt-4 block has-text-weight-bold">
-            Classification by Type
+            Classification by Cancer Type
           </h1>
 
           <TitleSetter setTitle={setTitle} />

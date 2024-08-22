@@ -173,7 +173,7 @@ const Help = () => {
             already been FPKM normalised. This may be uploaded on the upload
             page. Data should be formatted as shown in the{" "}
             <a
-              href="/test_data.csv"
+              href="/icst/test_data.csv"
               className="queens-branding-text"
               download={true}
             >
