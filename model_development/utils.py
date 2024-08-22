@@ -199,6 +199,45 @@ def predict_with_qc(pipe, threshold, x, y):
     return predictions, filtered_true, num_nc
 
 
+def predict_with_qc_and_predom(pipe, threshold, x, y):
+    """Performs predictions with a QC threshold given data and an estimarots
+    Args:
+    pipe: the estimator
+    threshold: the QC threshold value
+    x: the x features
+    y: the y labels
+
+    Returns:
+    predictions: the predictions assigned with those below threshold removed
+    filtered_true: the corresponding set of y true values with those below threshold removed
+    num_nc: the number of samples belwo the QC threshold
+    """
+    # get prediction probs for train and test
+    prediction_probs = pipe.predict_proba(x)
+
+    nc_indicies, predom_indicies = [], []
+
+    for index, prob in enumerate(prediction_probs):
+        max_prob = np.amax(prob)
+        if max_prob < threshold:
+
+            if (max_prob + np.sort(prob)[-2]) > threshold and max_prob > 0.5:
+                predom_indicies.append(index)
+            else:
+                nc_indicies.append(index)
+
+    indicies_to_remove = nc_indicies + predom_indicies
+
+    filtered_samples = np.delete(x, indicies_to_remove, axis=0)
+
+    filtered_true = np.delete(y, indicies_to_remove)
+
+    predictions = pipe.predict(filtered_samples)
+    num_nc = len(nc_indicies)
+    num_predom = len(predom_indicies)
+    return predictions, filtered_true, num_nc, num_predom
+
+
 def tune_models(x_train, y_train, models):
     """Perform grid search on all models and evaluates performance
     Args:

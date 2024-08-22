@@ -36,23 +36,34 @@ def predict(features):
 
     # get probabilites and mark those below QC
     prediction_probs = MODEL.predict_proba(features)
-    nc_indicies = [
-        index
-        for index, prob in enumerate(prediction_probs)
-        if np.amax(prob) < QC_THRESHOLD
-    ]
+
+    nc_indicies, predom_indicies = [], []
+
+    for index, prob in enumerate(prediction_probs):
+        max_prob = np.amax(prob)
+        if max_prob < QC_THRESHOLD:
+            if (max_prob + np.sort(prob)[-2]) > QC_THRESHOLD and max_prob > 0.5:
+                predom_indicies.append(index)
+            else:
+                nc_indicies.append(index)
 
     # make prediction
     predictions = MODEL.predict(features).tolist()
 
-    # filter out NC probs
-    predictions = [
-        prediction + 1 if index not in nc_indicies else "NC"
-        for index, prediction in enumerate(predictions)
-    ]
+    filtered_predictions = []
+
+    for index, prediction in enumerate(predictions):
+        pred_to_add = 0
+        if index in nc_indicies:
+            pred_to_add = "NC"
+        elif index in predom_indicies:
+            pred_to_add = 7
+        else:
+            pred_to_add = prediction + 1
+        filtered_predictions.append(pred_to_add)
 
     num_nc = len(nc_indicies)
-    return predictions, prediction_probs.tolist(), num_nc
+    return filtered_predictions, prediction_probs.tolist(), num_nc
 
 
 def confidence_intervals(features, interval):

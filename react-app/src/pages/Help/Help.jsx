@@ -75,10 +75,12 @@ const Help = () => {
               >
                 The Immune Landscape of Cancer
               </a>
-              . Full class names are listed below. More details about the
-              characterists along with therapeutic inights can be fodun in the
-              paper. The tool also provides useful visualisation tools for the
-              data.
+              . In addition to these six subgroups, a seventh subgroup (the
+              predominant subgroup) for samples which fall between two subgroups
+              has been discovred by Dr Rafiee. Full class names are listed
+              below. More details about the characterists along with therapeutic
+              inights can be fodun in the paper. The tool also provides useful
+              visualisation tools for the data.
             </div>
           </div>
 
@@ -115,6 +117,10 @@ const Help = () => {
                   <tr>
                     <td className="has-text-centered">6</td>
                     <td className="has-text-centered">TGF-β Dominant</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">7</td>
+                    <td className="has-text-centered">Predominant</td>
                   </tr>
                 </tbody>
               </table>
