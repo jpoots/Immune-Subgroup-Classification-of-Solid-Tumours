@@ -1,6 +1,6 @@
 import Plot from "react-plotly.js";
 import { useContext, useEffect, useRef, useState } from "react";
-import TitleSetter from "../../components/graphs/TitleSetter";
+import GraphTitleSetter from "../../components/graphs/GraphTitleSetter";
 import { CSVLink } from "react-csv";
 import { callAsyncApi } from "../../../utils/asyncAPI";
 import ErrorModal from "../../components/errors/ErrorModal";
@@ -8,6 +8,7 @@ import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
@@ -148,11 +149,8 @@ const Confidence = ({ graphState }) => {
     <>
       <div className="columns">
         <Box className="column is-one-quarter">
-          <h1 className="mt-4 block has-text-weight-bold">
-            {" "}
-            Confidence Interval
-          </h1>
-          <TitleSetter setTitle={setTitle} />
+          <Title classes="mt-4"> Confidence Interval</Title>
+          <GraphTitleSetter setTitle={setTitle} />
 
           <div className="block">
             <h1 className="has-text-weight-bold mt-5">Interval</h1>

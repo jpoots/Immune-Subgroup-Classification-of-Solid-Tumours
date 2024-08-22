@@ -1,12 +1,13 @@
 import { useState, useMemo, useContext } from "react";
 import Plot from "react-plotly.js";
-import TitleSetter from "../../components/graphs/TitleSetter";
+import GraphTitleSetter from "../../components/graphs/GraphTitleSetter";
 import { CSVLink } from "react-csv";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 const ClassificationByType = () => {
-  const [title, setTitle] = useState("Class label by type");
+  const [title, setTitle] = useState("Class label by cancer type");
   const [download, setDownload] = useState([]);
   const results = useContext(ResultsContext)[0];
 
@@ -66,11 +67,8 @@ const ClassificationByType = () => {
     <>
       <div className="columns">
         <Box className="column is-one-quarter">
-          <h1 className="mt-4 block has-text-weight-bold">
-            Classification by Cancer Type
-          </h1>
-
-          <TitleSetter setTitle={setTitle} />
+          <Title classes="mt-4">Classification by Cancer Type</Title>
+          <GraphTitleSetter setTitle={setTitle} />
 
           <CSVLink
             data={download}

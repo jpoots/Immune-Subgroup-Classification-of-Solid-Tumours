@@ -1,6 +1,7 @@
 import { Tooltip } from "react-tooltip";
 import { renderToStaticMarkup } from "react-dom/server";
-import TitleSetter from "./TitleSetter";
+import GraphTitleSetter from "./GraphTitleSetter";
+import Title from "../other/Title";
 
 /**
  * a componet which handles the dimensions viewed and the title of a visualisation graph
@@ -31,7 +32,7 @@ export function GraphControls({
 
   return (
     <>
-      <h1 className="has-text-weight-bold block mt-4">
+      <Title classes="mt-4">
         {pageTitle}{" "}
         <a
           className="queens-branding-text"
@@ -40,7 +41,7 @@ export function GraphControls({
         >
           ?
         </a>
-      </h1>
+      </Title>
       <div
         className="control block"
         onChange={() => setDimensions(dimension === 2 ? 3 : 2)}
@@ -68,7 +69,7 @@ export function GraphControls({
           3D
         </label>
       </div>
-      <TitleSetter setTitle={setTitle} />
+      <GraphTitleSetter setTitle={setTitle} />
       <Tooltip
         id="visual-tooltip"
         place="right-end"

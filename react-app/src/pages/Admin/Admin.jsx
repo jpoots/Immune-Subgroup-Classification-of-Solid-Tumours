@@ -8,6 +8,7 @@ import useAuthHeader from "react-auth-kit/hooks/useAuthHeader";
 import { Tooltip } from "react-tooltip";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 /**
  * the admin page where the admin can edit the gene list, create a new admin or log out
@@ -195,7 +196,7 @@ const Admin = () => {
       <Box>
         <div className="columns">
           <div className="column is-half">
-            <h1 className="has-text-weight-bold block">
+            <Title>
               Edit accepted genes{" "}
               <a
                 className="queens-branding-text"
@@ -204,7 +205,7 @@ const Admin = () => {
               >
                 ?
               </a>
-            </h1>
+            </Title>
           </div>
 
           <div className="column is-half has-text-right">

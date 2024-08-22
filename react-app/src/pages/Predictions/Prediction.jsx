@@ -1,4 +1,3 @@
-import { SearchByID } from "../../components/tables/SearchByID";
 import { Table } from "../../components/tables/Table";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { useState, useMemo, useContext } from "react";
@@ -13,6 +12,8 @@ import {
 import { CSVLink } from "react-csv";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
+import SearchAndFilter from "../../components/tables/SearchAndFilter";
 
 /**
  * the report page showing the prediction table with confidence
@@ -95,36 +96,8 @@ const Prediction = () => {
       {results ? (
         <>
           <Box>
-            <h1 className="block has-text-weight-bold">Prediction Report</h1>
-
-            <div className="columns">
-              <div className="column is-one-quarter">
-                <SearchByID table={table} />
-              </div>
-              <div className="column is-half">
-                <div className="select is-danger">
-                  <select
-                    name=""
-                    onChange={(e) => {
-                      table
-                        .getColumn("prediction")
-                        .setFilterValue(e.target.value);
-                    }}
-                    defaultValue={""}
-                  >
-                    <option value="">All</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                    <option value="5">5</option>
-                    <option value="6">6</option>
-                    <option value="NC">Non-classifiable</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
+            <Title>Prediction Report</Title>
+            <SearchAndFilter table={table}></SearchAndFilter>
             <Table table={table} />
           </Box>
           <PaginationBar table={table} />

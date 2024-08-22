@@ -1,4 +1,4 @@
-const TitleSetter = ({ setTitle }) => {
+const GraphTitleSetter = ({ setTitle }) => {
   return (
     <div className="block mt-2">
       <h1 className="has-text-weight-bold">Title</h1>
@@ -12,4 +12,4 @@ const TitleSetter = ({ setTitle }) => {
   );
 };
 
-export default TitleSetter;
+export default GraphTitleSetter;

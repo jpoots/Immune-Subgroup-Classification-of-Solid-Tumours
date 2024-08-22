@@ -10,8 +10,9 @@ import { Table } from "../../components/tables/Table";
 import { CSVLink } from "react-csv";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
-import { TitleAndSearch } from "../../components/tables/TitleAndSearch";
 import Box from "../../components/layout/Box";
+import SearchAndFilter from "../../components/tables/SearchAndFilter";
+import Title from "../../components/other/Title";
 
 /**
  * the gene expression page where the extracted genes can be viewed
@@ -22,6 +23,9 @@ const GeneExpression = () => {
   const [sorting, setSorting] = useState([]);
   const [download, setDownload] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
+  const [columnVisibility, setColumnVisibility] = useState({
+    prediction: false,
+  });
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
@@ -39,6 +43,16 @@ const GeneExpression = () => {
         header: "Sample ID",
         id: "sampleID",
         cell: (props) => <p>{props.getValue()}</p>,
+      },
+
+      {
+        accessorKey: "prediction",
+        header: "Subgroup",
+        id: "prediction",
+        cell: (props) => <p>{props.getValue()}</p>,
+        enableSorting: false,
+        enableColumnVisibility: false,
+        filterFn: "equalsString",
       },
     ];
 
@@ -65,11 +79,12 @@ const GeneExpression = () => {
     onPaginationChange: setPagination,
     getSortedRowModel: getSortedRowModel(),
     onSortingChange: setSorting,
-
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       columnFilters,
       pagination,
       sorting,
+      columnVisibility,
     },
   });
 
@@ -90,12 +105,11 @@ const GeneExpression = () => {
     setDownload(toExport);
   };
 
-  const title = "Gene Expression Report";
-
   return (
     <>
       <Box>
-        <TitleAndSearch title={title} table={table} />
+        <Title>Gene Expression Report</Title>
+        <SearchAndFilter table={table}></SearchAndFilter>
         <Table table={table} />
       </Box>
       <PaginationBar table={table} />
