@@ -1,18 +1,12 @@
 import joblib
 import sklearn
-import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from sklearn.calibration import CalibrationDisplay
-from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 import pandas as pd
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
 )
-from scipy.stats import beta
-
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
@@ -40,7 +34,7 @@ def main():
     idx, x, y, _genes = split_data(data)
 
     # remove test set and get validtion set
-    x_train, x_test, y_train, y_test = train_test_split(
+    x_train, _x_test, y_train, _y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
     x_train, x_val, y_train, y_val = train_test_split(
@@ -67,9 +61,9 @@ def main():
 def evaluate_performance(true, predictions, num_removed):
     """Evaluates a models performance and displays a confusion matrix
     Args:
-    true: The target labels
-    predictions: the models predictions
-    num_removed: the number of results removed by the QC threshold
+        true: The target labels
+        predictions: the models predictions
+        num_removed: the number of results removed by the QC threshold
     """
     print(f"Removed: {num_removed}")
     print(f"QC Threshold: {QC_THRESHOLD}")

@@ -12,13 +12,13 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils import get_data, split_data, RANDOM_STATE
+from utils import get_data, split_data, RANDOM_STATE, TEST_SIZE
 
 """
 Trains N_BOOSTRAPS number of models on a bootstrap resample of the dataset and saves to a file to be used for confidence predictions
 """
 
-# location to save
+# location to save the bootstraps
 FILE_NAME = "./trained_models/bootstrap_models.pkl"
 
 # define sample strategy
@@ -34,8 +34,7 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
-# training params
-TEST_SIZE = 0.2
+# number of bootstraps to use
 N_BOOTSTRAPS = 10
 
 
@@ -45,15 +44,14 @@ def main():
     """
     # import data using util
     data = get_data()
-    idx, x, y, genes = split_data(data)
+    _idx, x, y, _genes = split_data(data)
 
     # remove the test set
-    x_train, x_test, y_train, y_test = train_test_split(
+    x_train, _x_test, y_train, _y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
-
-    # remove the validation
-    x_train, x_test, y_train, y_test = train_test_split(
+    # remove the validation set
+    x_train, _x_test_val, y_train, _y_test_val = train_test_split(
         x_train,
         y_train,
         test_size=TEST_SIZE,
@@ -61,32 +59,32 @@ def main():
         random_state=RANDOM_STATE,
     )
 
+    # train bootstraps
     models = train_bootstraps(x_train, y_train)
+
+    # save
     print("TRAINING COMPLETE SAVING")
     joblib.dump(models, FILE_NAME)
-
-    # saving and testing save successful
     print("SAVE SUCCESSFUL")
 
 
 def train_bootstraps(x_train, y_train):
-    """Trains N_BOOTSRAPS models on a bootstrap resample of the training data
+    """Trains N_BOOTSTRAPS models on a bootstrap resample of the training data
     Args:
-    axs: Axs of the confusion amtric plot
-    x_train: the training data
-    y_train: the training data
+        x_train: the training data
+        y_train: the training data
 
     Returns:
-    models: a list of trained models
+        models: a list of trained models
     """
     # data scaler
     scaler = MinMaxScaler()
 
-    # set up samplers and fit
+    # set up samplers
     rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
     smt = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
-    # set up pipeline and fit
+    # set up pipeline and fit for each model, append to list
     models = []
     for bootstrap in range(N_BOOTSTRAPS):
         model = XGBClassifier(
@@ -105,7 +103,9 @@ def train_bootstraps(x_train, y_train):
         invalid_sample = True
         while invalid_sample:
             try:
-                x_boot, y_boot = resample(x_train, y_train, stratify=y_train)
+                x_boot, y_boot = resample(
+                    x_train, y_train, stratify=y_train, random_state=RANDOM_STATE
+                )
                 pipe.fit(x_boot, y_boot)
                 invalid_sample = False
             except:

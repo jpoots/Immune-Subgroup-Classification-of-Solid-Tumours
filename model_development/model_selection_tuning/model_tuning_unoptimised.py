@@ -8,13 +8,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import (
-    f1_score,
-    recall_score,
-    precision_score,
-    make_scorer,
-)
 import numpy as np
 import time
 import datetime
@@ -22,21 +15,16 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils import get_data, split_data, tune_models, RANDOM_STATE
+from utils import get_data, split_data, tune_models, RANDOM_STATE, TEST_SIZE
 
 """
 Takes a range of models and tunes them on a hyperparameter grid on the unbalanced dataset
 """
-# size of test split
-TEST_SIZE = 0.2
-# number of crossvalidation runs
-CV = 10
 
-# models to tune and parameters
-# set up samplers and scaler
+# set up scaler
 SCALER = MinMaxScaler()
 
-# models to train
+# models to tune and parameters
 MODELS = [
     {
         "model": Pipeline(
@@ -114,7 +102,7 @@ MODELS = [
 
 def main():
     """
-    gets data, splits it into train and test and tunes all miodels
+    gets data, splits it into train and test and tunes all models on the imbalanced dataset
     """
 
     # import data using util

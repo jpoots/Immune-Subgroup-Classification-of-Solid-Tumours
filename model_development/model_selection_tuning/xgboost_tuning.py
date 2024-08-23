@@ -1,22 +1,7 @@
-from sklearn.neural_network import MLPClassifier
-from sklearn.ensemble import (
-    RandomForestClassifier,
-    HistGradientBoostingClassifier,
-)
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import (
-    f1_score,
-    recall_score,
-    precision_score,
-    make_scorer,
-)
 from imblearn.pipeline import Pipeline as ImbPipeline
 import numpy as np
 import time
@@ -30,11 +15,12 @@ from utils import (
     split_data,
     tune_models,
     RANDOM_STATE,
+    TEST_SIZE,
 )  # append the path of the parent (taken from chatGPT)
 
 
 """
-Tuning hyperparamets of models on their best data balance as attained in balancing_tests.py
+This script tunes the XGBoost model over a hyperparameter grid usign grid search
 """
 
 # define sample strategy
@@ -55,7 +41,7 @@ RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STA
 SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 SCALER = MinMaxScaler()
 
-# models to train
+# model to train and hyperparameter grid
 MODELS = [
     {
         "model": ImbPipeline(
@@ -75,19 +61,6 @@ MODELS = [
     },
 ]
 
-# scoring metrics to use
-SCORING = {
-    "accuracy": "accuracy",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
-    "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
-    "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
-}
-# size of test set
-TEST_SIZE = 0.2
-# number of cross validation splits to do
-CV = 10
-
 
 def main():
     """
@@ -96,19 +69,25 @@ def main():
 
     # import data using util
     data = get_data()
-    idx, x, y, genes = split_data(data)
+    _idx, x, y, _genes = split_data(data)
 
     # get rid of test data
     x_train, _x_test, y_train, _y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
+    # used to time the tuning
     total_start = time.time()
+
+    # tune model
     tune_models(x_train, y_train, MODELS)
 
     total_end = time.time()
+
+    # display time
     duration_seconds_total = total_end - total_start
     duration_total = datetime.timedelta(seconds=duration_seconds_total)
+
     print(f"Total tuning time: {duration_total}")
 
 

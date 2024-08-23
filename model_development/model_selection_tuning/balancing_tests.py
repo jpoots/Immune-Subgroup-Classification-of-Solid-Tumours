@@ -8,16 +8,9 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_validate
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from imblearn.under_sampling import RandomUnderSampler
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    f1_score,
-    recall_score,
-    make_scorer,
-)
 from sklearn.neural_network import MLPClassifier
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
@@ -26,7 +19,18 @@ import sys
 
 # append the path of the parent (taken from chatGPT)
 sys.path.append("..")
-from utils import get_data, split_data, print_cv_results, RANDOM_STATE, SCORING_CV
+from utils import (
+    get_data,
+    split_data,
+    print_cv_results,
+    RANDOM_STATE,
+    SCORING_CV,
+    TEST_SIZE,
+)
+
+"""
+This script is for testing models with default hyperparameters on data balances
+"""
 
 # define potential models
 MODELS = [
@@ -41,7 +45,7 @@ MODELS = [
 ]
 # scaler to use
 SCALER = MinMaxScaler()
-TEST_SIZE = 0.2
+
 # define sample strategy
 UNDER_SAMPLE = {
     0: 1000,
@@ -55,11 +59,13 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
-# set up samplers and fit
+# set up samplers
 RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
 SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
-QC_THRESHOLD = 0.989
+# QC threshold to use for predictions
+QC_THRESHOLD = 0
+
 # the number of cross validation splits
 CV = 10
 
@@ -69,38 +75,26 @@ def main():
     tests a range of models with default parameters with various data balances
     """
 
-    # import data using util
+    # import data
     data = get_data()
     idx, x, y, genes = split_data(data)
 
-    fig, axs = plt.subplots(nrows=2, ncols=4, figsize=(15, 10))
-
-    analyse_models(x, y, axs)
-
-    plt.tight_layout()
-    plt.show()
+    analyse_models(x, y)
 
 
-def analyse_models(x, y, axs):
+def analyse_models(x, y):
     """Cross validates all models with the given sampling strategy, trains on a validation split and produces a confusion matrix.
     Args:
-    x_train: the training data
-    y_train: the training data
-    axs: the axis of the confusion matrix
+        x: all data
+        y: all data
     """
-    # remove the test set and create a training and validation set
-    x_train, x_test, y_train, y_test = train_test_split(
+    # remove the test set
+    x_train, _x_test, y_train, _y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
 
-    x_train_val, x_test_val, y_train_val, y_test_val = train_test_split(
-        x_train,
-        y_train,
-        test_size=TEST_SIZE,
-        stratify=y_train,
-        random_state=RANDOM_STATE,
-    )
-    for model, ax in zip(MODELS, axs.flatten()):
+    for model in MODELS:
+        # construct pipeline
         pipe = ImbPipeline(
             steps=[("rus", RUS), ("smt", SMT), ("scaler", SCALER), ("model", model)]
         )
@@ -109,6 +103,7 @@ def analyse_models(x, y, axs):
         cv = cross_validate(
             pipe, x_train, y_train, cv=CV, n_jobs=-1, scoring=SCORING_CV
         )
+
         print("Model Name: " + model.__class__.__name__)
         print_cv_results(cv)
 

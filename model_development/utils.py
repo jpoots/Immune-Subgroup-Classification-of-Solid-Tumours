@@ -14,19 +14,22 @@ from sklearn.model_selection import GridSearchCV
 import datetime
 
 """
-A number of utility functions that are used across the model development pipeline are kept here
+Utility functions common to mutltiple files in the development pipeline are kept here
 """
 
 # The location of the data file
 CURRENT = os.path.dirname(os.path.abspath(__file__))
 FILE_LOCATION = os.path.join(CURRENT, "data.csv")
 
+# the size of the test set used throughout
+TEST_SIZE = 0.2
+
 # random state was set manually in each function as imblearn was not behaving as expected with np.random.seed. Manuals etting ensured reproduability.
 # random state to use for the project, according to hitchikers guide, 42 is the meaning of life the universe and everything
 # some fun facts about the number 42 https://grsahagian.medium.com/what-is-random-state-42-d803402ee76b
 RANDOM_STATE = 42
 
-# how to score
+# scoring metrics for tuning
 SCORING_TUNING = {
     "accuracy": "accuracy",
     "balanced_accuracy": "balanced_accuracy",
@@ -35,6 +38,7 @@ SCORING_TUNING = {
     "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
 }
 
+# scoring metrics to use for cross validation
 SCORING_CV = {
     "accuracy": "accuracy",
     "balanced_accuracy": "balanced_accuracy",
@@ -46,14 +50,13 @@ SCORING_CV = {
         recall_score, average=None, labels=[5], zero_division=np.nan
     ),
 }
+
 # the number of cross validation splits to use
 CV = 10
 
 
 def get_data():
-    """
-    loads the data into a panda dataframe and returns the transposed data fram
-    """
+    """loads the data into a panda dataframe and returns the transposed data frame"""
 
     data = pd.read_csv(FILE_LOCATION, index_col=0)
     data = data.T
@@ -64,29 +67,35 @@ def get_data():
 def split_data(data):
     """Splits a gene expression data frame into its component parts
     Args:
-    data: the dataframe to split
+        data:the dataframe to split
 
     Returns:
-    idx: a list of sample ids
-    features: a numpy array of features
-    classification: a list of assigned classifications
-    genes: a list of gene names in the file
+        split_data: a tuple containing
+            - idx: a list of sample ids
+            - features: a numpy array of features
+            - classification: a list of assigned classifications
+            - genes: a list of gene names in the file
     """
+
+    # extract index names
     idx = [sample_id for sample_id in data.index]
+
+    # extract the column names
     genes = [gene for gene in data.columns.values]
 
-    # extract last digit of name
+    # extract last digit of name and 0 index it
     classification = np.array([int(sample[-1]) - 1 for sample in data.index.values])
     features = data.to_numpy()
+
     return idx, features, classification, genes
 
 
 def print_tuning_results(pipe, grid_search, duration):
     """Prints the results of model tuning
     Args:
-    pipe: the base moedl
-    grid_search: the fitted GridSearchCV object
-    duration: the time taken to tune
+        pipe: the base model
+        grid_search: the fitted GridSearchCV object
+        duration: the time taken to tune
     """
 
     results = grid_search.cv_results_
@@ -108,7 +117,7 @@ def print_tuning_results(pipe, grid_search, duration):
 def print_cv_results(cv):
     """Prints the results of cross validation
     Args:
-    cv: the dictionary result of cross validation
+        cv: the dictionary result of cross validation
     """
     # pulling out my performance metrics
     accuracy_cv = np.average(cv["test_accuracy"])
@@ -134,8 +143,8 @@ def print_cv_results(cv):
 def analyse_prediction_results(predictions, target):
     """Analyses the results of a prediction run given predictions and target labels
     Args:
-    predictions: the assigned predictions
-    target: target labels
+        predictions: the assigned predictions
+        target: target labels
     """
 
     accuracy = accuracy_score(target, predictions)
@@ -153,15 +162,15 @@ def analyse_prediction_results(predictions, target):
 def print_all_scores(
     accuracy, f1, precision, recall, bal_ac, recall_group_6, f1_group_6
 ):
-    """Prints a list of standard scors
+    """Prints a list of standard metrics
     Args:
-    accuracy: accuracy score
-    f1: f1 score
-    precision: precision score
-    recall: recall score
-    bal_ac: balanced accuracy score
-    recall_group_6: recall score for subgroup 6
-    f1_group_6: f1 score for subgroup 6
+        accuracy: accuracy score
+        f1: f1 score
+        precision: precision score
+        recall: recall score
+        bal_ac: balanced accuracy score
+        recall_group_6: recall score for subgroup 6
+        f1_group_6: f1 score for subgroup 6
     """
     print(f"Accuracy: {accuracy}")
     print(f"F1: {f1}")
@@ -174,17 +183,18 @@ def print_all_scores(
 
 
 def predict_with_qc(pipe, threshold, x, y):
-    """Performs predictions with a QC threshold given data and an estimarots
+    """Performs predictions with a QC threshold given data and an estimator
     Args:
-    pipe: the estimator
-    threshold: the QC threshold value
-    x: the x features
-    y: the y labels
+        pipe:the estimator
+        threshold:the QC threshold value
+        x:the x features
+        y:the y labels
 
     Returns:
-    predictions: the predictions assigned with those below threshold removed
-    filtered_true: the corresponding set of y true values with those below threshold removed
-    num_nc: the number of samples belwo the QC threshold
+    results: A tuple containing:
+        - predictions: the predictions assigned with those below threshold removed
+        - filtered_true: the corresponding set of y true values with those below threshold removed
+        - num_nc: the number of samples below the QC threshold
     """
     # get prediction probs for train and test
     prediction_probs = pipe.predict_proba(x)
@@ -202,15 +212,17 @@ def predict_with_qc(pipe, threshold, x, y):
 def tune_models(x_train, y_train, models):
     """Perform grid search on all models and evaluates performance
     Args:
-    x_train: the training data
-    y_train: the training data
-    models: the models to tune
+        x_train: the training data
+        y_train: the training data
+        models: the models to tune
     """
     for model in models:
         start = time.time()
 
         # try except to prevent long training runs failing because of an issue
         try:
+
+            # seperate pipeline and parameter grid
             pipe = model["model"]
             params = model["params"]
 
@@ -225,11 +237,12 @@ def tune_models(x_train, y_train, models):
             )
             grid_search.fit(x_train, y_train)
 
-            # model tuning time
+            # model tuning time display
             end = time.time()
             duration_seconds = end - start
             duration = datetime.timedelta(seconds=duration_seconds)
 
+            # print results
             print(f"Model Name: {pipe.named_steps['model'].__class__.__name__}")
             print_tuning_results(pipe, grid_search, duration)
 

@@ -10,13 +10,6 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import (
-    f1_score,
-    recall_score,
-    precision_score,
-    make_scorer,
-)
 from imblearn.pipeline import Pipeline as ImbPipeline
 import numpy as np
 import time
@@ -29,11 +22,12 @@ from utils import (
     split_data,
     tune_models,
     RANDOM_STATE,
+    TEST_SIZE,
 )  # append the path of the parent (taken from chatGPT)
 
 
 """
-Tuning hyperparamets of models on their best data balance as attained in balancing_tests.py
+Tuning hyperparameters of models on their best data balance as attained in balancing_tests.py
 """
 
 # define sample strategy
@@ -135,19 +129,6 @@ MODELS = [
         },
     },
 ]
-
-# scoring metrics to use
-SCORING = {
-    "accuracy": "accuracy",
-    "balanced_accuracy": "balanced_accuracy",
-    "f1": make_scorer(f1_score, average="macro", zero_division=np.nan),
-    "precision": make_scorer(precision_score, average="macro", zero_division=np.nan),
-    "recall": make_scorer(recall_score, average="macro", zero_division=np.nan),
-}
-# size of test set
-TEST_SIZE = 0.2
-# number of cross validation splits to do
-CV = 10
 
 
 def main():

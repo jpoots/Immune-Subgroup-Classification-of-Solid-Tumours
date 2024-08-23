@@ -1,23 +1,15 @@
-import numpy as np
-import matplotlib.pyplot as plt
 import joblib
-from sklearn.pipeline import make_pipeline
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
-    GradientBoostingClassifier,
-    RandomForestClassifier,
 )
 from xgboost import XGBClassifier
 from sklearn.preprocessing import MinMaxScaler
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
-from sklearn.calibration import CalibratedClassifierCV
 from imblearn.pipeline import Pipeline as ImbPipeline
-from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-
 import sys
 
 # append the path of the parent (taken from chatGPT)
@@ -25,19 +17,17 @@ sys.path.append("..")
 from utils import (
     get_data,
     split_data,
-    analyse_prediction_results,
-    predict_with_qc,
     RANDOM_STATE,
+    TEST_SIZE,
 )
 
 """
-This script trains a final model, evaluates it and saves it to a file
+This script trains a final model and imputer and saves them to .pkl files.
 """
 
+# define locations
 MODEL_FILE_NAME = "./trained_models/model.pkl"
 IMPUTER_FILE_NAME = "./trained_models/mice.pkl"
-
-TEST_SIZE = 0.2
 
 # define sample strategy
 UNDER_SAMPLE = {
@@ -52,20 +42,21 @@ OVER_SAMPLE = {
     5: 1000,
 }
 
-"""
-Trains, evaluates and saves to file
-"""
-
 
 def main():
+    """
+    This script trains the defined model and imputer and saves it to a file
+    """
+
+    # load data
     data = get_data()
     _idx, x, y, _genes = split_data(data)
 
     # remove test set and get validtion set
-    x_train, x_test, y_train, y_test = train_test_split(
+    x_train, _x_test, y_train, _y_test = train_test_split(
         x, y, test_size=TEST_SIZE, stratify=y, random_state=RANDOM_STATE
     )
-    x_train, x_val, y_train, y_val = train_test_split(
+    x_train, _x_val, y_train, _y_val = train_test_split(
         x_train,
         y_train,
         test_size=TEST_SIZE,
@@ -73,39 +64,34 @@ def main():
         random_state=RANDOM_STATE,
     )
 
+    # build models on training data
+    print("FITTING MODEL....")
     pipe = build_model(x_train, y_train)
+    print("DONE")
 
+    # fit the imputer
+    print("FITTING IMPUTER...")
     imp = IterativeImputer(max_iter=100).set_output(transform="pandas")
     imp.fit(x_train)
+    print("DONE")
 
-    # get prediction probs for test
-    predictions, true, num_removed = predict_with_qc(pipe, 0, x_val, y_val)
-
-    # saving and testing save successful
+    # saving to file
+    print("SAVING...")
     joblib.dump(pipe, MODEL_FILE_NAME)
     joblib.dump(imp, IMPUTER_FILE_NAME)
     print("SAVE SUCCESSFUL")
 
-    # sanity check the save
-    loaded_model = joblib.load(MODEL_FILE_NAME)
-    loaded_model.predict(x_test)
-
-    print(f"Removed: {num_removed}")
-    analyse_prediction_results(predictions, true)
-    ConfusionMatrixDisplay.from_predictions(true, predictions)
-
-    plt.show()
-
 
 def build_model(x, y):
-    """Trains a gradient boosting model on the data using sampling
+    """Trains a gradient boosting model on the data using sampling strategy
     Args:
-    x: the training data
-    y: the training data
+        x: the training data
+        y: the training data
 
     Returns:
-    pipe: a trained model
+        pipe: a trained model
     """
+
     # define model to train
     model = XGBClassifier(
         learning_rate=0.3,
@@ -119,7 +105,7 @@ def build_model(x, y):
     # data scaler and generic pipeleine
     scaler = MinMaxScaler()
 
-    # set up samplers and fit
+    # set up samplers
     rus = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
     smt = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
 
