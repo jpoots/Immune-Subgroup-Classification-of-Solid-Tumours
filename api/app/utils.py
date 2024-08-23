@@ -23,6 +23,9 @@ GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
 
 IMPUTER = joblib.load(os.path.join(CURRENT_DIR, "mice.pkl"))
 
+# set up gene list variable
+gene_list = None
+
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
     "type": "object",
@@ -61,11 +64,11 @@ VALIDATOR = compile(SCHEMA)
 def parse_csv(filepath, delimiter):
     """Parses a file from a file path and returns key info as a dict
     Args:
-    filepath: The file path to read from
-    delimiter: The files delimiter
+        filepath: The file path to read from
+        delimiter: The files delimiter
 
     Returns:
-        A dict including the features dataframe, type IDs and the number of invlaid samples
+        results: A dict including the features dataframe, type IDs and the number of invlaid samples
 
     Raises:
         BadRequest: The file is missing from the request or the sample file is invalid
@@ -80,10 +83,9 @@ def parse_csv(filepath, delimiter):
         data.columns = data.columns.str.upper()
         data.columns = data.columns.str.strip()
 
-        gene_name_list = gene_list
-
+        # get gene names that are in the list
         gene_names_to_extract = [
-            gene_name for gene_name in gene_name_list if gene_name in data.columns
+            gene_name for gene_name in gene_list if gene_name in data.columns
         ]
 
         # extract valid data
@@ -147,7 +149,7 @@ def parse_json(data):
     """Parses a json request sent to the api for processing
 
     Args:
-    data: The JSON data to process
+        data: The JSON data to process
 
     Returns:
         A dict including the features dataframe, type IDs and the number of invlaid samples
@@ -160,11 +162,13 @@ def parse_json(data):
     interval = False
     num_dimensions = False
 
+    # validate JSON data using compiled validator
     try:
         VALIDATOR(data)
     except JsonSchemaValueException as e:
         raise BadRequest(body=e.message)
 
+    # extract relevant configuration params if present
     try:
         if "perplexity" in data:
             perplexity = int(data["perplexity"])
@@ -194,15 +198,14 @@ def parse_json(data):
 
 
 def validate_csv_upload(request):
-    """
-    Takes a request and validates for samples file and delimiter
+    """Takes a request and validates for samples file and delimiter
 
     Args:
-    request: the request object
+        request: the request object
 
     Returns:
-    file: the samples file
-    delimiter: the file delimiter
+        file: the samples file
+        delimiter: the file delimiter
     """
     if "samples" not in request.files:
         raise exceptions.BadRequest("File missing")
@@ -218,11 +221,10 @@ def validate_csv_upload(request):
 
 
 def delete_file_on_failure(self, exc, task_id, args, kwargs, einfo):
-    """
-    Takes args from a celery task given a file name as input and deletes the file on return.
+    """Takes args from a celery task given a file name as input and deletes the file on return.
 
     Args:
-    See the celery on_return documentation
+        See the celery on_return documentation
     """
     os.remove(args[0])
     return
@@ -239,5 +241,5 @@ def reload_gene_list():
     return
 
 
-gene_list = None
+# load gene list
 reload_gene_list()

@@ -1,6 +1,5 @@
 class BadRequest(Exception):
-    """
-    A custom bad request error needed by celery
+    """A custom bad request error needed by celery
     Properties:
         status_code: the status code of the object. Defaults to 400
         headers: the object headers

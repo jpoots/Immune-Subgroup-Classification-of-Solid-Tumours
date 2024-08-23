@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from ..utils import parse_csv, parse_json, validate_csv_upload
 from werkzeug import exceptions
-from ..ml_models.predictions import predict, probability
+from ..ml_models.predictions import predict
 import uuid
 import os
 from werkzeug import exceptions
@@ -12,7 +12,7 @@ from .celery_tasks import confidence_celery, tsne_celery, analyse
 from flasgger import swag_from
 from app import limiter
 import pandas as pd
-from .. import PORT, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, API_ROOT
+from .. import DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, API_ROOT
 
 """
 The main api endpoints for the system to perform analysis
@@ -20,6 +20,8 @@ The main api endpoints for the system to perform analysis
 
 # the pca pipeline to be used
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
+
+# API results endpoint
 RESULTS_ENDPOINT = f"{API_ROOT}/results"
 
 main = Blueprint("main", __name__)
@@ -32,7 +34,7 @@ def parse_samples():
     """Endpoint to extract data from a csv file attached as samples to an HTTP from using delimtier delimtiter. Full details of request input in swagger docs.
 
     Returns:
-        A dict including key the sample data, number of invlaid samples.
+        A json response object including key the sample data, number of invlaid samples.
 
         "data": {
             "invalid": 0,
@@ -44,10 +46,8 @@ def parse_samples():
                 "sampleID": "TCGA.02.0047.GBM.C4"
                 "typeid": GBM
             },
+            ]
         }
-
-    Raises:
-        BadRequest: The file is missing from the request or the sample file is invalid
     """
 
     # validate csv
@@ -57,6 +57,7 @@ def parse_samples():
     filename = f"{uuid.uuid4()}"
     filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
+
     # parse data
     data = parse_csv(filepath, delimiter)
 
@@ -83,7 +84,7 @@ def predictgroup():
     """Endpoint to form predictions from json data in a request. Full details of request input in swagger docs.
 
     Returns:
-        A dict including the sample id and prediction
+        A json response object including the sample id and prediction
 
         "data": {
             "samples": [
@@ -91,18 +92,18 @@ def predictgroup():
                 "prediction": 4
                 "sampleID": "TCGA.02.0047.GBM.C4"
             },
+            ]
         }
-
-    Raises:
-        BadRequest: The JSON sent is missing or invalid
     """
 
+    # parse json
     data = request.get_json()
     data = parse_json(data)
 
     idx = data["ids"]
     features = data["features"]
 
+    # predict
     predictions, prediction_probs, num_nc = predict(features)
 
     # prepare for response
@@ -127,7 +128,7 @@ def pca():
             {
                 "pca": [1,2,3]
                 "sampleID": "TCGA.02.0047.GBM.C4"
-            },
+            },]
         }
 
     Raises:
@@ -136,11 +137,13 @@ def pca():
     data = request.get_json()
     data = parse_json(data)
 
+    # if too few features
     if len(data["features"]) < 3:
         raise exceptions.BadRequest(
             "At least 3 samples is requried to perform PCA analysis"
         )
     else:
+        # perform pca analysis and parcel for return
         pc = PCA_PIPE.fit_transform(data["features"]).tolist()
         idx = data["ids"]
 
@@ -194,10 +197,14 @@ def tsne_async():
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
+
+    # check for necessary params
     if "numDimensions" not in data:
         raise exceptions.BadRequest("t-SNE requires a number of dimensions")
     if "perplexity" not in data:
         raise exceptions.BadRequest("t-SNE requires perplexity")
+
+    # start celery task
     task = tsne_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/tsne/{task.id}"}), 202
 
@@ -211,13 +218,12 @@ def confidence_async():
     Returns:
         A dict containing the location of the result
 
-        data: {"resultURL": "localhost:3000/confidence/tsne/123-abc}
+        data: {"resultURL": "localhost:3000/results/confidence/123-abc}
 
-    Raises:
-        BadRequest: The JSON sent is missing or invalid
     """
     # handles error automatically if the request isn't JSON
     data = request.get_json()
 
+    # start celery task
     task = confidence_celery.apply_async(args=[data])
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/confidence/{task.id}"}), 202

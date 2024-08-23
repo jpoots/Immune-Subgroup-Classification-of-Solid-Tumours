@@ -8,8 +8,8 @@ class Admin(db.Model):
     """Model for an administrtor account
 
     Attributes:
-    username: Admin username
-    pass_hash: The hashed user password
+        username: Admin username
+        pass_hash: The hashed user password
 
     methods:
         verify_password(password): returns boolean value indicating if the password matches that of the user
@@ -26,30 +26,34 @@ class Admin(db.Model):
         "pass_hash", db.String(80), unique=False, nullable=False
     )
 
+    # https://docs.sqlalchemy.org/en/14/orm/extensions/hybrid.html
     @hybrid_property
     def pass_hash(self):
         return self._pass_hash
 
     @pass_hash.setter
     def pass_hash(self, password):
-        """
-        Setter for password, hashes before entry
+        """Setter for password, hashes before entry
+        Args:
+            self: the Admin object
+            password: the password to hash and add
         """
         self._pass_hash = bcrypt.generate_password_hash(password).decode("utf-8")
 
     def verify_password(self, password):
         """Verifies a password against user
         Args:
-        password: Password to check
+            self: the Admin object
+            password: Password to check
 
         Returns:
-            Boolean indicating match or not
+            password: Boolean indicating match or not
         """
         return bcrypt.check_password_hash(self.pass_hash, password)
 
     def to_json(self):
         """Creates a json representation of the user
         Returns:
-            A JSON representation of the user
+            admin: A JSON representation of the user
         """
         return {"id": self.id, "username": self.username, "passHash": self.pass_hash}

@@ -1,4 +1,4 @@
-from ..ml_models.predictions import predict, confidence_intervals, probability
+from ..ml_models.predictions import predict, confidence_intervals
 from .. import celery
 from ..errors.BadRequest import BadRequest
 from ..utils import parse_csv, parse_json, delete_file_on_failure
@@ -18,24 +18,25 @@ def confidence_celery(data):
     """
     Calculates confidence intervals for JSON input samples
     Args:
-    data: The json data dict to processe
+        data: The json data dict to processe
 
     Returns:
-        The confidence results as a dict
+        results: The confidence results as a dict
             "data": {
-        {
-            "sampleID": "TCGA.02.0047.GBM.C4",
-            "confidence": {
-                "upper": 6
-                "lower": 4
-                "median": 5
-                "max": 10
-                "min": 1
-            },
-        },
-    }
+                [{
+                    "sampleID": "TCGA.02.0047.GBM.C4",
+                    "confidence": {
+                        "upper": 6
+                        "lower": 4
+                        "median": 5
+                        "max": 10
+                        "min": 1
+                    },
+                },]
+            }
 
-    Throws: BadRequest if invalid JSON data is input
+    Throws:
+        BadRequest if invalid JSON data is input
     """
     # extract data from JSON
     data = parse_json(data)
@@ -70,21 +71,21 @@ def confidence_celery(data):
 
 @celery.task(throws=(BadRequest,))
 def tsne_celery(data):
-    """
-    Performs t-SNE analysis on input JSON data
+    """Performs t-SNE analysis on input JSON data
     Args:
-    data: The json data dict to processe
+        data: The json data dict to processe
 
     Returns:
-        The confidence results as a dict
-            "data": {
-        {
-            "sampleID": "TCGA.02.0047.GBM.C4",
-            "tsne": [1,2,3],
-        },
-    }
+        results: The confidence results as a dict
+        "data": {
+            [{
+                "sampleID": "TCGA.02.0047.GBM.C4",
+                "tsne": [1,2,3],
+            },]
+        }
 
-    Throws: BadRequest if invalid JSON data is input
+    Throws:
+        BadRequest if invalid JSON data is input
     """
 
     # extract data from JSON
@@ -96,15 +97,18 @@ def tsne_celery(data):
     perplexity = data["perplexity"]
     num_dimensions = data["num_dimensions"]
 
+    # check for necessary paras
     if not perplexity:
         raise BadRequest(body="Missing perplexity")
 
     if not num_dimensions:
         raise BadRequest(body="Missing dimension")
 
+    # check sample length
     if len(idx) < 3:
         raise BadRequest(body="At least 3 samples is required for t-SNE analysis")
 
+    # check for valid perplexity and dimensions
     if (
         perplexity >= len(idx)
         or perplexity < 1
@@ -121,10 +125,10 @@ def tsne_celery(data):
             ("dr", TSNE(n_components=num_dimensions, perplexity=perplexity)),
         ]
     )
+    tsne = tsne_pipeline.fit_transform(features).tolist()
 
     # parcel for return
     results = []
-    tsne = tsne_pipeline.fit_transform(features).tolist()
     for id, tsne_result in zip(idx, tsne):
         results.append({"sampleID": id, "tsne": tsne_result})
 
@@ -133,31 +137,31 @@ def tsne_celery(data):
 
 @celery.task(throws=(BadRequest,), on_failure=delete_file_on_failure)
 def analyse(filepath, delimiter):
-    """
-    Performs a full non-configurable analysis on a csv file
+    """Performs a full non-configurable analysis on a csv file and deletes invalid csvs
     Args:
-    filepath: The path of the csv file to analyse
-    delimiter: the files delimiter
+        filepath: The path of the csv file to analyse
+        delimiter: the files delimiter
 
     Returns:
-        The analysis results as a dict
+        results: The analysis results as a dict
 
-    "data": {
-        "invalid": 0,
-        "samples": [
-        {
-            "genes": {
-            "ACTL6A_S5": 745.567,
-            },
-            "sampleID": "TCGA.02.0047.GBM.C4",
-            "probs":[0.1,0.1,0.1,0.1,0.1,0.5],
-            "prediction: 1,
-            "pca": [1,2,3],
-            "typeid: "GBM
-        },
-    }
+        "data": {
+            "invalid": 0,
+            "samples": [
+            {
+                "genes": {
+                "ACTL6A_S5": 745.567,
+                },
+                "sampleID": "TCGA.02.0047.GBM.C4",
+                "probs":[0.1,0.1,0.1,0.1,0.1,0.5],
+                "prediction: 1,
+                "pca": [1,2,3],
+                "typeid: "GBM
+            },]
+        }
 
-    Throws: BadRequest if invalid JSON data is input
+    Throws:
+        BadRequest if invalid JSON data is input
     """
     # extract data from CSV
     data = parse_csv(filepath, delimiter)

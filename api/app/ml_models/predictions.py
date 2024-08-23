@@ -1,7 +1,6 @@
 import joblib
 import os
 import numpy as np
-import pandas
 
 """
 Functions for using the trained ML model (and bootstrap models) to attain predictions, probabilties and confidence intervals
@@ -23,15 +22,15 @@ QC_THRESHOLD = 0.915
 
 
 def predict(features):
-    """
-    Forms predictions and probailties given features as input
+    """Forms predictions and probailties given features as input
     Args:
-    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
+        features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
 
     Returns:
-        predictions: a list of predictions
-        prediction_probs: a list of prediction probs for each sample
-        num_nc: the number of non classifiable samples
+        results: a tuple containing
+            - predictions: a list of predictions
+            - prediction_probs: a list of prediction probs for each sample
+            - num_nc: the number of non classifiable samples
     """
 
     # get probabilites and mark those below QC
@@ -56,11 +55,10 @@ def predict(features):
 
 
 def confidence_intervals(features, interval):
-    """
-    Calculates prediction intervals given an interval and feature set
+    """Calculates prediction confidence intervals given an interval and feature set
     Args:
-    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
-    interval: the percentage confidence interval (e.g 95)
+        features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
+        interval: the percentage confidence interval (e.g 95)
 
     Returns:
         intervals: a list as [min, lower percentile, median, upper percentile, max]
@@ -92,16 +90,3 @@ def confidence_intervals(features, interval):
         for classified in all_classified
     ]
     return intervals
-
-
-def probability(features):
-    """
-    Calculates probabilites of each sub group given a list of featues
-    Args:
-    features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
-    interval: the percentage confidence interval (e.g 95)
-
-    Returns:
-        intervals: a list as [min, lower percentile, median, upper percentile, max]
-    """
-    return MODEL.predict_proba(features).tolist

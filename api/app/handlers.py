@@ -10,7 +10,7 @@ error handlers for the app
 def handle_http_exception(err):
     """Handles http exceptiosn and returns an appropriate response
     Args:
-    err: The error to handle
+        err: The error to handle
 
     Returns:
         An appropriate response object
@@ -26,7 +26,7 @@ def handle_http_exception(err):
 def handle_custom_bad_request(err):
     """Handles the custom bad request error needed by celery
     Args:
-    err: The error to handle
+        err: The error to handle
 
     Returns:
         An appropriate response object
@@ -51,7 +51,7 @@ def handle_custom_bad_request(err):
 def handle_generic_exception(err):
     """Handles generic unknown errors
     Args:
-    err: The error to handle
+        err: The error to handle
 
     Returns:
         An appropriate response object
@@ -68,7 +68,13 @@ def handle_generic_exception(err):
 @jwt.invalid_token_loader
 @jwt.unauthorized_loader
 def missing_invalid_token_callback(reason):
-    err = exceptions.Unauthorized()
+    """The function to use when an unauthorised token is used or no token is present
+    Args:
+        reason: reason for no token
+    Returns:
+        response: http response object for 401
+    """
+    err = exceptions.Unauthorized(reason)
     response = err.get_response()
     response.data = json.dumps(
         {"error": {"code": err.code, "name": err.name, "description": err.description}}
@@ -79,6 +85,13 @@ def missing_invalid_token_callback(reason):
 
 @jwt.expired_token_loader
 def expired_token_callback(header, payload):
+    """The function to use when an unauthorised token is used or no token is present
+    Args:
+        header: see jwt documentation
+        payload: see jwt documentation
+    Returns:
+        response: http response object for 401
+    """
     err = exceptions.Unauthorized("Token timed out")
     response = err.get_response()
     response.data = json.dumps(

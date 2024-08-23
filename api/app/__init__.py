@@ -57,7 +57,7 @@ def create_app():
     """Creates an app object
 
     Returns:
-        An app object
+        app: An app object
     """
     # create app
     app = Flask(__name__)

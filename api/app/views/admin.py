@@ -32,7 +32,7 @@ def authenticate():
     """Endpoint to authenticate and admin. See swagger docs for full details
 
     Returns:
-        An access token dict
+        jwt: An access token dict
 
         "data": {
             "accessToken": ABCDEFG
@@ -72,7 +72,7 @@ def admins():
     """Endpoint to create a new admin user. See swagger docs for full info
 
     Returns:
-        A json object containing username and password for the new user
+        credentials: A json object containing username and password for the new user
             data:{
             "username": "ABCDEFG",
             "password: "123456"
@@ -103,14 +103,17 @@ def edit_gene_list():
     """Endpoint to get the gene list or replace it given one. See swagger docs for full info.
 
     Returns:
-        A json object containing the gene list on get
+        gene_list: A json object containing the gene list on get
             data:{
             "geneList": ["ABCDEFG",...]
             }
-        or a success message on put
-            data:{
+
+        OR
+
+        status: A message confirming success fo change
+        data:{
             "message": "success"
-            }
+        }
     Raises:
         Unauthorised: an attempt to modify the gene list is made without login
         BadRequest: the gene list is invalid
