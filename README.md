@@ -8,12 +8,12 @@ The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="htt
 
 ## Table of Contents
 
-1. [Description](##Description)
+1. [Description](#Description)
 2. [Requirements](#Requirements)
 3. [Installation](#Installation)
-4. [Web App Usage](#Web_App_Usage)
-5. [Model Development Usage](#Model_Development_Usage)
-6. [Additional Folders](#Additional_Folders)
+4. [Web App Usage](#Web-App-Usage)
+5. [Model Development Usage](#Model-Development-Usage)
+6. [Additional Folders](#Additional-Folders)
 7. [Contact](#Contact)
 
 ## Description
