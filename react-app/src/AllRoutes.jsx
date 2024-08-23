@@ -20,7 +20,7 @@ import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
  * @param {[Object, function]} confidenceState - array containing confidenceGraphData and its setter
  * @param {[Object, function]} summaryState - array containing summary object and its setter
  * @param {[string, function]} fileNameState - array containing fileName and its setter
- * @returns - the routes objects
+ * @returns - the routes object
  */
 const AllRoutes = ({
   tsneGraph2DState,
@@ -31,7 +31,7 @@ const AllRoutes = ({
   fileNameState,
   resetApp,
 }) => {
-  // desctructure props
+  // deconstruct props
   const [tsneGraph2D, setTsneGraph2D] = tsneGraph2DState;
   const [tsneGraph3D, setTsneGraph3D] = tsneGraph3DState;
   const [tsneDimensions, setTsneDimensions] = tsneGraphDimensions;

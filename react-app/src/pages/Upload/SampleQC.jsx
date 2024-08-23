@@ -1,16 +1,17 @@
 import { useContext } from "react";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 /**
- * given a resutls object returns a QC summary
+ * given a results object returns a summary of quality control
  * @returns - a summary of the QC results
  */
 const SampleQC = () => {
   const results = useContext(ResultsContext)[0];
   return (
     <Box>
-      <h1 className="block has-text-weight-bold">Gene QC</h1>
+      <Title>Gene QC</Title>
       <div className="block">
         {results["samples"].length} sample(s) passed gene QC
       </div>

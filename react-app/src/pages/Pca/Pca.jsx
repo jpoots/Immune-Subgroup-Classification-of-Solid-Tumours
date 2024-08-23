@@ -8,17 +8,16 @@ import Box from "../../components/layout/Box";
 import DataTooSmall from "../../components/graphs/DataTooSmall";
 
 /**
- * the pca visualisation page for viewing results in 2D and 3D
+ * the pca visualisation page for viewing results in 2D and 3D. Only available if more than 3 samples
  * @returns the pca visualisation page
  */
 const Pca = () => {
-  const graphData = useRef();
+  // set up app state
   const [dimension, setDimensions] = useState(2);
   const [title, setTitle] = useState("PCA");
   const [download, setDownload] = useState([]);
   const results = useContext(ResultsContext)[0];
-
-  console.log(results.samples.length);
+  const graphData = useRef();
 
   /**
    * generates the graph data object using the helper function from the results
@@ -29,6 +28,9 @@ const Pca = () => {
     }
   }, [results]);
 
+  /**
+   * set up download object for download by CSV link
+   */
   const handleDownload = () => {
     let toDownload = [];
     results.samples.forEach((sample) => {
@@ -59,20 +61,22 @@ const Pca = () => {
               setDimensions={setDimensions}
               dimension={dimension}
               setTitle={setTitle}
+              title={title}
               pageTitle={pageTitle}
               tooltipMessage={tooltip}
               fullName={fullName}
               tooltipLink={tooltipLink}
             />
-
-            <CSVLink
-              data={download}
-              filename="data"
-              onClick={handleDownload}
-              className="button is-dark"
-            >
-              <button>Download Report</button>
-            </CSVLink>
+            <div className="has-text-centered">
+              <CSVLink
+                data={download}
+                filename="data"
+                onClick={handleDownload}
+                className="button is-dark"
+              >
+                <button>Download Report</button>
+              </CSVLink>
+            </div>
           </Box>
           <div className="column is-fullheight">
             <Plot

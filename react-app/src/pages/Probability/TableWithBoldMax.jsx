@@ -2,10 +2,10 @@ import sortArrows from "/sort-solid.svg";
 import { flexRender } from "@tanstack/react-table";
 import NumEntriesSelector from "../../components/tables/NumEntriesSelector";
 /**
- * takes a tanstack table and displays it in the appropriate format with bold row maxs
+ * takes a tanstack table and displays it in the appropriate format with bold row maxs for probabiility
  * @param {TableInstance} table - the tanstack table instance to display
  * @param {string} accessor - the key to the original list of items to be maxed
- * @returns a table
+ * @returns a table with bold maxes
  */
 export function TableWithBoldMax({ table, accessor }) {
   return (
@@ -37,7 +37,6 @@ export function TableWithBoldMax({ table, accessor }) {
           <tbody>
             {table.getRowModel().rows.map((row) => {
               let max = Math.max(...row.original[accessor]).toFixed(5);
-              console.log(max);
               return (
                 <tr key={row.id}>
                   {row.getVisibleCells().map((cell) => (

@@ -5,9 +5,14 @@ import Title from "../other/Title";
 
 /**
  * a componet which handles the dimensions viewed and the title of a visualisation graph
- * @param {function} setDimensions
- * @param {number} dimension
- * @param {function} setTitle
+ * @param {function} setDimensions - the setter function for the number of dimensions on the current graph
+ * @param {number} dimension - the dimensions of the grapg
+ * @param {function} setTitle - settter function for the graph title state
+ * @param {string} title - the graph title
+ * @param {string} pageTitle - settter function for the graph title state
+ * @param {string} tooltipMessage - the message to display beside the full name in the tool tip
+ * @param {string} toooltipLink - the page that clicking the full name links to
+ * @param {string} fullName - the full name of the graph being shown
  * @returns - the graph controls
  */
 
@@ -15,11 +20,13 @@ export function GraphControls({
   setDimensions,
   dimension,
   setTitle,
+  title,
   pageTitle,
   tooltipMessage,
   tooltipLink,
   fullName,
 }) {
+  // converting tooltip to static html
   const tooltipHTML = () =>
     renderToStaticMarkup(
       <div>
@@ -69,7 +76,7 @@ export function GraphControls({
           3D
         </label>
       </div>
-      <GraphTitleSetter setTitle={setTitle} />
+      <GraphTitleSetter setTitle={setTitle} title={title} />
       <Tooltip
         id="visual-tooltip"
         place="right-end"

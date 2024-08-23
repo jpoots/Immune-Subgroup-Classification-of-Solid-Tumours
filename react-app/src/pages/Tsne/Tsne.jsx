@@ -10,14 +10,17 @@ import Plot from "react-plotly.js";
 import { CSVLink } from "react-csv";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import ErrorModal from "../../components/errors/ErrorModal";
-import { callAsyncApi } from "../../../utils/asyncAPI";
+import {
+  callAsyncApi,
+  cancelAnalysisFunctionDefiner,
+} from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
 import DataTooSmall from "../../components/graphs/DataTooSmall";
 
-// tnse api url and perplexity setting
+// tnse api url and min perplexity setting
 const API_URL = `${API_ROOT}/tsne`;
 const MIN_PERPLEXITY = 1;
 
@@ -26,7 +29,7 @@ const MIN_PERPLEXITY = 1;
  * @param {Array} graph2D - the state array for the 2D tsne graph
  * @param {Array} graph3D - the state array for the 3D tsne graph
  * @param {Array} graphDim - the state array for the tsne dimensions
- * @returns the t-SNE visualisation page
+ * @returns the t-SNE visualisation page. Only available is more than 3 samples
  */
 const Tsne = ({ graph2D, graph3D, graphDim }) => {
   // setting up to hold dom element and graph points
@@ -55,26 +58,35 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
    * useLayoutEffect returns a function which is performed on unmount
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
    */
-  useLayoutEffect(() => {
-    const cancelAnalysis = () => {
-      cancelled.current = true;
-    };
-    return cancelAnalysis;
-  }, []);
+  useLayoutEffect(() => cancelAnalysisFunctionDefiner(cancelled), []);
+
+  useEffect(() => {}, [graphData]);
 
   /**
-   * any time to graph dimension changes, change the graph data
+   * any time to graph dimension changes, on change of graphData2d or 3d and on first load, set graphData. If graph data not empty configure controls.
    */
-  useEffect(() => {
-    setGraphData(dimension == 2 ? graphData2D : graphData3D);
+  useLayoutEffect(() => {
+    let dataToSet = dimension == 2 ? graphData2D : graphData3D;
+    setGraphData(dataToSet);
+
+    if (!dataToSet) {
+      setDisabled(dataToSet ? true : false);
+    } else {
+      setPerplexity(dataToSet.metadata.perplexity);
+      slider.current.value = dataToSet.metadata.perplexity;
+      setDisabled(true);
+      setTitle(`t-SNE Perplexity: ${dataToSet.metadata.perplexity}`);
+    }
   }, [dimension, graphData2D, graphData3D]);
 
-  /**
-   * any time the graph dimension changes, alter disabled to either display or hide the button depending on if its there
-   */
+  // every time perplexity changes and on first load if graph data exists, set the disabled button appropriately
   useEffect(() => {
-    setDisabled(graphData ? true : false);
-  }, [dimension, graphData]);
+    if (graphData && graphData.metadata.perplexity === perplexity) {
+      setDisabled(true);
+    } else {
+      setDisabled(false);
+    }
+  }, [graphData, perplexity]);
 
   /**
    * generates an object of the tsne results for each sample to be given to csv link
@@ -88,11 +100,13 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
 
     // for each subgroup
     Object.keys(graphData.x).forEach((key) => {
+      // pull param lists
       id = graphData.ids[key];
       tsne1 = graphData.x[key];
       tsne2 = graphData.y[key];
       tsne3 = graphData.z[key];
 
+      // pull out tsne
       id.forEach((id, index) => {
         let listToPush = {
           sampleID: id,
@@ -100,6 +114,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
           tsne2: tsne2[index],
         };
 
+        // if theres a 3 dimension push a third item
         if (dimension == 3) listToPush["tsne3"] = tsne3[index];
         toDownload.push(listToPush);
       });
@@ -114,7 +129,9 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
     // if the cancelled ref has been set to true it must be reset
     cancelled.current = false;
 
+    // start loading button
     setLoading(true);
+
     let request = {
       method: "POST",
       headers: {
@@ -128,6 +145,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
       }),
     };
 
+    // call api
     let tsneResults = await callAsyncApi(
       API_URL,
       request,
@@ -136,20 +154,27 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
       cancelled
     );
 
+    // if successful call set relvenant state
     if (tsneResults.success) {
       if (dimension == 2) {
         setGraphData2D(
-          generateGraphData(results, tsneResults.results, "tsne", dimension)
+          generateGraphData(results, tsneResults.results, "tsne", dimension, {
+            perplexity: perplexity,
+          })
         );
       } else {
         setGraphData3D(
-          generateGraphData(results, tsneResults.results, "tsne", dimension)
+          generateGraphData(results, tsneResults.results, "tsne", dimension, {
+            perplexity: perplexity,
+          })
         );
       }
 
+      // disable current analyse button
       setDisabled(true);
     }
 
+    // stop loading
     setLoading(false);
   };
 
@@ -169,6 +194,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
                 setDimensions={setDimensions}
                 dimension={dimension}
                 setTitle={setTitle}
+                title={title}
                 pageTitle={pageTitle}
                 tooltipMessage={tooltip}
                 fullName={fullName}
@@ -176,7 +202,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
               />
 
               <div className="block">
-                <h1 className="has-text-weight-bold mt-">Perplexity</h1>
+                <h1 className="has-text-weight-bold">Perplexity</h1>
                 <input
                   type="range"
                   min={MIN_PERPLEXITY}
@@ -185,7 +211,6 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
                   value={perplexity}
                   onChange={(e) => {
                     setPerplexity(e.target.value);
-                    setDisabled(false);
                   }}
                   className="queens-slider"
                 />

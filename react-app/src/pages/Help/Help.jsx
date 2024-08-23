@@ -10,14 +10,14 @@ import Box from "../../components/layout/Box";
  * @returns a help page for the ap
  */
 const Help = () => {
-  // setting state
+  // setting state for the [age]
   const [download, setDownload] = useState([]);
   const [openModal, setOpenModal] = useState();
   const [modalMessage, setModalMessage] = useState();
   const csvLink = useRef();
 
   /**
-   * use effect to trigger download once state is set
+   * use effect to trigger download once state is set for gene list
    */
   useEffect(() => {
     if (download.length != 0) {
@@ -26,7 +26,7 @@ const Help = () => {
   }, [download]);
 
   /**
-   * gets the current gene name list and puts it into an array of arrays in down load to be handled by CSVLink
+   * gets the current gene name list and puts it into an array of arrays in down oad to be handled by CSVLink
    */
   const handleDownloadGeneList = async () => {
     try {
@@ -35,7 +35,7 @@ const Help = () => {
       //  if unknown error throw error to be caught
       if (!response.ok) throw new Error();
       else {
-        // if all is good display the gene list
+        // if all is good set the gene lists to a array of arrays
         response = await response.json();
         let gene_name_list = response.data.results;
         gene_name_list = gene_name_list.map((name) => [name]);

@@ -1,3 +1,8 @@
+/**
+ * a combined search and filter by id for a table with columns prediction and sampleid
+ * @param {TableInstance} table - the table to search and filter
+ * @returns the seach and filter bar
+ */
 const SearchAndFilter = ({ table }) => {
   return (
     <div className="columns">

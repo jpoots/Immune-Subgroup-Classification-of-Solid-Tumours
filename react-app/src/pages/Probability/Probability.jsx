@@ -21,7 +21,7 @@ import Title from "../../components/other/Title";
  * @returns a probabiltiy page
  */
 const Probability = () => {
-  // could add extra layer of protection here
+  // grab results context
   const results = useContext(ResultsContext)[0];
 
   const samples = results["samples"];
@@ -29,7 +29,10 @@ const Probability = () => {
   // state for the componet
   const [sorting, setSorting] = useState([]);
   const [download, setDownload] = useState([]);
+
+  // graph state
   const [columnFilters, setColumnFilters] = useState([]);
+  // prediction hidden by default, only used for filtering
   const [columnVisibility, setColumnVisibility] = useState({
     prediction: false,
   });
@@ -55,7 +58,7 @@ const Probability = () => {
     );
   };
 
-  // generates a list of columns
+  // generates a list of columns helped by https://www.youtube.com/watch?v=CjqG277Hmgg&pp=ygUPdGFuc3RhY2sgdGFibGVz
   const columns = useMemo(
     () => [
       {
@@ -113,6 +116,7 @@ const Probability = () => {
     []
   );
 
+  // set up table
   const table = useReactTable({
     data: samples,
     columns,

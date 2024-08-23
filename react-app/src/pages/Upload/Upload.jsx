@@ -6,14 +6,18 @@ import Summary from "./Summary";
 import { Link } from "react-router-dom";
 import { CSVLink } from "react-csv";
 import ErrorModal from "../../components/errors/ErrorModal";
-import { callAsyncApi } from "../../../utils/asyncAPI";
+import {
+  callAsyncApi,
+  cancelAnalysisFunctionDefiner,
+} from "../../../utils/asyncAPI";
 import { API_ROOT } from "../../../utils/constants";
 import { openWarningModal } from "../../../utils/openWarningModal";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 /**
- * constants for managing the allowed file types to upload
+ * constants for managing the allowed files to upload
  */
 const ALLOWED_FILES = ["csv", "txt"];
 const ALLOWED_FILE_HTML = ALLOWED_FILES.map((file) => `.${file}`).join(",");
@@ -22,23 +26,27 @@ const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1048576;
 const API_URL = `${API_ROOT}/analyse`;
 
 /**
- *  This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
- * @param {function} setResults - setter fir results
+ * This component renders a dynamic upload page for uploading sample data. It makes a request to the ML API, sets the results state and presents a dynamic summary and downloads
  * @param {Object.<number, number>} [summary] - summary of results
  * @param {function} setSummary - setter for summary
- * @returns
+ * @param {string} filename - file name state object
+ * @param {function} setFileName - setter for the file name state
+ * @param {function} resetApp - app wide resetter function
+ * @returns the upload page
  */
 const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
   // defining state for the component
   const [file, setFile] = useState();
   const [loading, setLoading] = useState(false);
-  const fileInput = useRef();
   const [summaryDownload, setSummaryDownload] = useState([]);
   const [allDownload, setAllDownload] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState();
-  const cancelled = useRef(false);
   const [delimiter, setDelimiter] = useState();
+
+  // defining refs
+  const cancelled = useRef(false);
+  const fileInput = useRef();
 
   // pulling context
   const [results, setResults] = useContext(ResultsContext);
@@ -48,7 +56,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
    */
   useEffect(() => {
     if (!results) {
-      setFileName("Upload file...");
+      resetApp();
     }
     // disables ESLint rule
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -58,25 +66,19 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
    */
-  useEffect(() => {
-    const cancelAnalysis = () => {
-      cancelled.current = true;
-    };
-    return cancelAnalysis;
-  }, []);
+  useEffect(() => cancelAnalysisFunctionDefiner(cancelled), []);
 
   /**
-   * sets the filename and file for the component after reset the current ones
+   * sets the filename and file for the component after resetting the current ones when the a file is selected
    * @param {event} event - the onChange event from the file input
    */
   const handleFile = (event) => {
     const file = event.target.files[0];
-    handleReset(file.name);
+    handleReset();
     setFile(file);
     setFileName(file.name);
 
     // if invlaid file type or too big, open warning modal
-
     if (!ALLOWED_FILES.includes(file.name.split(".").pop()))
       openWarningModal(setModalMessage, setOpenModal, "Invalid file type");
     if (file.size > MAX_FILE_SIZE)
@@ -88,28 +90,22 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
   };
 
   /**
-   * resets the state of the app and clears the file input. The use of filename allows the name to persist in the box if resetting for new immediate upload
-   * @param {string} [fileName] - the name of the file to set, optional. If none is given, the filename is reset to default
+   * resets the state of the app and clears the file input.
    */
-  const handleReset = (fileName) => {
+  const handleReset = () => {
+    // cancel any ongoing async requests
     cancelled.current = true;
-    fileName = typeof fileName === "undefined" ? "Upload File..." : filename;
-
-    // clear field
-    fileInput.current.value = null;
 
     // reset the app elements
     resetApp();
 
     // set local state
     setFile();
-    setFileName(fileName);
     setLoading(false);
-    cancelled.current = true;
   };
 
   /**
-   * Generates a summary of the results when called in an object for downloading
+   * Sets the summary download to a downloadable format by CSV link
    */
   const handleSummaryDownload = () => {
     setSummaryDownload(
@@ -121,7 +117,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
   };
 
   /**
-   * Generates an object from the results which can be given to csv link
+   * Generates an object from the results which can be given to csv link and assigns it to allDownload
    */
   const handleAllDownload = () => {
     const allDownload = [];
@@ -155,25 +151,26 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
   };
 
   /**
-   * handles the logic to reach out to the ML api and set results
+   * handles the logic to reach out to the API and set results
    */
   const handlePredict = async () => {
-    const formData = new FormData();
-    let request = {
-      method: "POST",
-      body: formData,
-    };
-
     // if the cancelled ref has been set to true it must be reset
     cancelled.current = false;
 
     // loading true to make button change
     setLoading(true);
 
-    // create a form and hit the api for predictions
+    // create the form and request to send
+    const formData = new FormData();
     formData.append("samples", file);
     formData.append("delimiter", delimiter);
 
+    let request = {
+      method: "POST",
+      body: formData,
+    };
+
+    // call async API
     let asyncResults = await callAsyncApi(
       API_URL,
       request,
@@ -182,18 +179,20 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
       cancelled
     );
 
+    // if successful
     if (asyncResults.success) {
       // set state
       setResults(asyncResults.results);
       setSummary(generateSummary(asyncResults.results));
     }
+    // loading complete
     setLoading(false);
   };
 
   /**
    * generate a summary given results
-   * @param {object} results
-   * @returns a summary object to be given to csv link
+   * @param {Object} results - the results object
+   * @returns a summary object
    */
   const generateSummary = (results) => {
     // generate summary
@@ -214,7 +213,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
     <>
       <Box>
         <div className="block">
-          <h1 className="block has-text-weight-bold">
+          <Title>
             RNA-Seq Upload{" "}
             <a
               className="queens-branding-text"
@@ -224,7 +223,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
             >
               ?
             </a>
-          </h1>
+          </Title>
         </div>
         <div className="file has-name">
           <label className="file-label">
@@ -307,25 +306,25 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
       {results && <Summary summary={summary} />}
 
       {results && (
-        <CSVLink
-          data={summaryDownload}
-          filename="data"
-          onClick={handleSummaryDownload}
-          className="button is-dark mr-2 mb-5"
-        >
-          <button>Download Summary</button>
-        </CSVLink>
-      )}
+        <>
+          <CSVLink
+            data={summaryDownload}
+            filename="data"
+            onClick={handleSummaryDownload}
+            className="button is-dark mr-2 mb-5"
+          >
+            <button>Download Summary</button>
+          </CSVLink>
 
-      {results && (
-        <CSVLink
-          data={allDownload}
-          filename="data"
-          onClick={handleAllDownload}
-          className="button queens-branding queens-button mr-2 mb-5"
-        >
-          <button>Download All Info</button>
-        </CSVLink>
+          <CSVLink
+            data={allDownload}
+            filename="data"
+            onClick={handleAllDownload}
+            className="button queens-branding queens-button mr-2 mb-5"
+          >
+            <button>Download All Info</button>
+          </CSVLink>
+        </>
       )}
 
       {openModal && (

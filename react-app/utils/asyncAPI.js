@@ -2,17 +2,20 @@ import { openWarningModal } from "./openWarningModal";
 
 /**
  * queries the given api every two seconds and checks for results
- * // function adapted from https://stackoverflow.com/questions/62520968/keep-calling-an-api-every-2-5-seconds-and-close-the-call-once-desired-result-is
- * @param {string} resultURL - the api to hit
+ * function adapted from https://stackoverflow.com/questions/62520968/keep-calling-an-api-every-2-5-seconds-and-close-the-call-once-desired-result-is
+ * @param {string} resultURL - the API url to hit
+ * @param {React.MutableRefObject} cancelled - the cancelled ref from the page requestion
  * @returns the result when the promise resolves
  */
 const getData = (resultURL, cancelled) => {
 return new Promise((resolve) => {
+    // start every 2 seconds
     const interval = setInterval(async () => {
-
-
+    
+    // call API
     let result = await fetch(resultURL);
-
+    
+    // if cancelled exists and cancelled is true stop calls else if not still pending resovle promise
     if (cancelled && cancelled.current){
         clearInterval(interval);
     } else if (result.status !== 201){
@@ -27,17 +30,18 @@ return new Promise((resolve) => {
 
 /**
  * calls an async api, gets the task id and polls for a final result every two seconds. Returns the success status and results if valid. Validation is performed and an error modal opened with custom message on failure
- * @param {string} url - the async enpoint
- * @param {object} request - the request to send
+ * @param {string} url - the async enpoint url to call
+ * @param {Object} request - the request to send
  * @param {function} setModalMessage -  the function to set the modal message variable
- * @param {function} setOpenModal  - the function to set he openModal variable
+ * @param {function} setOpenModal  - the function to set the openModal variable
+ * @param {React.MutableRefObject} cancelled - the cancelled ref from the page requestion
  * @returns an object containing the results from the api and the success status
  */
 const callAsyncApi = async (url, request, setModalMessage, setOpenModal, cancelled) => {
     let apiResponse;
-    let errorMessage = "Sorry something went wrong! Please try again later.";
     let results;
     let resultURL;
+    let errorMessage = "Sorry something went wrong! Please try again later.";
 
     try {
         apiResponse = await fetch(url, request);
@@ -67,10 +71,17 @@ const callAsyncApi = async (url, request, setModalMessage, setOpenModal, cancell
         return {"results": results, "success": true}
 
         } catch (err) {
-        //  error
+        //  open error model on error
         openWarningModal(setModalMessage, setOpenModal, errorMessage);
         return {"results": null, "success": false}
         }
 }
 
-export {getData, callAsyncApi}
+const cancelAnalysisFunctionDefiner = (cancelled) => {
+    const cancelAnalysis = () => {
+        cancelled.current = true;
+      };
+      return cancelAnalysis;
+}
+
+export {getData, callAsyncApi, cancelAnalysisFunctionDefiner}

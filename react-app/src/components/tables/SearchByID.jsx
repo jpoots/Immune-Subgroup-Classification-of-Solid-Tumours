@@ -1,5 +1,5 @@
 /**
- * a searchbar for searchign by ID on any table with column sampleID
+ * a searchbar for searching by ID on any table with column sampleID
  * @param {TableInstance} table - the table to be searched
  * @returns
  */

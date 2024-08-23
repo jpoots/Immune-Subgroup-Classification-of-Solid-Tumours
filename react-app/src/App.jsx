@@ -19,6 +19,8 @@ function App() {
   const [fileName, setFileName] = useState("Upload File...");
   const [results, setResults] = useState();
   const [summary, setSummary] = useState();
+
+  // global state to hold tsne and confidence analysis results moving between tabs
   const [tsneGraph2D, setTsneGraph2D] = useState();
   const [tsneGraph3D, setTsneGraph3D] = useState();
   const [tsneGraphDimensions, setTsneGraphDimensions] = useState(2);

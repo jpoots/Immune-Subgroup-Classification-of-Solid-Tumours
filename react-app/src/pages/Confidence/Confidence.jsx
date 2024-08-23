@@ -2,7 +2,10 @@ import Plot from "react-plotly.js";
 import { useContext, useEffect, useRef, useState } from "react";
 import GraphTitleSetter from "../../components/graphs/GraphTitleSetter";
 import { CSVLink } from "react-csv";
-import { callAsyncApi } from "../../../utils/asyncAPI";
+import {
+  callAsyncApi,
+  cancelAnalysisFunctionDefiner,
+} from "../../../utils/asyncAPI";
 import ErrorModal from "../../components/errors/ErrorModal";
 import { API_ROOT } from "../../../utils/constants";
 import EmptyGraph from "../../components/graphs/EmptyGraph";
@@ -10,6 +13,7 @@ import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
 import Title from "../../components/other/Title";
 
+// constants for page
 const MIN_INTERVAL = 0;
 const MAX_INTERVAL = 100;
 const API_URL = `${API_ROOT}/confidence`;
@@ -19,9 +23,9 @@ const API_URL = `${API_ROOT}/confidence`;
  * @returns - the box plotted confidence interval
  */
 const Confidence = ({ graphState }) => {
-  const slider = useRef();
+  // set up state for page
   const [download, setDownload] = useState([]);
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("Confidence Interval");
   const [interval, setInterval] = useState(95);
   const [disabled, setDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,25 +33,34 @@ const Confidence = ({ graphState }) => {
   const [openModal, setOpenModal] = useState(false);
   const results = useContext(ResultsContext)[0];
   const [graphData, setGraphData] = graphState;
+
+  // set up refs
   const cancelled = useRef();
   const confidenceResults = useRef();
+  const slider = useRef();
 
   /**
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
    */
+  useEffect(() => cancelAnalysisFunctionDefiner(cancelled), []);
+
+  /**
+   * manage page state when moving between tabs
+   */
   useEffect(() => {
-    const cancelAnalysis = () => {
-      cancelled.current = true;
-    };
-    return cancelAnalysis;
-  }, []);
+    if (graphData) {
+      setInterval(graphData.interval);
+      setDisabled(true);
+      setTitle(`${graphData.interval}% Confidence interval`);
+    }
+  }, [graphData]);
 
   /**
    * handles the confidence interval download info
    */
   const handleDownload = () => {
-    console.log(confidenceResults.current);
+    // for each sample map
     let toDownload = confidenceResults.current.map((sample) => ({
       sampleID: sample.sampleID,
       max: sample.max,
@@ -63,7 +76,7 @@ const Confidence = ({ graphState }) => {
   /**
    * Generates plotly graph data from confidence
    * @param {object} confidenceResults  -  the results from the confidence API
-   * @returns
+   * @returns - the graph data for a box plot which can be accepted by plotly
    */
   const generateConfidenceData = (confidenceResults) => {
     let upper = {
@@ -105,17 +118,21 @@ const Confidence = ({ graphState }) => {
       min: min,
       predictions: preds,
       ids: id,
+      interval: interval,
     };
   };
 
   /**
-   * calls the confidence api
+   * calls the confidence api and handles result
    */
   const handleConfidenceInterval = async () => {
     // if the cancelled ref has been set to true it must be reset
     cancelled.current = false;
 
+    // start loading spinner
     setLoading(true);
+
+    // form request
     let request = {
       method: "POST",
       headers: {
@@ -128,6 +145,7 @@ const Confidence = ({ graphState }) => {
       }),
     };
 
+    // call API
     let confidenceAPIResults = await callAsyncApi(
       API_URL,
       request,
@@ -135,10 +153,14 @@ const Confidence = ({ graphState }) => {
       setOpenModal,
       cancelled
     );
+
+    // if api success set relevant params
     if (confidenceAPIResults.success) {
       setTitle(`${interval}% Confidence Interval`);
       setGraphData(generateConfidenceData(confidenceAPIResults.results));
       confidenceResults.current = confidenceAPIResults.results;
+
+      // disables analyse button
       setDisabled(true);
     }
 
@@ -150,7 +172,7 @@ const Confidence = ({ graphState }) => {
       <div className="columns">
         <Box className="column is-one-quarter">
           <Title classes="mt-4"> Confidence Interval</Title>
-          <GraphTitleSetter setTitle={setTitle} />
+          <GraphTitleSetter setTitle={setTitle} title={title} />
 
           <div className="block">
             <h1 className="has-text-weight-bold mt-5">Interval</h1>

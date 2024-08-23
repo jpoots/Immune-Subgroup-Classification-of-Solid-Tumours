@@ -12,7 +12,7 @@ import Title from "../../components/other/Title";
 
 /**
  * the admin page where the admin can edit the gene list, create a new admin or log out
- * @returns
+ * @returns the admin page
  */
 const Admin = () => {
   // set page state
@@ -22,14 +22,20 @@ const Admin = () => {
   const [disabled, setDisabled] = useState(true);
   const [imSure, setImsure] = useState(false);
   const geneNameList = useRef();
+  const [createAdminLoading, setCreateAdminLoading] = useState();
+
+  // auth items
+  const authHeader = useAuthHeader();
   const signOut = useSignOut();
   const navigate = useNavigate();
-  const authHeader = useAuthHeader();
-  const [createAdminLoading, setCreateAdminLoading] = useState();
   const isAuthenticated = useIsAuthenticated();
 
-  // only do this on first render
+  // on first render check for auth and redirect if needed, otherwise get gene list
   useEffect(() => {
+    /**
+     * get and set gene list
+     * @returns the gene list
+     */
     const getGeneList = async () => {
       // redirect to login if session has timed out
       if (!isAuthenticated) {
@@ -46,6 +52,8 @@ const Admin = () => {
           // if all is good display the gene list
           response = await response.json();
           let gene_name_list = response.data.results;
+
+          // cleanse gene list for display
           gene_name_list = gene_name_list.join("\n");
           geneNameList.current.value = gene_name_list;
         }
@@ -58,19 +66,23 @@ const Admin = () => {
         );
       }
     };
-    // open with warning modal about danger
+
+    // perform gene list func
+    getGeneList();
+
+    // open with warning modal about danger to slow user
     openWarningModal(
       setModalMessage,
       setOpenModal,
       "WARNING: Editing the gene name list is a destructive action and should be performed with caution."
     );
-    getGeneList();
   }, [authHeader, isAuthenticated, navigate]);
 
   /**
    * handle the updating of the gene list
    */
   const handleUpdate = async () => {
+    // start loading spinner
     setLoading(true);
 
     // redirect to login if session has timed out
@@ -83,22 +95,20 @@ const Admin = () => {
     let errorMessage = "Invalid input";
 
     try {
-      // https://stackoverflow.com/questions/3871816/is-there-a-javascript-regular-expression-to-remove-all-whitespace-except-newline regex taken from here
-      // clean data
+      // https://stackoverflow.com/questions/3871816/is-there-a-javascript-regular-expression-to-remove-all-whitespace-except-newline regex taken from here to clean user input
       let geneList = geneNameList.current.value
         .replace(",", "")
         .replace(/[^\S\r\n]+/g, "")
         .split("\n");
 
-      //https://stackoverflow.com/questions/281264/remove-empty-elements-from-an-array-in-javascript works because empty strings are false
-      // remove any empty token
+      //https://stackoverflow.com/questions/281264/remove-empty-elements-from-an-array-in-javascript remove empty arrays. works because empty strings are false
       geneList.filter((name) => name);
 
       // convert to set and back to remove duplicates
       geneList = new Set(geneList);
       geneList = [...geneList];
 
-      // request to sends
+      // request to send
       const request = {
         method: "PUT",
         headers: {
@@ -111,11 +121,13 @@ const Admin = () => {
         }),
       };
 
-      // validation
+      // make sure at least 1 gene persists
       if (geneList.length == 0) throw Error();
 
       // if validation has passed, change error message, these structures avoid try catch hell
       errorMessage = "Something went wrong!";
+
+      // make request
       let response = await fetch(`${API_ROOT}/genelist`, request);
 
       // if ok, notify user, otherwise get the error and display
@@ -130,6 +142,7 @@ const Admin = () => {
     } catch (err) {
       openWarningModal(setModalMessage, setOpenModal, errorMessage);
     } finally {
+      // set loading state and put button in proper state
       setLoading(false);
       setDisabled(true);
     }
@@ -156,6 +169,13 @@ const Admin = () => {
    */
   const handleNewAdmin = async () => {
     setCreateAdminLoading(true);
+
+    // redirect to login if session has timed out
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
     try {
       // request to send
       const request = {

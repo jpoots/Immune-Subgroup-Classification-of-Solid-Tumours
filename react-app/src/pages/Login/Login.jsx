@@ -4,13 +4,14 @@ import useSignIn from "react-auth-kit/hooks/useSignIn";
 import { useNavigate } from "react-router-dom";
 import useIsAuthenticated from "react-auth-kit/hooks/useIsAuthenticated";
 import Box from "../../components/layout/Box";
+import Title from "../../components/other/Title";
 
 /**
  * the login page for admin authentication
  * @returns the admin page
  */
 const Login = () => {
-  // settign app state
+  // setting app state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Login = () => {
     // set loading for button
     setLoading(true);
 
-    // http request
+    // form request
     let request = {
       method: "POST",
       headers: {
@@ -44,13 +45,13 @@ const Login = () => {
       body: JSON.stringify({ username: username, password: password }),
     };
 
+    // reach API
     try {
       let response = await fetch(`${API_ROOT}/authenticate`, request);
 
       // if response ok set the token and navigate to admin. If not authorised, show the error message
       if (response.ok) {
         response = await response.json();
-        console.log(response);
         signIn({
           auth: {
             token: response.data.accessToken,
@@ -62,6 +63,7 @@ const Login = () => {
         setErrorMessage("Invalid credentials");
         setLoginFailed(true);
       } else {
+        // if there's an unexpected error
         throw new Error();
       }
     } catch (err) {
@@ -84,9 +86,8 @@ const Login = () => {
                 {errorMessage}
               </h1>
             )}
-            <h1 className="has-text-centered has-text-weight-bold block">
-              Admin Login
-            </h1>
+            <Title classes="has-text-centered">Admin Login</Title>
+
             <div className="field">
               <div className="control">
                 <input

@@ -6,12 +6,17 @@ import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
 import Title from "../../components/other/Title";
 
+/**
+ * a page to display classification by cancer type in a stacked bar chart
+ * @returns the classification by type page
+ */
 const ClassificationByType = () => {
+  // set state for the app and pull context
   const [title, setTitle] = useState("Class label by cancer type");
   const [download, setDownload] = useState([]);
   const results = useContext(ResultsContext)[0];
 
-  // useMemo used for these calcualtions as could be expensive and rereun too much
+  // useMemo used for these calcualtions as could be expensive
   // unique type ids extracted
   let typeids = useMemo(
     () => Array.from(new Set(results.samples.map((sample) => sample.typeid))),
@@ -30,15 +35,22 @@ const ClassificationByType = () => {
   // traces built
   let traces = useMemo(() => {
     let traces = [];
+
+    // for each subgroup
     subgroups.forEach((subgroup) => {
       let y = [];
+
+      // for each type id get the samples which have the current subgroup
       typeids.forEach((typeid) => {
         let filtered = results.samples.filter(
           (sample) => sample.prediction == subgroup && sample.typeid == typeid
         );
+
+        // add to list for the current trace
         y.push(filtered.length);
       });
 
+      // define trace
       let trace = {
         name: subgroup,
         x: typeids,
@@ -50,16 +62,22 @@ const ClassificationByType = () => {
     return traces;
   }, [results.samples, subgroups, typeids]);
 
+  /**
+   * handles the download of type info by CSV link. Sets data to download
+   */
   const handleDownload = () => {
+    // for each subgroup
     let results = traces.map((trace) => {
       let traceResults = { subgroup: trace.name };
 
+      // get the count of each type
       trace.x.forEach((type, index) => {
         traceResults[type] = trace.y[index];
       });
       return traceResults;
     });
 
+    // set data
     setDownload(results);
   };
 
@@ -68,16 +86,18 @@ const ClassificationByType = () => {
       <div className="columns">
         <Box className="column is-one-quarter">
           <Title classes="mt-4">Classification by Cancer Type</Title>
-          <GraphTitleSetter setTitle={setTitle} />
+          <GraphTitleSetter setTitle={setTitle} title={title} />
 
-          <CSVLink
-            data={download}
-            filename="data"
-            onClick={handleDownload}
-            className="button is-dark"
-          >
-            <button>Download Report</button>
-          </CSVLink>
+          <div className="has-text-centered">
+            <CSVLink
+              data={download}
+              filename="data"
+              onClick={handleDownload}
+              className="button is-dark"
+            >
+              <button>Download Report</button>
+            </CSVLink>
+          </div>
         </Box>
 
         <div className="column is-fullheight">

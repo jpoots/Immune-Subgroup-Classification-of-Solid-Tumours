@@ -19,9 +19,10 @@ import Title from "../../components/other/Title";
  * @returns - the gene expression results page
  */
 const GeneExpression = () => {
-  // defining state
-  const [sorting, setSorting] = useState([]);
+  // defining state for the page
   const [download, setDownload] = useState([]);
+  // table state
+  const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({
     prediction: false,
@@ -31,7 +32,10 @@ const GeneExpression = () => {
     pageSize: 5,
   });
 
+  // pull context
   const results = useContext(ResultsContext)[0];
+
+  // pull out samples and gene list
   const samples = results["samples"];
   const geneNameList = Object.keys(samples[0]["genes"]);
 
@@ -69,6 +73,7 @@ const GeneExpression = () => {
     return columns;
   }, [geneNameList]);
 
+  // defining react table
   const table = useReactTable({
     data: samples,
     columns,
@@ -93,15 +98,18 @@ const GeneExpression = () => {
    */
   const handleDownload = () => {
     let toExport = table.getFilteredRowModel().rows.map((row) => {
+      // for each sapmple...
       let sample = row.original;
-      let sampleDict = { sampleID: sample.sampleID };
 
+      // add sample id and gene for each gene
+      let sampleDict = { sampleID: sample.sampleID };
       Object.keys(sample["genes"]).forEach(
         (gene) => (sampleDict[gene] = sample["genes"][gene])
       );
       return sampleDict;
     });
 
+    // set download state
     setDownload(toExport);
   };
 

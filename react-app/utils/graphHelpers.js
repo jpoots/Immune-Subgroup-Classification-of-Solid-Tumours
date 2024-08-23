@@ -4,7 +4,7 @@
 
 
 /**
- * 
+ * generates plotly scatter plot data given x, y and (optionally z) coorinates
  * @param {Object} graphData - the graph object structred by point and then sample
  * @param {number} dimension - the number of dimennsions to render 
  * @returns a list of plotly data traces
@@ -28,12 +28,14 @@ const getPlotlyData = (graphData, dimension) => {
 
 /**
  * generates a graph data dictionary containing all lists required to build a plotly trace for each subgroup
- * @param {Object} results - the generic prediction results
+ * @param {Object} results - the generic prediction results containg the required graph info as well as predictions and ids
  * @param {Object} graphResponse - the data attained from the api call to data analysis api
- * @param {string} accessorKey - the key to access the required array in graphResponse
- * @returns 
+ * @param {string} accessorKey - the key to access the required array in graphResponse (PCA or t-SNE)
+ * @returns - dictionary containing x,y,z,id,prediction array and dimensions
  */
-const generateGraphData = (results, graphResponse, accessorKey, dimensions) => {
+const generateGraphData = (results, graphResponse, accessorKey, dimensions, metadata) => {
+    if (!metadata) metadata = {}
+
     let x  = {
         1: [],
         2: [],
@@ -67,7 +69,8 @@ const generateGraphData = (results, graphResponse, accessorKey, dimensions) => {
         z: z,
         ids: idx,
         predictions: preds,
-        dim: dimensions
+        dim: dimensions,
+        metadata: metadata
       });
 }
 
