@@ -6,6 +6,8 @@ ICST is a machine learning based web app for immune subgroup classification of s
 
 The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="http://analytics.eeecs.qub.ac.uk:8080">API </a> may be accessed at the linked location when on a wired connection to the Queen's University network. Instructions for local usage are given below.
 
+> **Note:** This repository contains large file. Make sure to use git lfs install, git lfs fetch and git lfs pull with git lfs installed to the system to pull large files.
+
 ## Table of Contents
 
 1. [Description](#Description)
@@ -17,6 +19,7 @@ The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="htt
 7. [Contact](#Contact)
 
 ## Description
+
 Pioneering cancer research has identified six immune subgroups, clustered on tumour gene data including RNA-Seq gene expression using unsupervised machine learning clustering on over 10,000 samples taken from The Cancer Genome Atlas (TCGA) across 33 cancer types in the paper <a href="https://pubmed.ncbi.nlm.nih.gov/29628290/"> The Immune Landscape of Cancer</a>.
 
 ICST is the first publicly available tool for classifying new samples based upon the 440 key genes identified in the above paper using a supervised gradient boosting machine learning model. Contained in this repository is the model development scripts for reproduction of results, the Flask API and the React frontend. Setup and start scripts are also included for these along with some results produced by the model, test data and the models evaluation data as discussed in the accompanying report.
@@ -29,16 +32,16 @@ The project has been tested for the following configurations. Additional configu
 
 All requirements can be installed using the provided scripts. If a script fails for your system, you may manually install the requirements as below. It is assumed Python3 is already installed on the system along with the Brew package manager for MacOS and venv. The software was tested using Python 3.10.
 
-- **OS:** Mac OS Senoma or Ubuntu Linux 22.04
+- **OS:** Mac OS Senoma (ARM) or Ubuntu Linux 22.04 (x86)
 - **Software:**
   - Python 3.10
   - Node.js 20
-  - Redis 6.2
+  - Redis 6.0
   - MySQL 8
 
 ## Installation
 
-Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired.
+Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired. Scripts should be executed in the below order.
 
 ### install_requirments_OS.sh
 
