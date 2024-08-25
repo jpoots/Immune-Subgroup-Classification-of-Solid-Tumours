@@ -6,9 +6,6 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
 } from "@tanstack/react-table";
-
-import { CSVLink } from "react-csv";
-import NothingToDisplay from "../NothingToDisplay/NothingToDisplay";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
@@ -138,30 +135,16 @@ const Probability = () => {
 
   return (
     <>
-      {results ? (
-        <>
-          <Box>
-            <Title> Prediction Probability by Subgroup</Title>
-            <SearchAndFilter table={table} />
-            <TableWithBoldMax table={table} accessor="probs" />
-          </Box>
-          <PaginationBar
-            table={table}
-            download={download}
-            exportSamples={handleDownload}
-          />
-          <CSVLink
-            data={download}
-            filename="data"
-            onClick={handleDownload}
-            className="button is-dark"
-          >
-            <button>Download Report</button>
-          </CSVLink>
-        </>
-      ) : (
-        <NothingToDisplay />
-      )}
+      <Box>
+        <Title> Prediction Probability by Subgroup</Title>
+        <SearchAndFilter table={table} />
+        <TableWithBoldMax table={table} accessor="probs" />
+      </Box>
+      <PaginationBar
+        table={table}
+        download={download}
+        handleDownload={handleDownload}
+      />
     </>
   );
 };

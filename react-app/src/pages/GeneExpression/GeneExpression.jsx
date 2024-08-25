@@ -7,7 +7,6 @@ import {
   getSortedRowModel,
 } from "@tanstack/react-table";
 import { Table } from "../../components/tables/Table";
-import { CSVLink } from "react-csv";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
@@ -120,15 +119,11 @@ const GeneExpression = () => {
         <SearchAndFilter table={table}></SearchAndFilter>
         <Table table={table} />
       </Box>
-      <PaginationBar table={table} />
-      <CSVLink
-        data={download}
-        filename="data"
-        onClick={handleDownload}
-        className="button is-dark"
-      >
-        <button>Download Report</button>
-      </CSVLink>
+      <PaginationBar
+        table={table}
+        download={download}
+        handleDownload={handleDownload}
+      />
     </>
   );
 };

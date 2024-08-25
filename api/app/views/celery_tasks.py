@@ -7,6 +7,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import os
+import numpy as np
 
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
 
@@ -198,6 +199,21 @@ def analyse(filepath, delimiter):
             for gene_name, expression in zip(data["gene_names"], feature_list)
         }
 
+        predom_prediction = None
+        predom_probs = None
+
+        # get the predom data where relevant
+        if prediction == 7:
+            sorted_probs = np.argsort(prob_list).tolist()
+            predom_1_index = sorted_probs[-1]
+            predom_2_index = sorted_probs[-2]
+
+            predom_probs = [
+                prob_list[predom_1_index],
+                prob_list[predom_2_index],
+            ]
+            predom_prediction = [predom_1_index + 1, predom_2_index + 1]
+
         # append for sample
         results.append(
             {
@@ -207,9 +223,11 @@ def analyse(filepath, delimiter):
                 "probs": prob_list,
                 "pca": pc_comps,
                 "typeid": type_id,
+                "predomPrediction": predom_prediction,
+                "predomProbs": predom_probs,
             }
         )
-
+    print(results)
     return {
         "samples": results,
         "invalid": data["invalid"],

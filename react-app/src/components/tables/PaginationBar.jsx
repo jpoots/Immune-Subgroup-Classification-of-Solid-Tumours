@@ -1,9 +1,11 @@
+import { CSVLink } from "react-csv";
+
 /**
  * a pagination bar componet for a results table
  * @param {TableInstance} table - the table to be paginated
  * @returns - the pagination bar for the table
  */
-export function PaginationBar({ table }) {
+export function PaginationBar({ table, download, handleDownload }) {
   return (
     <nav className="pagination is-right">
       <button
@@ -39,8 +41,19 @@ export function PaginationBar({ table }) {
             min={1}
             max={table.getPageCount()}
             value={table.getState().pagination.pageIndex + 1}
-            className="queens-textfield"
+            className="queens-textfield mr-5"
           />
+        </li>
+
+        <li>
+          <CSVLink
+            data={download}
+            filename="data"
+            onClick={handleDownload}
+            className="ml-5 button is-dark"
+          >
+            <button>Download Report</button>
+          </CSVLink>
         </li>
       </ul>
     </nav>

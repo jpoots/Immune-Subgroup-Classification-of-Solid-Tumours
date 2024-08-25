@@ -18,15 +18,17 @@ export function Table({ table }) {
                 {headerGroup.headers.map((header) => {
                   return (
                     <th key={header.id} className="has-text-centered">
-                      {header.column.columnDef.header}{" "}
-                      {header.column.getCanSort() && (
-                        <button
-                          className="button is-small sort-button"
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          <img src={sortArrows} width={10} />
-                        </button>
-                      )}
+                      <div className="is-justify-content-center is-flex is-flex-wrap-nowrap">
+                        {header.column.columnDef.header}{" "}
+                        {header.column.getCanSort() && (
+                          <button
+                            className="button is-small sort-button"
+                            onClick={header.column.getToggleSortingHandler()}
+                          >
+                            <img src={sortArrows} width={10} />
+                          </button>
+                        )}
+                      </div>
                     </th>
                   );
                 })}
