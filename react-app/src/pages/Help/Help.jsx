@@ -75,11 +75,11 @@ const Help = () => {
               >
                 The Immune Landscape of Cancer
               </a>
-              . In addition, Dr Rafiee suggests a 7th predominant subgroup (7-1)
-              for samples which fall between subgroups. Full class names are
-              listed below. More details about the characterists along with
-              therapeutic inights can be fodun in the paper. The tool also
-              provides useful visualisation tools for the data.
+              . In addition, a 7th subgroup is defined by Dr Rafiee for samples
+              which fall between subgroups. Full class names are listed below.
+              More details about the characterists along with therapeutic
+              inights can be fodun in the paper. The tool also provides useful
+              visualisation tools for the data.
             </div>
           </div>
 
@@ -118,7 +118,7 @@ const Help = () => {
                     <td className="has-text-centered">TGF-β Dominant</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">C7-1</td>
+                    <td className="has-text-centered">C7</td>
                     <td className="has-text-centered">Predominant</td>
                   </tr>
                 </tbody>
@@ -203,9 +203,13 @@ const Help = () => {
             440 required genes. A label row/column should be included for both
             axis. In addition, to maintain accuracy, any samples for which ICST
             cannot make a confident prediction will be deemed non-classifiable
-            (NC). The current threshold for this is 91.5%. Results and
-            visualisations can be viewed using the navigation bar at the top of
-            the screen. All data including graphs is available to download.
+            (NC). The current threshold for this is 92%. Where samples fall
+            below this threshold but above a random guess (50%) and have a top
+            two probabilities which sum to a value above the threshold, they are
+            deemed to have two predominant subgroups and are labelled as
+            subgroup 7 in the classification table. Results and visualisations
+            can be viewed using the navigation bar at the top of the screen. All
+            data including graphs is available to download.
           </div>
         </div>
 

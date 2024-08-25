@@ -63,7 +63,7 @@ def predict(features):
         if index in nc_indicies:
             pred_to_add = "NC"
         elif index in predom_indicies:
-            pred_to_add = "7-1"
+            pred_to_add = 7
         else:
             pred_to_add = prediction + 1
         filtered_predictions.append(pred_to_add)

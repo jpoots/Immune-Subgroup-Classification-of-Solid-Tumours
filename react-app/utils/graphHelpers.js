@@ -43,7 +43,7 @@ const generateGraphData = (results, graphResponse, accessorKey, dimensions, meta
         4: [],
         5: [],
         6: [],
-        "7-1": [],
+        7: [],
         NC: [],
       };
   

@@ -204,7 +204,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
       4: 0,
       5: 0,
       6: 0,
-      "7-1": 0,
+      7: 0,
       NC: 0,
     };
     results["samples"].forEach((result) => summaryToSet[result.prediction]++);
