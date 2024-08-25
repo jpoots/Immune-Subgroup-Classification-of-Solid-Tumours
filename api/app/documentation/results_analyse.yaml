@@ -25,6 +25,8 @@ responses:
               type: integer
             nc:
               type: integer
+            predom:
+              type: integer
             samples:
               items:
                 properties:

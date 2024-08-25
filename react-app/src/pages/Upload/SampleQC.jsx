@@ -16,6 +16,10 @@ const SampleQC = () => {
         {results["samples"].length} sample(s) passed gene QC
       </div>
       <div className="block">
+        {results["predominant"]} sample(s) were deemed to be between subgroups
+        (predominant)
+      </div>
+      <div className="block">
         {results["nc"]} sample(s) were deemed non-classifiable due to a low
         confidence score
       </div>

@@ -74,6 +74,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
    */
   const handleFile = (event) => {
     const file = event.target.files[0];
+    event.target.value = "";
     handleReset();
     setFile(file);
     setFileName(file.name);
@@ -203,6 +204,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
       4: 0,
       5: 0,
       6: 0,
+      "7-1": 0,
       NC: 0,
     };
     results["samples"].forEach((result) => summaryToSet[result.prediction]++);
@@ -280,7 +282,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
 
         <div className="block">
           ICST is an open-access, open source software package which allows you
-          to classify samples solid tumour samples into one of 6 immune
+          to classify samples solid tumour samples into one of 7 immune
           subgroups using FPKM normalised RNA-Seq data. Please read the help
           section before use. By using the software you agree to be bound by the{" "}
           <Link to="/help" className="queens-branding-text">

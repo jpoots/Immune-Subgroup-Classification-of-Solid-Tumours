@@ -1,4 +1,7 @@
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/55DH349/logo.png" alt="logo" border="0"></a>
+<div align="center">
+    <img src="https://i.ibb.co/55DH349/logo.png" alt="logo" border="0"> 
+</div>
+
 # ICST: Immune Subgroup Classification for Solid Tumours
 
 ## Overview
@@ -23,7 +26,7 @@ The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="htt
 
 Pioneering cancer research has identified six immune subgroups, clustered on tumour gene data including RNA-Seq gene expression using unsupervised machine learning clustering on over 10,000 samples taken from The Cancer Genome Atlas (TCGA) across 33 cancer types in the paper <a href="https://pubmed.ncbi.nlm.nih.gov/29628290/"> The Immune Landscape of Cancer</a>.
 
-ICST is the first publicly available tool for classifying new samples based upon the 440 key genes identified in the above paper using a supervised gradient boosting machine learning model. Contained in this repository is the model development scripts for reproduction of results, the Flask API and the React frontend. Setup and start scripts are also included for these along with some results produced by the model, test data and the models evaluation data as discussed in the accompanying report.
+ICST is the first publicly available tool for classifying new samples based upon the 440 key genes identified in the above paper using a supervised gradient boosting machine learning model. In addition, Dr Rafiee suggests a 7th subgroup for samples which fall between subgroups. Contained in this repository is the model development scripts for reproduction of results, the Flask API and the React frontend. Setup and start scripts are also included for these along with some results produced by the model, test data and the models evaluation data as discussed in the accompanying report.
 
 Full discussion of the function of each file is contained in the accompanying report.
 

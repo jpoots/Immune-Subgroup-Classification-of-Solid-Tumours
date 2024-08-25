@@ -167,7 +167,7 @@ def analyse(filepath, delimiter):
     data = parse_csv(filepath, delimiter)
 
     # predict
-    predictions, prediction_probs, num_nc = predict(data["features"])
+    predictions, prediction_probs, num_nc, num_predom = predict(data["features"])
 
     # perform PCA
     if len(predictions) < 3:
@@ -210,4 +210,9 @@ def analyse(filepath, delimiter):
             }
         )
 
-    return {"samples": results, "invalid": data["invalid"], "nc": num_nc}
+    return {
+        "samples": results,
+        "invalid": data["invalid"],
+        "nc": num_nc,
+        "predominant": num_predom,
+    }

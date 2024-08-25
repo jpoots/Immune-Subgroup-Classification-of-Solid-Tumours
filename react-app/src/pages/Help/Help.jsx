@@ -75,10 +75,11 @@ const Help = () => {
               >
                 The Immune Landscape of Cancer
               </a>
-              . Full class names are listed below. More details about the
-              characterists along with therapeutic inights can be fodun in the
-              paper. The tool also provides useful visualisation tools for the
-              data.
+              . In addition, Dr Rafiee suggests a 7th predominant subgroup (7-1)
+              for samples which fall between subgroups. Full class names are
+              listed below. More details about the characterists along with
+              therapeutic inights can be fodun in the paper. The tool also
+              provides useful visualisation tools for the data.
             </div>
           </div>
 
@@ -93,28 +94,32 @@ const Help = () => {
                 </thead>
                 <tbody>
                   <tr>
-                    <td className="has-text-centered">1</td>
+                    <td className="has-text-centered">C1</td>
                     <td className="has-text-centered">Wound Healing</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">2</td>
+                    <td className="has-text-centered">C2</td>
                     <td className="has-text-centered">IFN-&#947; Dominant</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">3</td>
+                    <td className="has-text-centered">C3</td>
                     <td className="has-text-centered">Inflammatory</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">4</td>
+                    <td className="has-text-centered">C4</td>
                     <td className="has-text-centered">Lymphocyte Depleted</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">5</td>
+                    <td className="has-text-centered">C5</td>
                     <td className="has-text-centered">Immunologically Quiet</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">6</td>
+                    <td className="has-text-centered">C6</td>
                     <td className="has-text-centered">TGF-β Dominant</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">C7-1</td>
+                    <td className="has-text-centered">Predominant</td>
                   </tr>
                 </tbody>
               </table>

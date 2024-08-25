@@ -33,7 +33,9 @@ responses:
           properties:
             nc:
               type: integer
-            results:
+            predom:
+              type: integer
+            samples:
               items:
                 properties:
                   prediction:
@@ -43,8 +45,6 @@ responses:
                       type: number
                   type: array
                   sampleID:
-                    type: string
-                  typeid:
                     type: string
                 type: object
               type: array

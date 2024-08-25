@@ -37,6 +37,8 @@ def parse_samples():
         A json response object including key the sample data, number of invlaid samples.
 
         "data": {
+            "predom": 1,
+            "nc": 1,
             "invalid": 0,
             "samples": [
             {
@@ -89,10 +91,13 @@ def predictgroup():
         "data": {
             "samples": [
             {
-                "prediction": 4
-                "sampleID": "TCGA.02.0047.GBM.C4"
+                "prediction": 1
+                "sampleID": "TCGA.02.0047.GBM.C1"
+                "probs": [0.95, 0.01, 0.01, 0.01, 0.01, 0.01]
             },
-            ]
+            ],
+            "predom": 1,
+            "nc": 1
         }
     """
 
@@ -104,14 +109,16 @@ def predictgroup():
     features = data["features"]
 
     # predict
-    predictions, prediction_probs, num_nc = predict(features)
+    predictions, prediction_probs, num_nc, num_predom = predict(features)
 
     # prepare for response
     results = []
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
         results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
 
-    return jsonify({"data": {"results": results, "nc": num_nc}})
+    return jsonify(
+        {"data": {"samples": results, "nc": num_nc, "predominant": num_predom}}
+    )
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)

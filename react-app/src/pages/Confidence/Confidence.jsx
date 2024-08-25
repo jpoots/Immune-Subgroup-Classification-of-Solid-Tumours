@@ -86,6 +86,7 @@ const Confidence = ({ graphState }) => {
       4: [],
       5: [],
       6: [],
+      "7-1": [],
       NC: [],
     };
     let lower = structuredClone(upper);

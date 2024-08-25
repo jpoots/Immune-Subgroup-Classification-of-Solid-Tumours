@@ -14,7 +14,7 @@ from utils import (
     get_data,
     split_data,
     analyse_prediction_results,
-    predict_with_qc,
+    predict_with_qc_and_predom,
     RANDOM_STATE,
     TEST_SIZE,
 )
@@ -68,10 +68,10 @@ def main():
     extract_missmatch_probs(loaded_model, x_test_labelled, y_test_labelled)
 
     # predict and evaluate
-    predictions, true, num_removed = predict_with_qc(
+    predictions, true, num_removed, num_predom = predict_with_qc_and_predom(
         loaded_model, QC_THRESHOLD, x_test, y_test
     )
-    evaluate_performance(true, predictions, num_removed)
+    evaluate_performance(true, predictions, num_removed, num_predom)
 
     # show plot
     plt.show()
@@ -87,16 +87,46 @@ def extract_nc_probs(pipe, threshold, x):
 
     features = [features for _id, features in x]
 
-    # predict
     prediction_probs = pipe.predict_proba(features)
     predictions = pipe.predict(features)
 
     # filter to max probs
-    max_probs_test = np.amax(prediction_probs, axis=1)
-    nc_indicies = [i for i, prob in enumerate(max_probs_test) if prob < threshold]
+    nc_indicies, predom_indicies = [], []
+    nc_probabilities, predom_prob1, predom_prob2, predom_class1, predom_class2 = (
+        [],
+        [],
+        [],
+        [],
+        [],
+    )
 
-    # get the max probs that are nc
-    nc_probabilities = max_probs_test[nc_indicies]
+    # for each probability
+    for index, prob in enumerate(prediction_probs):
+        # get max
+        max_prob = np.amax(prob)
+
+        # if nc
+        if max_prob < threshold:
+
+            # if below thresh but sum of two highest above thresh and max above 0.5 (random guess)
+            if (max_prob + np.sort(prob)[-2]) > threshold and max_prob > 0.5:
+                predom_indicies.append(index)
+
+                # sort indicies
+                sorted_indicies = np.argsort(prob)
+
+                # get the two highest classes
+                predom_class1.append(sorted_indicies[-1] + 1)
+                predom_class2.append(sorted_indicies[-2] + 1)
+
+                # get the two highest probs
+                predom_prob1.append(max_prob)
+                predom_prob2.append(np.sort(prob)[-2])
+
+            else:
+                # note indicies and max prob
+                nc_indicies.append(index)
+                nc_probabilities.append(max_prob)
 
     # get the nc predictions and undo 0 index
     nc_predictions = predictions[nc_indicies]
@@ -104,12 +134,22 @@ def extract_nc_probs(pipe, threshold, x):
 
     # get nc ids
     nc_ids = [x[i][0] for i in nc_indicies]
+    predom_ids = [x[i][0] for i in predom_indicies]
 
     # build dataframe and write to file
     nc_df = pd.DataFrame(data=nc_probabilities, index=nc_ids, columns=["max_prob"])
     nc_df.index.name = "sampleID"
     nc_df.insert(loc=1, column="prediction", value=nc_predictions)
     nc_df.to_csv(f"{PROBS_FOLDER_NAME}/nc.csv")
+
+    # build dataframe and write to file
+    predom_df = pd.DataFrame(index=predom_ids)
+    predom_df.index.name = "sampleID"
+    predom_df.insert(loc=0, column="prob1", value=predom_prob1)
+    predom_df.insert(loc=1, column="prob2", value=predom_prob2)
+    predom_df.insert(loc=2, column="class1", value=predom_class1)
+    predom_df.insert(loc=3, column="class2", value=predom_class2)
+    predom_df.to_csv(f"{PROBS_FOLDER_NAME}/predom.csv")
 
 
 def extract_missmatch_probs(pipe, x, y):
@@ -149,14 +189,16 @@ def extract_missmatch_probs(pipe, x, y):
     df.to_csv(f"{PROBS_FOLDER_NAME}/mismatch.csv")
 
 
-def evaluate_performance(true, predictions, num_removed):
+def evaluate_performance(true, predictions, num_removed, num_predom):
     """Evaluates performance
     Args:
         true: target labels
         predictions: model predictions
         num_removed: the number of sampels removed as NC
+        num_predom : the number of predominant samples
     """
     print(f"Removed: {num_removed}")
+    print(f"Predominant: {num_predom}")
     print(f"QC Threshold: {QC_THRESHOLD}")
     analyse_prediction_results(predictions, true)
     cf = ConfusionMatrixDisplay.from_predictions(true, predictions)
