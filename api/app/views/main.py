@@ -22,7 +22,7 @@ The main api endpoints for the system to perform analysis
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
 
 # API results endpoint
-RESULTS_ENDPOINT = f"{API_ROOT}/results"
+RESULTS_ENDPOINT = f"{API_ROOT}/ results"
 
 main = Blueprint("main", __name__)
 
@@ -93,7 +93,9 @@ def predictgroup():
             {
                 "prediction": 1
                 "sampleID": "TCGA.02.0047.GBM.C1"
-                "probs": [0.95, 0.01, 0.01, 0.01, 0.01, 0.01]
+                "probs": [0.95, 0.01, 0.01, 0.01, 0.01, 0.01],
+                "predomPrediction": Null
+                "predomProbs": Null
             },
             ],
             "predom": 1,
@@ -116,9 +118,7 @@ def predictgroup():
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
         results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
 
-    return jsonify(
-        {"data": {"samples": results, "nc": num_nc, "predominant": num_predom}}
-    )
+    return jsonify({"data": {"samples": results, "nc": num_nc, "predom": num_predom}})
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)

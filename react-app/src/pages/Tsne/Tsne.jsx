@@ -180,7 +180,7 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
 
   const pageTitle = "t-SNE Visualisation";
   const tooltip =
-    " is an unsupervised non-linear dimensionality reduction technique for visualizing high-dimensional data.";
+    " is a dimensionality reduction technique for visualizing high-dimensional data maintaining local strucutre.";
   const fullName = "t-distributed Stochastic Neighbor Embedding (t-SNE)";
   const tooltipLink = "https://www.datacamp.com/tutorial/introduction-t-sne";
 

@@ -47,10 +47,10 @@ const Pca = () => {
   // constants for the tooltip
   const pageTitle = "PCA Visualisation";
   const tooltip =
-    " is a dimensionality reduction technique which seeks to visualise high dimensional data to while maintaining maximum variance";
+    " is a dimensionality reduction technique which seeks to visualise high dimensional data while maintaining maximum variance";
   const fullName = "Principle Component Analysis (PCA)";
   const tooltipLink =
-    "https://builtin.com/data-science/step-step-explanation-principal-component-analysis#:~:text=necessary%20for%20context.-,What%20Is%20Principal%20Component%20Analysis%3F,information%20in%20the%20large%20set.";
+    "https://builtin.com/data-science/step-step-explanation-principal-component-analysis";
 
   return (
     <>

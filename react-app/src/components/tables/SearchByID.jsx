@@ -1,10 +1,10 @@
 /**
  * a searchbar for searching by ID on any table with column sampleID
  * @param {TableInstance} table - the table to be searched
- * @returns
+ * @returns the input box
  */
 
-export function SearchByID({ table }) {
+const SearchByID = ({ table }) => {
   return (
     <input
       type="text"
@@ -16,4 +16,6 @@ export function SearchByID({ table }) {
       placeholder="Search by sample ID"
     />
   );
-}
+};
+
+export default SearchByID;

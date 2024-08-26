@@ -1,3 +1,5 @@
+import SearchByID from "./SearchByID";
+
 /**
  * a combined search and filter by id for a table with columns prediction and sampleid
  * @param {TableInstance} table - the table to search and filter
@@ -7,15 +9,7 @@ const SearchAndFilter = ({ table }) => {
   return (
     <div className="columns">
       <div className="column is-one-quarter">
-        <input
-          type="text"
-          className="input queens-textfield"
-          onChange={(e) => {
-            let column = table.getColumn("sampleID");
-            column.setFilterValue(e.target.value.toUpperCase());
-          }}
-          placeholder="Search by sample ID"
-        />
+        <SearchByID table={table} />
       </div>
       <div className="column is-half">
         <div className="select is-danger">

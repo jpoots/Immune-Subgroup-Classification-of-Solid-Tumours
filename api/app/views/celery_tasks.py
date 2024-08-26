@@ -148,6 +148,8 @@ def analyse(filepath, delimiter):
 
         "data": {
             "invalid": 0,
+            "nc": 0,
+            "predom": 0,
             "samples": [
             {
                 "genes": {
@@ -157,7 +159,9 @@ def analyse(filepath, delimiter):
                 "probs":[0.1,0.1,0.1,0.1,0.1,0.5],
                 "prediction: 1,
                 "pca": [1,2,3],
-                "typeid: "GBM
+                "typeid: "GBM"
+                "predomPrediction": Null
+                "predomProbs": Null
             },]
         }
 
@@ -227,7 +231,6 @@ def analyse(filepath, delimiter):
                 "predomProbs": predom_probs,
             }
         )
-    print(results)
     return {
         "samples": results,
         "invalid": data["invalid"],

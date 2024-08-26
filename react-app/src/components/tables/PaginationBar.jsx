@@ -1,8 +1,10 @@
 import { CSVLink } from "react-csv";
 
 /**
- * a pagination bar componet for a results table
+ * a pagination bar componet for a results table includin a download button
  * @param {TableInstance} table - the table to be paginated
+ * @param {array} download - the data to be downloaded
+ * @param {function} handleDownload - a function to perform before download
  * @returns - the pagination bar for the table
  */
 export function PaginationBar({ table, download, handleDownload }) {

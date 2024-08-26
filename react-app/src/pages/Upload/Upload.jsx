@@ -15,6 +15,7 @@ import { openWarningModal } from "../../../utils/openWarningModal";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";
 import Title from "../../components/other/Title";
+import QueensLink from "../../components/other/QueensLink";
 
 /**
  * constants for managing the allowed files to upload
@@ -217,14 +218,14 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
         <div className="block">
           <Title>
             RNA-Seq Upload{" "}
-            <a
+            <span
               className="queens-branding-text"
               data-tooltip-content={`ICST accepts FPKM normalised RNA-Seq data in CSV or TXT format up to ${MAX_FILE_SIZE_MB}MB. See help for more details.`}
               data-tooltip-id="icst-tooltip"
               data-tooltip-place="right"
             >
               ?
-            </a>
+            </span>
           </Title>
         </div>
         <div className="file has-name">
@@ -291,13 +292,13 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
           {""}.
         </div>
         <div className="block">
-          <a
+          <QueensLink
             href="/icst/test_data.csv"
-            className="queens-branding-text mr-5"
             download={true}
+            className={"mr-5"}
           >
             Download Test Data
-          </a>
+          </QueensLink>{" "}
           <Link to="/help" className="queens-branding-text">
             Help
           </Link>

@@ -11,6 +11,7 @@ import { Table } from "../../components/tables/Table";
 import Box from "../../components/layout/Box";
 import { PaginationBar } from "../../components/tables/PaginationBar";
 import Title from "../../components/other/Title";
+import SearchByID from "../../components/tables/SearchByID";
 
 const PredominanceReport = () => {
   // setting state for the component
@@ -113,6 +114,13 @@ const PredominanceReport = () => {
       <>
         <Box className="block">
           <Title>Predominance Report</Title>
+
+          <div className="columns">
+            <div className="column is-one-quarter">
+              <SearchByID table={table} />
+            </div>
+          </div>
+
           <Table table={table} />
         </Box>
         <PaginationBar

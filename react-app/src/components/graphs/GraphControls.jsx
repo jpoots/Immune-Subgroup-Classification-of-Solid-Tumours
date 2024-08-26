@@ -2,6 +2,7 @@ import { Tooltip } from "react-tooltip";
 import { renderToStaticMarkup } from "react-dom/server";
 import GraphTitleSetter from "./GraphTitleSetter";
 import Title from "../other/Title";
+import QueensLink from "../other/QueensLink";
 
 /**
  * a componet which handles the dimensions viewed and the title of a visualisation graph
@@ -30,9 +31,7 @@ export function GraphControls({
   const tooltipHTML = () =>
     renderToStaticMarkup(
       <div>
-        <a className="queens-branding-text" href={tooltipLink} target="_blank">
-          {fullName}
-        </a>
+        <QueensLink href={tooltipLink}> {fullName}</QueensLink>
         {tooltipMessage}
       </div>
     );

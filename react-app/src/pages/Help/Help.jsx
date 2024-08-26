@@ -4,6 +4,7 @@ import { CSVLink } from "react-csv";
 import ErrorModal from "../../components/errors/ErrorModal";
 import { openWarningModal } from "../../../utils/openWarningModal";
 import Box from "../../components/layout/Box";
+import QueensLink from "../../components/other/QueensLink";
 
 /**
  * a help page for the app containing help text
@@ -68,23 +69,19 @@ const Help = () => {
               normalised RNA-Seq data from 440 genes to group solid tumour
               samples into one of the six immune sugroups identified in the 2018
               publication{" "}
-              <a
-                href="https://pubmed.ncbi.nlm.nih.gov/29628290/"
-                className="queens-branding-text"
-                target="_blank"
-              >
+              <QueensLink href="https://pubmed.ncbi.nlm.nih.gov/29628290/">
                 The Immune Landscape of Cancer
-              </a>
+              </QueensLink>
               . In addition, a 7th subgroup is defined by Dr Rafiee for samples
               which fall between subgroups. Full class names are listed below.
               More details about the characterists along with therapeutic
-              inights can be fodun in the paper. The tool also provides useful
-              visualisation tools for the data.
+              inights can be found in the linked paper. The tool also provides
+              useful visualisation tools for the data.
             </div>
           </div>
 
           <div className="columns is-centered">
-            <div className="column is-half">
+            <div className="column is-half is-flex is-justify-content-center">
               <table className="table block">
                 <thead>
                   <tr>
@@ -134,28 +131,31 @@ const Help = () => {
               ICST accepts FPKM normalised RNA-Seq data and extracts 440 key
               genes for the subgroup classification. Any missing genes are
               imputed using MICE (Multivariate Imputation by Chained Equations).
-              To ensure the quality of predictions all samples undergo Gene QC
-              and samples with 10 or more missing genes will be rejected. Gene
-              expression values are then scaled between 0 and 1 using a Minmax
-              scaling algorithm. These &quot;features&quot; are fed to a
-              supervised machine learning model trained on over 7000 samples
-              from PanCanAtlas using the{" "}
-              <a
-                href="https://xgboost.readthedocs.io/en/stable/index.html"
-                className="queens-branding-text"
-                target="_blank"
-              >
+              Note that the system will not accept missing gene rows. To ensure
+              the quality of predictions all samples undergo Gene Quality
+              Control and samples with 10 or more missing genes will be
+              rejected. Gene expression values are then scaled between 0 and 1
+              using a Minmax scaling algorithm. These &quot;features&quot; are
+              fed to a supervised machine learning model trained on
+              approximately 6000 samples from PanCanAtlas using the{" "}
+              <QueensLink href="https://xgboost.readthedocs.io/en/stable/index.html">
                 Extreme Gradient Boosting
-              </a>{" "}
-              algorthim in order the attain a classification along with the
-              models probability of each subgroup.
+              </QueensLink>{" "}
+              algorthim to attain a classification along with the models
+              probability of each subgroup.
             </p>
 
             <p className="block">
-              The tool also uses the PCA (Principle Component Analysis)
-              algorithm with standard scaling and the t-SNE (t-distributed
-              Stochastic Neighbor Embedding) algorithm to visualise the sample
-              data and identify clustering.
+              The tool also uses the{" "}
+              <QueensLink href="https://builtin.com/data-science/step-step-explanation-principal-component-analysis">
+                {" "}
+                PCA (Principle Component Analysis)
+              </QueensLink>{" "}
+              algorithm with standard scaling and the{" "}
+              <QueensLink href="https://www.datacamp.com/tutorial/introduction-t-sne">
+                t-SNE (t-distributed Stochastic Neighbor Embedding)
+              </QueensLink>{" "}
+              algorithm to visualise the sample data and identify clustering.
             </p>
 
             <p className="block">
@@ -164,8 +164,18 @@ const Help = () => {
               demonstration purposes only. A larger number of bootstraps should
               be used in production. Prediction probabilities are generated from
               each of these models and a confidence interval is extracted. This
-              is shown via a box plot where the box contains the requested
-              percentage.
+              is shown via a box plot where the box indicates the true range of
+              the probability with a confidence of the requested interval. For
+              example, a box ranging from 0.95 - 0.9 for a 95% interval
+              indicates the system is 95% sure that the true proability is in
+              that range.
+            </p>
+
+            <p className="block">
+              {" "}
+              Visualisation of the classification by cancer type using a stacked
+              bar chart is also avaialble on the &quot;Type&quot; where type IDs
+              have been provided.
             </p>
           </div>
         </div>
@@ -177,22 +187,16 @@ const Help = () => {
             with a comma, semicolon or tab delimiter and assumes the data has
             already been FPKM normalised. This may be uploaded on the upload
             page. Data should be formatted as shown in the{" "}
-            <a
-              href="/icst/test_data.csv"
-              className="queens-branding-text"
-              download={true}
-            >
-              Test Data
-            </a>{" "}
+            <QueensLink href="/icst/test_data.csv" download={true} target="">
+              {" "}
+              Test Data {}
+            </QueensLink>
             with each column representing a sample and each row a gene. A list
             of the current accepted gene names can be found{" "}
-            <a
-              className="queens-branding-text"
-              onClick={handleDownloadGeneList}
-            >
+            <QueensLink onClick={handleDownloadGeneList} target="">
               here
-            </a>
-            .
+            </QueensLink>
+            .{" "}
             <CSVLink
               data={download}
               filename="data"
@@ -217,19 +221,47 @@ const Help = () => {
           <h1 className="block has-text-weight-bold	">How good is it?</h1>
           <div className="block">
             While training and evaluation of a machine learning model is a
-            complicated process, some evaluation statistics from a holdout set
-            of test data are listed below for your confidence in the models
-            output. In addition, the model has underwent 10 fold cross
-            validation prior to QC thresholding and final testing.
+            complicated process, some evaluation metrics from a holdout set of
+            stratfified test data (approximately 2000 samples) are listed below
+            for your confidence in the models output. In addition, the model has
+            underwent 10 fold cross validation prior to QC thresholding and
+            final testing.
           </div>
 
-          <div className="block">
-            <ul>
-              <li>Accuracy: 95.9%</li>
-              <li>F1: 90.6%</li>
-              <li>Precision: 89.0%</li>
-              <li>Recall: 93.%</li>
-            </ul>
+          <div className="columns is-centered">
+            <div className="column is-half is-flex is-justify-content-center">
+              {" "}
+              <table className="table block">
+                <thead>
+                  <tr>
+                    <th className="has-text-centered">Metric</th>
+                    <th className="has-text-centered">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="has-text-centered">Accuracy</td>
+                    <td className="has-text-centered">95.9%</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">F1</td>
+                    <td className="has-text-centered">90.6%</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">Precision</td>
+                    <td className="has-text-centered">89.0%</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">Precision</td>
+                    <td className="has-text-centered">89.0%</td>
+                  </tr>
+                  <tr>
+                    <td className="has-text-centered">Recall</td>
+                    <td className="has-text-centered">93.1%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -237,16 +269,11 @@ const Help = () => {
           <h1 className="block has-text-weight-bold	">For developers</h1>
           <div className="block">
             In keeping with the open access nature of ICST, all APIs used to
-            provide site functionality are open. Full Swagger documumentation
+            provide site functionality are open. In addition, other APIs are
+            availble for conveience of development. Full Swagger documumentation
             for these can be found{" "}
-            <a
-              href={`${API_ROOT}/apidocs`}
-              className="queens-branding-text"
-              target="_blank"
-            >
-              here
-            </a>
-            . These can used to perform your own custom analysis .
+            <QueensLink href={`${API_ROOT}/apidocs`}>here</QueensLink>. These
+            can used to perform your own custom analysis.
           </div>
         </div>
 

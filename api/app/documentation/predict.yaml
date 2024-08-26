@@ -40,7 +40,15 @@ responses:
                 properties:
                   prediction:
                     type: integer
+                  predomPrediction:
+                    items:
+                      type: number
+                  type: array
                   probs:
+                    items:
+                      type: number
+                  type: array
+                  predomProbs:
                     items:
                       type: number
                   type: array
