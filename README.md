@@ -53,7 +53,9 @@ Before installing the app, ensure the relevant requirments are installed on your
 
 ### database_setup.sh
 
-This script creates a MySQL database for admin credentials. One legacy account exists. You may need to edit the script to match the root username, password and host of your own MySQL configuration. Alternatively, you may manually create a database and user with the required name and credentials and populate it using database_setup.sql.
+This script creates a MySQL database for admin credentials. One legacy account exists. You may need to edit the script to match the root username, password and host of your own MySQL configuration. Alternatively, you may manually create a database and user with the required name and credentials and populate it using database_setup.sql. 
+
+> **Note:** If this database is used, one administrator exists in the system with username "admin" and password "pass".
 
 ### setupAPI.sh
 

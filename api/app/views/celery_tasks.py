@@ -199,10 +199,7 @@ def analyse(filepath, delimiter, gene_list):
         data["type_ids"],
     ):
         # for each gene in sample extract expression
-        genes = {
-            gene_name: expression
-            for gene_name, expression in zip(data["gene_names"], feature_list)
-        }
+        genes = [expression for expression in feature_list]
 
         predom_prediction = None
         predom_probs = None
@@ -237,4 +234,5 @@ def analyse(filepath, delimiter, gene_list):
         "invalid": data["invalid"],
         "nc": num_nc,
         "predominant": num_predom,
+        "geneNames": data["gene_names"],
     }

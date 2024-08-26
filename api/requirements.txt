@@ -14,7 +14,6 @@ click-repl==0.3.0
 cryptography==43.0.0
 Deprecated==1.2.14
 fastjsonschema==2.20.0
-filelock==3.15.4
 flasgger==0.9.7.1
 Flask==3.0.3
 Flask-Bcrypt==1.0.1

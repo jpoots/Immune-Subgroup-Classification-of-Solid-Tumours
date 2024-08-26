@@ -25,16 +25,19 @@ responses:
               type: integer
             nc:
               type: integer
-            predom:
+            predominant:
               type: integer
+            geneNames:
+              items:
+                  type: string
+              type: array
             samples:
               items:
                 properties:
                   genes:
-                    properties:
-                      gene_name:
-                        type: number
-                    type: object
+                    items:
+                      type: number
+                  type: array
                   pca:
                     items:
                       type: number

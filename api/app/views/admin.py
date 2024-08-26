@@ -13,9 +13,7 @@ from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, jwt
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
-import csv
 from secrets import token_urlsafe
-import json
 
 """
 Admin API endpoints for setting the gene lists

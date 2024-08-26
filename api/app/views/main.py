@@ -6,6 +6,7 @@ from .. import utils
 from ..utils import parse_csv, parse_json, validate_csv_upload
 from werkzeug import exceptions
 from ..ml_models.predictions import predict
+import numpy as np
 import uuid
 import os
 from werkzeug import exceptions
@@ -41,10 +42,12 @@ def parse_samples():
             "predom": 1,
             "nc": 1,
             "invalid": 0,
+            "geneNames": ["abc", "def"],
             "samples": [
             {
                 "genes": {
-                "ACTL6A_S5": 745.567,
+                745.567,
+                123,
                 },
                 "sampleID": "TCGA.02.0047.GBM.C4"
                 "typeid": GBM
@@ -73,11 +76,27 @@ def parse_samples():
     for sample_id, feature_index, type_id in zip(
         data["ids"], features, data["type_ids"]
     ):
+        gene_values = list(features[feature_index].values())
         returnData.append(
-            {"sampleID": sample_id, "genes": features[feature_index], "typeid": type_id}
+            {
+                "sampleID": sample_id,
+                "genes": gene_values,
+                "typeid": type_id,
+            }
         )
 
-    return (jsonify({"data": {"samples": returnData, "invalid": data["invalid"]}}), 200)
+    return (
+        jsonify(
+            {
+                "data": {
+                    "samples": returnData,
+                    "invalid": data["invalid"],
+                    "geneNames": data["gene_names"],
+                }
+            }
+        ),
+        200,
+    )
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
@@ -117,7 +136,29 @@ def predictgroup():
     # prepare for response
     results = []
     for pred, id, prob_list in zip(predictions, idx, prediction_probs):
-        results.append({"sampleID": id, "prediction": pred, "probs": prob_list})
+        predom_prediction = None
+        predom_probs = None
+
+        if pred == 7:
+            sorted_probs = np.argsort(prob_list).tolist()
+            predom_1_index = sorted_probs[-1]
+            predom_2_index = sorted_probs[-2]
+
+            predom_probs = [
+                prob_list[predom_1_index],
+                prob_list[predom_2_index],
+            ]
+            predom_prediction = [predom_1_index + 1, predom_2_index + 1]
+
+        results.append(
+            {
+                "sampleID": id,
+                "prediction": pred,
+                "probs": prob_list,
+                "predomPredictions": predom_prediction,
+                "predomProbs": predom_probs,
+            }
+        )
 
     return jsonify({"data": {"samples": results, "nc": num_nc, "predom": num_predom}})
 

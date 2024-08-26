@@ -11,10 +11,9 @@ parameters:
           items:
             properties:
               genes:
-                properties:
-                  gene_name:
-                    type: number
-                type: object
+                items:
+                  type: number
+                type: array
               sampleID:
                 type: string
             type: object

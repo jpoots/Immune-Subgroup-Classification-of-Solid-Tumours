@@ -41,13 +41,10 @@ SCHEMA = {
                         "minLength": 1,
                     },
                     "genes": {
-                        "type": "object",
-                        "patternProperties": {
-                            "^(?!\s*$).+": {"type": "number"},
-                        },
-                        "additionalProperties": False,
-                        "minProperties": NUM_GENES,
-                        "maxProperties": NUM_GENES,
+                        "type": "array",
+                        "items": {"type": "number"},
+                        "minLength": NUM_GENES,
+                        "maxLength": NUM_GENES,
                     },
                 },
                 "required": ["sampleID", "genes"],
@@ -186,7 +183,7 @@ def parse_json(data):
     idx, features = [], []
     for sample in data:
         idx.append(sample["sampleID"])
-        features.append(list(sample["genes"].values()))
+        features.append(list(sample["genes"]))
 
     return {
         "features": features,

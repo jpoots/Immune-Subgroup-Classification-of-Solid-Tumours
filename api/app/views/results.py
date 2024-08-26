@@ -50,6 +50,9 @@ def analysis_task_status(task_id):
             - results: A response including key the sample data, number of invalid samples and key analysis insights or an appropriate eror.
             "data": {
                 "invalid": 0,
+                "geneNames": ["abc", "def"],
+                "predominant": 0,
+                "invalid": 0
                 "samples": [
                     {
                         "genes": {

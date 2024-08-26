@@ -36,7 +36,7 @@ const GeneExpression = () => {
 
   // pull out samples and gene list
   const samples = results["samples"];
-  const geneNameList = Object.keys(samples[0]["genes"]);
+  const geneNameList = results["geneNames"];
 
   // generating columns based on the gene names
   let columns = useMemo(() => {
@@ -59,8 +59,8 @@ const GeneExpression = () => {
       },
     ];
 
-    let append = geneNameList.map((name) => ({
-      accessorKey: `genes.${name}`,
+    let append = geneNameList.map((name, index) => ({
+      accessorFn: (row) => row.genes[index],
       header: name,
       id: name,
       cell: (props) => <p>{props.getValue()}</p>,
@@ -102,9 +102,10 @@ const GeneExpression = () => {
 
       // add sample id and gene for each gene
       let sampleDict = { sampleID: sample.sampleID };
-      Object.keys(sample["genes"]).forEach(
-        (gene) => (sampleDict[gene] = sample["genes"][gene])
+      geneNameList.forEach(
+        (geneName, index) => (sampleDict[geneName] = sample["genes"][index])
       );
+
       return sampleDict;
     });
 

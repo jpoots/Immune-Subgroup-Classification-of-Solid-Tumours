@@ -83,12 +83,14 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
     // if invlaid file type or too big, open warning modal
     if (!ALLOWED_FILES.includes(file.name.split(".").pop()))
       openWarningModal(setModalMessage, setOpenModal, "Invalid file type");
-    if (file.size > MAX_FILE_SIZE)
+    if (file.size > MAX_FILE_SIZE) {
+      handleReset();
       openWarningModal(
         setModalMessage,
         setOpenModal,
         `Files must be smaller than ${MAX_FILE_SIZE_MB} MB`
       );
+    }
   };
 
   /**
@@ -123,6 +125,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
    */
   const handleAllDownload = () => {
     const allDownload = [];
+    console.log(results);
     results.samples.forEach((result) => {
       // initialising result dict for each result
       let resultDict = {
@@ -141,9 +144,10 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
         resultDict[`pca${index + 1}`] = pca;
       });
 
+      console.log(results.geneNames);
       // extracting genes
-      Object.entries(result.genes).forEach(
-        ([geneName, expression]) => (resultDict[geneName] = expression)
+      results.geneNames.forEach(
+        (geneName, index) => (resultDict[geneName] = result.genes[index])
       );
 
       allDownload.push(resultDict);
