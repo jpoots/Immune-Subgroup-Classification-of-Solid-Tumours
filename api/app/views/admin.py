@@ -8,8 +8,7 @@ from werkzeug import exceptions
 import os
 from flasgger import swag_from
 from app import limiter
-from filelock import FileLock
-from ..models import Admin
+from ..models import Admin, GeneList
 from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, jwt
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
@@ -142,17 +141,13 @@ def edit_gene_list():
         if len(new_gene_list) == 0:
             raise exceptions.BadRequest("bad gene list")
 
-        # lock to prevent race condition
-        lock = FileLock("file.lock")
+        new_gene_list_string = ",".join(new_gene_list)
 
-        with lock:
-            try:
-                with open(utils.GENE_LIST_FILE_LOCATION, "w") as f:
-                    writer = csv.writer(f)
-                    writer.writerow(new_gene_list)
+        new_gene_list_ob = GeneList(gene_list=new_gene_list_string)
+        db.session.add(new_gene_list_ob)
+        db.session.commit()
 
-                # live reload the gene list
-                utils.reload_gene_list()
-            except Exception as e:
-                raise exceptions.InternalServerError("Error writing to file")
+        # live reload the gene list
+        utils.reload_gene_list()
+
         return jsonify(data={"message": "success"}), 200

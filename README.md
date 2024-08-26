@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://i.ibb.co/55DH349/logo.png" alt="logo" border="0"> 
+    <img src="https://i.ibb.co/55DH349/logo.png" width=200 alt="logo" border="0"> 
 </div>
 
 # ICST: Immune Subgroup Classification for Solid Tumours

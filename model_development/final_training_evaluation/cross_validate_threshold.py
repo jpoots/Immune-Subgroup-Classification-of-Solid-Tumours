@@ -32,7 +32,7 @@ This script cross validates a models class 6 recall and accuracy with a QC thres
 CV = 10
 
 # The QC threshold to use
-QC_THRESHOLD = 0.915
+QC_THRESHOLD = 0.92
 
 # define sample strategy
 UNDER_SAMPLE = {

@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, current_app
 from functools import wraps
 from werkzeug import exceptions
 from fastjsonschema import compile, JsonSchemaValueException
@@ -9,6 +9,7 @@ import joblib
 import os
 from .errors.BadRequest import BadRequest
 import numpy as np
+from .models import GeneList
 
 """
 utility functions to be used throughout the project
@@ -61,7 +62,7 @@ SCHEMA = {
 VALIDATOR = compile(SCHEMA)
 
 
-def parse_csv(filepath, delimiter):
+def parse_csv(filepath, delimiter, gene_list):
     """Parses a file from a file path and returns key info as a dict
     Args:
         filepath: The file path to read from
@@ -233,13 +234,10 @@ def delete_file_on_failure(self, exc, task_id, args, kwargs, einfo):
 def reload_gene_list():
     """Reloads the in memory gene list from the CSV file"""
     global gene_list
-    gene_list_csv = pd.read_csv(GENE_LIST_FILE_LOCATION)
-    gene_list_csv.columns = [
-        str(column).strip().upper() for column in gene_list_csv.columns
-    ]
-    gene_list = gene_list_csv.columns.to_list()
+    gene_list_record = GeneList.query.order_by(GeneList.id.desc()).first()
+
+    gene_list_string = gene_list_record.to_json()["geneList"]
+
+    gene_list = gene_list_string.split(",")
+    gene_list = [str(gene).strip().upper() for gene in gene_list]
     return
-
-
-# load gene list
-reload_gene_list()

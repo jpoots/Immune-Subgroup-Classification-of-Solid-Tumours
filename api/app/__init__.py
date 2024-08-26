@@ -108,6 +108,10 @@ def create_app():
 
         db.create_all()
 
+        from .utils import reload_gene_list
+
+        reload_gene_list()
+
     from .handlers import (
         handle_http_exception,
         handle_generic_exception,

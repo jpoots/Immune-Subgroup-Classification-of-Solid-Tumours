@@ -2,6 +2,7 @@ from flask import request, jsonify, Blueprint, current_app
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
+from .. import utils
 from ..utils import parse_csv, parse_json, validate_csv_upload
 from werkzeug import exceptions
 from ..ml_models.predictions import predict
@@ -22,7 +23,7 @@ The main api endpoints for the system to perform analysis
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
 
 # API results endpoint
-RESULTS_ENDPOINT = f"{API_ROOT}/ results"
+RESULTS_ENDPOINT = f"{API_ROOT}/results"
 
 main = Blueprint("main", __name__)
 
@@ -61,7 +62,7 @@ def parse_samples():
     file.save(filepath)
 
     # parse data
-    data = parse_csv(filepath, delimiter)
+    data = parse_csv(filepath, delimiter, utils.gene_list)
 
     # strucutre data for ease of surfing
     features = pd.DataFrame(data["features"], columns=data["gene_names"])
@@ -183,7 +184,11 @@ def analyse_async():
     filename = f"{uuid.uuid4()}"
     file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
     task = analyse.apply_async(
-        args=[os.path.join(current_app.config["UPLOAD_FOLDER"], filename), delimiter]
+        args=[
+            os.path.join(current_app.config["UPLOAD_FOLDER"], filename),
+            delimiter,
+            utils.gene_list,
+        ]
     )
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202
 

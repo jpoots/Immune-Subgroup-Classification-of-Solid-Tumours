@@ -57,3 +57,26 @@ class Admin(db.Model):
             admin: A JSON representation of the user
         """
         return {"id": self.id, "username": self.username, "passHash": self.pass_hash}
+
+
+class GeneList(db.Model):
+    """Model for a gene list
+
+    Attributes:
+        gene_list: A csv string of the gene list
+
+    methods:
+        to_json(): returns ba json representation of the list
+    """
+
+    __tablename__ = "gene_list"
+
+    id = db.Column(db.Integer, primary_key=True)
+    gene_list = db.Column(db.Text, nullable=False)
+
+    def to_json(self):
+        """Creates a json representation of the gene list
+        Returns:
+            gene_list: A JSON representation of the gene list
+        """
+        return {"id": self.id, "geneList": self.gene_list}
