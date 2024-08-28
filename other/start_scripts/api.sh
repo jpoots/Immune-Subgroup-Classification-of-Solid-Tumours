@@ -3,8 +3,6 @@
 cd ../../api
 source .venv/bin/activate
 
-echo "starting DB"
-
 echo "starting app"
 gunicorn -b localhost:3000 -w 1 main:app
 

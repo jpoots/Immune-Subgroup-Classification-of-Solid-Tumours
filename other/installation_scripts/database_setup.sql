@@ -1,10 +1,3 @@
-# remove previous work
-DROP USER 'jordan'@'localhost';
-DROP DATABASE icst;
-
-# create db
-create database icst character set utf8 collate utf8_bin;
-
 USE icst;
 START TRANSACTION;
 
