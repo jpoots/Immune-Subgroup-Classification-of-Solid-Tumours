@@ -67,7 +67,7 @@ const PredominanceReport = () => {
       },
       {
         accessorFn: (row) => row.predomPrediction[1],
-        header: "Subgroup 1",
+        header: "Subgroup 2",
         id: "prediction2",
         cell: (props) => <p>{props.getValue()}</p>,
         enableSorting: false,

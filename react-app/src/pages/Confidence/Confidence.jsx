@@ -39,6 +39,15 @@ const Confidence = ({ graphState }) => {
   const confidenceResults = useRef();
   const slider = useRef();
 
+  // every time interval changes and on first load if graph data exists, set the disabled button appropriately
+  useEffect(() => {
+    if (graphData && graphData.metadata.interval == interval) {
+      setDisabled(true);
+    } else {
+      setDisabled(false);
+    }
+  }, [interval, graphData]);
+
   /**
    * useLayoutEffect returns a function which is performed on unmount to cancel analysis
    * https://stackoverflow.com/questions/55139386/componentwillunmount-with-react-useeffect-hook
@@ -78,7 +87,7 @@ const Confidence = ({ graphState }) => {
    * @param {object} confidenceResults  -  the results from the confidence API
    * @returns - the graph data for a box plot which can be accepted by plotly
    */
-  const generateConfidenceData = (confidenceResults) => {
+  const generateConfidenceData = (confidenceResults, metadata) => {
     let upper = {
       1: [],
       2: [],
@@ -120,6 +129,7 @@ const Confidence = ({ graphState }) => {
       predictions: preds,
       ids: id,
       interval: interval,
+      metadata: metadata,
     };
   };
 
@@ -158,7 +168,12 @@ const Confidence = ({ graphState }) => {
     // if api success set relevant params
     if (confidenceAPIResults.success) {
       setTitle(`${interval}% Confidence Interval`);
-      setGraphData(generateConfidenceData(confidenceAPIResults.results));
+      setGraphData(
+        generateConfidenceData(confidenceAPIResults.results, {
+          interval: interval,
+          metadata: { interval: interval },
+        })
+      );
       confidenceResults.current = confidenceAPIResults.results;
 
       // disables analyse button
@@ -185,7 +200,6 @@ const Confidence = ({ graphState }) => {
               value={interval}
               onChange={(e) => {
                 setInterval(e.target.value);
-                setDisabled(false);
               }}
               className="queens-slider"
             />
