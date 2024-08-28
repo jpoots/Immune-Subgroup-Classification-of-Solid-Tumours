@@ -11,5 +11,5 @@ COPY .flaskenv .flaskenv
 COPY boot.sh boot.sh
 RUN chmod a+x boot.sh
 
-EXPOSE 8000
+EXPOSE 3000
 ENTRYPOINT [ "./boot.sh" ]

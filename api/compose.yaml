@@ -2,17 +2,16 @@ services:
   api:
     build: .
     ports:
-      - "3000:8000"
+      - "3000:3000"
     depends_on:
       - mysql
       - redis-stack
     volumes:
       - icst_upload:/uploads
+    resart: always
     
   redis-stack:
     image: "redis/redis-stack:latest"
-    ports:
-      - "6379:6379"
 
   mysql:
     image: mysql:latest
@@ -23,10 +22,12 @@ services:
       MYSQL_USER: jordan
       MYSQL_PASSWORD: icst
     ports:
-      - "3306:3306"
+      - "3308:3306"
     volumes:
       - mysql:/var/lib/mysql
       - ./../other/installation_scripts/database_setup.sql:/docker-entrypoint-initdb.d/init.sql
+    resart: always
+
   
   celery_worker:
     build: .
@@ -38,6 +39,8 @@ services:
     entrypoint: [""]
     command:
       celery -A celery_worker.celery worker --pool=threads --loglevel=INFO
+  resart: always
+
 
 volumes:
   mysql:
