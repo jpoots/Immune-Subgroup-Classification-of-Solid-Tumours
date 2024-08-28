@@ -23,7 +23,7 @@ A script for running the trained model with a variety of QC thresholds on a vali
 """
 TEST_SIZE = 0.2
 MODEL_FILE_NAME = "./trained_models/model.pkl"
-QC_THRESHOLD = 0.915
+QC_THRESHOLD = 0.92
 
 
 def main():

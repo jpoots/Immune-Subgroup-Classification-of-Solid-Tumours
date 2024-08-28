@@ -1,5 +1,3 @@
-from flask import request, current_app
-from functools import wraps
 from werkzeug import exceptions
 from fastjsonschema import compile, JsonSchemaValueException
 import pandas as pd
@@ -43,8 +41,8 @@ SCHEMA = {
                     "genes": {
                         "type": "array",
                         "items": {"type": "number"},
-                        "minLength": NUM_GENES,
-                        "maxLength": NUM_GENES,
+                        "minItems": NUM_GENES,
+                        "maxItems": NUM_GENES,
                     },
                 },
                 "required": ["sampleID", "genes"],

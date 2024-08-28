@@ -6,7 +6,6 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-import os
 import numpy as np
 
 PCA_PIPE = Pipeline(steps=[("scaler", StandardScaler()), ("dr", PCA(n_components=3))])
@@ -171,7 +170,6 @@ def analyse(filepath, delimiter, gene_list):
     """
     # extract data from CSV
     data = parse_csv(filepath, delimiter, gene_list)
-
     # predict
     predictions, prediction_probs, num_nc, num_predom = predict(data["features"])
 

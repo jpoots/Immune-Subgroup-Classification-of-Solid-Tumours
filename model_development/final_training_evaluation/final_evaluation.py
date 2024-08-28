@@ -90,7 +90,6 @@ def extract_nc_probs(pipe, threshold, x):
     prediction_probs = pipe.predict_proba(features)
     predictions = pipe.predict(features)
 
-    # filter to max probs
     nc_indicies, predom_indicies = [], []
     nc_probabilities, predom_prob1, predom_prob2, predom_class1, predom_class2 = (
         [],

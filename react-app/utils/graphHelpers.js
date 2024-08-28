@@ -2,28 +2,27 @@
  * helpers for generating and displaying the tsne and pca graphs
  */
 
-
 /**
  * generates plotly scatter plot data given x, y and (optionally z) coorinates
  * @param {Object} graphData - the graph object structred by point and then sample
- * @param {number} dimension - the number of dimennsions to render 
+ * @param {number} dimension - the number of dimennsions to render
  * @returns a list of plotly data traces
  */
 const getPlotlyData = (graphData, dimension) => {
-    return Object.keys(graphData.x).map((key) => {
-      return {
-        x: graphData.x[key],
-        y: graphData.y[key],
-        z: graphData.z[key],
-        name: `${key}`,
-        type: dimension === 2 ? "scatter" : "scatter3d",
-        mode: "markers",
-        text: graphData.ids[key],
-        marker: {
-          color: graphData.predictions,
-        },
-      };
-    });
+  return Object.keys(graphData.x).map((key) => {
+    return {
+      x: graphData.x[key],
+      y: graphData.y[key],
+      z: graphData.z[key],
+      name: `${key}`,
+      type: dimension === 2 ? "scatter" : "scatter3d",
+      mode: "markers",
+      text: graphData.ids[key],
+      marker: {
+        color: graphData.predictions,
+      },
+    };
+  });
 };
 
 /**
@@ -33,46 +32,52 @@ const getPlotlyData = (graphData, dimension) => {
  * @param {string} accessorKey - the key to access the required array in graphResponse (PCA or t-SNE)
  * @returns - dictionary containing x,y,z,id,prediction array and dimensions
  */
-const generateGraphData = (results, graphResponse, accessorKey, dimensions, metadata) => {
-    if (!metadata) metadata = {}
+const generateGraphData = (
+  results,
+  graphResponse,
+  accessorKey,
+  dimensions,
+  metadata
+) => {
+  if (!metadata) metadata = {};
 
-    let x  = {
-        1: [],
-        2: [],
-        3: [],
-        4: [],
-        5: [],
-        6: [],
-        7: [],
-        NC: [],
-      };
-  
-      // there are other ways of doing this but this seemed clear
-      let y = structuredClone(x);
-      let z = structuredClone(x);
-      let preds = structuredClone(x);
-      let idx = structuredClone(x);
-  
-      // create an array of numbers for each grpah value and subgroup
-      graphResponse.forEach((sample, index) => {
-        let prediction = results.samples[index].prediction;
-        x[prediction].push(sample[accessorKey][0]);
-        y[prediction].push(sample[accessorKey][1]);
-        z[prediction].push(sample[accessorKey][2]);
-        idx[prediction].push(sample.sampleID);
-        preds[prediction].push(prediction);
-      });
-  
-      // set graph data
-      return ({
-        x: x,
-        y: y,
-        z: z,
-        ids: idx,
-        predictions: preds,
-        dim: dimensions,
-        metadata: metadata
-      });
-}
+  let x = {
+    1: [],
+    2: [],
+    3: [],
+    4: [],
+    5: [],
+    6: [],
+    7: [],
+    NC: [],
+  };
 
-export {getPlotlyData, generateGraphData}
+  // there are other ways of doing this but this seemed clear
+  let y = structuredClone(x);
+  let z = structuredClone(x);
+  let preds = structuredClone(x);
+  let idx = structuredClone(x);
+
+  // create an array of numbers for each grpah value and subgroup
+  graphResponse.forEach((sample, index) => {
+    let prediction = results.samples[index].prediction;
+    x[prediction].push(sample[accessorKey][0]);
+    y[prediction].push(sample[accessorKey][1]);
+    z[prediction].push(sample[accessorKey][2]);
+    idx[prediction].push(sample.sampleID);
+    preds[prediction].push(prediction);
+  });
+
+  // set graph data
+  return {
+    x: x,
+    y: y,
+    z: z,
+    ids: idx,
+    predictions: preds,
+    dim: dimensions,
+    metadata: metadata,
+  };
+};
+
+export { getPlotlyData, generateGraphData };

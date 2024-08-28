@@ -12,7 +12,7 @@ sys.path.append("..")
 from utils import get_data, split_data, RANDOM_STATE
 
 """
-Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished. t-SNE 2d and 3d should be performed seperately
+Generates 2D and 3D interactive t-SNE and PCA plots from the data. Note that this was experimental and therefore not polished. t-SNE 2d and 3d should be performed seperately. Aided by https://www.datacamp.com/tutorial/principal-component-analysis-in-python 
 """
 
 # all variables are self explanitory by na,e

@@ -24,7 +24,7 @@ FILE_LOCATION = os.path.join(CURRENT, "data.csv")
 # the size of the test set used throughout
 TEST_SIZE = 0.2
 
-# random state was set manually in each function as imblearn was not behaving as expected with np.random.seed. Manuals etting ensured reproduability.
+# random state was set manually in each function as imblearn was not behaving as expected with np.random.seed. Manual setting ensured reproducability.
 # random state to use for the project, according to hitchikers guide, 42 is the meaning of life the universe and everything
 # some fun facts about the number 42 https://grsahagian.medium.com/what-is-random-state-42-d803402ee76b
 RANDOM_STATE = 42
@@ -56,7 +56,10 @@ CV = 10
 
 
 def get_data():
-    """loads the data into a panda dataframe and returns the transposed data frame"""
+    """loads the data into a panda dataframe and returns the transposed data frame
+    Returns:
+        data: a dataframe containg the read data
+    """
 
     data = pd.read_csv(FILE_LOCATION, index_col=0)
     data = data.T
@@ -210,12 +213,12 @@ def predict_with_qc(pipe, threshold, x, y):
 
 
 def predict_with_qc_and_predom(pipe, threshold, x, y):
-    """Performs predictions with a QC threshold given data and an estimarots
+    """Performs predictions with a QC threshold given data and an estimator and includes predominant sample counting
     Args:
-    pipe: the estimator
-    threshold: the QC threshold value
-    x: the x features
-    y: the y labels
+        pipe: the estimator
+        threshold: the QC threshold value
+        x: the x features
+        y: the y labels
 
     Returns:
         results:
