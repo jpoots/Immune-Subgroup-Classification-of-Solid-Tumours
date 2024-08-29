@@ -1,3 +1,5 @@
+# Dockerfile to define main container aided by  https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xix-deployment-on-docker-containers and chatGPT
+
 FROM python:3.9-bullseye
 COPY requirements.txt requirements.txt
 

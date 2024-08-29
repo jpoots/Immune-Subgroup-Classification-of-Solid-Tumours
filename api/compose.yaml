@@ -13,11 +13,11 @@ services:
     restart: always
     
   redis-stack:
-    image: "redis/redis-stack:latest"
+    image: "redis/redis-stack:7.2.0-v12"
     restart: always
 
   mysql:
-    image: mysql:latest
+    image: mysql:9.0.1
     environment:
       DB_HOST: mysql
       MYSQL_RANDOM_ROOT_PASSWORD: yes

@@ -1,0 +1,28 @@
+.
+├── Dockerfile
+├── app
+│   ├── __init__.py
+│   ├── documentation/
+│   ├── errors/
+│   ├── handlers.py
+│   ├── mice.pkl
+│   ├── ml_models
+│   │   ├── __init__.py
+│   │   ├── bootstrap_models.pkl
+│   │   ├── model.pkl
+│   │   └── predictions.py
+│   ├── models.py
+│   ├── utils.py
+│   └── views
+│       ├── __init__.py
+│       ├── admin.py
+│       ├── celery_tasks.py
+│       ├── main.py
+│       └── results.py
+├── boot.sh
+├── celery_worker.py
+├── compose.yaml
+├── main.py
+├── requirements.txt
+
+12 directories, 49 files

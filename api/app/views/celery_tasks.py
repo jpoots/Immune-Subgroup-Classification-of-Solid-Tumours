@@ -141,7 +141,7 @@ def analyse(filepath, delimiter, gene_list):
     Args:
         filepath: The path of the csv file to analyse
         delimiter: the files delimiter
-        gene_list: the up to date gene list
+        gene_list: the currently accepted gene list
 
     Returns:
         results: The analysis results as a dict
@@ -168,8 +168,10 @@ def analyse(filepath, delimiter, gene_list):
     Throws:
         BadRequest if invalid JSON data is input
     """
+
     # extract data from CSV
     data = parse_csv(filepath, delimiter, gene_list)
+
     # predict
     predictions, prediction_probs, num_nc, num_predom = predict(data["features"])
 

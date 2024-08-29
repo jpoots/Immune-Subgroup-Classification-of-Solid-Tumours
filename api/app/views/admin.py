@@ -3,13 +3,13 @@ from flask import (
     jsonify,
     Blueprint,
 )
-from .. import utils
+from ..utils import get_gene_list
 from werkzeug import exceptions
 import os
 from flasgger import swag_from
 from app import limiter
 from ..models import Admin, GeneList
-from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE, jwt
+from .. import db, DOCUMENTATION_PATH, LOW_LIMIT, LOW_LIMIT_MESSAGE
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
@@ -117,7 +117,8 @@ def edit_gene_list():
         InternalServerError: there is some error writing to the file
     """
     if request.method == "GET":
-        return jsonify(data={"results": utils.gene_list})
+        gene_list = get_gene_list()
+        return jsonify(data={"results": gene_list})
     if request.method == "PUT":
         # is not auth
         if not get_jwt_identity():
@@ -144,8 +145,5 @@ def edit_gene_list():
         new_gene_list_ob = GeneList(gene_list=new_gene_list_string)
         db.session.add(new_gene_list_ob)
         db.session.commit()
-
-        # live reload the gene list
-        utils.reload_gene_list()
 
         return jsonify(data={"message": "success"}), 200

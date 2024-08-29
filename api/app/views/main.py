@@ -3,7 +3,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from .. import utils
-from ..utils import parse_csv, parse_json, validate_csv_upload
+from ..utils import parse_csv, parse_json, validate_csv_upload, get_gene_list
 from werkzeug import exceptions
 from ..ml_models.predictions import predict
 import numpy as np
@@ -64,8 +64,10 @@ def parse_samples():
     filepath = os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
     file.save(filepath)
 
+    gene_list = get_gene_list()
+
     # parse data
-    data = parse_csv(filepath, delimiter, utils.gene_list)
+    data = parse_csv(filepath, delimiter, gene_list)
 
     # strucutre data for ease of surfing
     features = pd.DataFrame(data["features"], columns=data["gene_names"])
@@ -221,6 +223,7 @@ def analyse_async():
     """
     # is file in request and is it a valid CSV
     file, delimiter = validate_csv_upload(request)
+    gene_list = get_gene_list()
 
     filename = f"{uuid.uuid4()}"
     file.save(os.path.join(current_app.config["UPLOAD_FOLDER"], filename))
@@ -228,7 +231,7 @@ def analyse_async():
         args=[
             os.path.join(current_app.config["UPLOAD_FOLDER"], filename),
             delimiter,
-            utils.gene_list,
+            gene_list,
         ]
     )
     return jsonify(data={"resultURL": f"{RESULTS_ENDPOINT}/analyse/{task.id}"}), 202

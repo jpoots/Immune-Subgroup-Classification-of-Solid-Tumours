@@ -8,6 +8,7 @@ import os
 from .errors.BadRequest import BadRequest
 import numpy as np
 from .models import GeneList
+from flask import current_app
 
 """
 utility functions to be used throughout the project
@@ -17,13 +18,8 @@ utility functions to be used throughout the project
 NUM_GENES = 440
 # current directory
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-# gene list file
-GENE_LIST_FILE_LOCATION = os.path.join(CURRENT_DIR, "gene_list.csv")
 
 IMPUTER = joblib.load(os.path.join(CURRENT_DIR, "mice.pkl"))
-
-# set up gene list variable
-gene_list = None
 
 # defining as constants for json validation, much less code than manual validation
 SCHEMA = {
@@ -62,6 +58,7 @@ def parse_csv(filepath, delimiter, gene_list):
     Args:
         filepath: The file path to read from
         delimiter: The files delimiter
+        gene_list: the currently accepted gene list
 
     Returns:
         results: A dict including the features dataframe, type IDs and the number of invlaid samples
@@ -87,6 +84,7 @@ def parse_csv(filepath, delimiter, gene_list):
         # extract valid data
         data = data[gene_names_to_extract]
     except Exception as e:
+        raise e
         # if file could not be succesfully read
         raise BadRequest(
             body='Sample files should be valid CSV or TXT files attached as "samples" and a delimiter as "delimiter"'
@@ -226,13 +224,12 @@ def delete_file_on_failure(self, exc, task_id, args, kwargs, einfo):
     return
 
 
-def reload_gene_list():
-    """Reloads the in memory gene list from the CSV file"""
-    global gene_list
+def get_gene_list():
+    """Gets the latest version of the gene list"""
     gene_list_record = GeneList.query.order_by(GeneList.id.desc()).first()
 
     gene_list_string = gene_list_record.to_json()["geneList"]
 
     gene_list = gene_list_string.split(",")
     gene_list = [str(gene).strip().upper() for gene in gene_list]
-    return
+    return gene_list
