@@ -1,3 +1,5 @@
+# docker compose file to coordinate execution of all containers aided by  https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xix-deployment-on-docker-containers and chatGPT
+
 services:
   api:
     build: .
@@ -8,10 +10,11 @@ services:
       - redis-stack
     volumes:
       - icst_upload:/uploads
-    resart: always
+    restart: always
     
   redis-stack:
     image: "redis/redis-stack:latest"
+    restart: always
 
   mysql:
     image: mysql:latest
@@ -26,7 +29,7 @@ services:
     volumes:
       - mysql:/var/lib/mysql
       - ./../other/installation_scripts/database_setup.sql:/docker-entrypoint-initdb.d/init.sql
-    resart: always
+    restart: always
 
   
   celery_worker:
@@ -39,7 +42,7 @@ services:
     entrypoint: [""]
     command:
       celery -A celery_worker.celery worker --pool=threads --loglevel=INFO
-  resart: always
+    restart: always
 
 
 volumes:
