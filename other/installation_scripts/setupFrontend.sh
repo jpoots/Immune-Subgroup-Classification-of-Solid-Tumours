@@ -1,13 +1,13 @@
 #!/bin/bash
 
-echo "moving folder"
+echo "MOVING LOCATION...."
 cd ../../react-app
 
-echo "installing app"
+echo "INSTALLING APP..."
 sudo npm i
 
-echo "building app"
+echo "BUILDING APP..."
 sudo npm run build
 
-echo "serving app"
+echo "LAUNCHING PREVIEW..."
 sudo npm run preview

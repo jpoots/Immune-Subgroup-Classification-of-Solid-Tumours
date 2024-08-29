@@ -36,30 +36,22 @@ The project has been tested for the following configurations. Additional configu
 
 All requirements can be installed using the provided scripts. If a script fails for your system, you may manually install the requirements as below. It is assumed Python3 is already installed on the system along with the Brew package manager for MacOS and venv. The software was tested using Python 3.10.
 
-- **OS:** Mac OS Senoma (ARM) or Ubuntu Linux 22.04 (x86)
+- **OS:** Any system which supports Docker
 - **Software:**
-  - Python 3.10
   - Node.js 20
-  - Redis 6.0
-  - MySQL 8
+  - Docker
 
 ## Installation
+This tutorial assumes you have Docker installed on your system. Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired. Scripts should be executed in the below order.
 
-Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired. Scripts should be executed in the below order.
+### install_node_OS.sh
 
-### install_requirments_OS.sh
+Before installing the app, ensure the relevant version of node is installed. This can be manually installed or installed using the install_node_OS.sh for your OS.
 
-Before installing the app, ensure the relevant requirments are installed on your system. These can be manually installed or installed using the install_requirements_OS.sh for your OS.
-
-### database_setup.sh
-
-This script creates a MySQL database for admin credentials. One legacy account exists. You may need to edit the script to match the root username, password and host of your own MySQL configuration. Alternatively, you may manually create a database and user with the required name and credentials and populate it using database_setup.sql. 
-
-> **Note:** If this database is used, one administrator exists in the system with username "admin" and password "pass".
 
 ### setupAPI.sh
 
-This script creates a virtual environment using venv and install the API requirements. The app is started on the WSGI server Gunicorn.
+This script builds the Docker contain and initalises the database with a gene list and legacy credentials of "admin" and "pass".
 
 ### setupFrontend.sh
 
@@ -67,17 +59,11 @@ This script installs the react apps requirements using NPM, builds the app and s
 
 ## Web App Usage
 
-Usage scripts are given in other/start_scripts. These scripts are used to start a celery worker, and the Flask API on a Gunicorn server as well as serve the React app. All these actions may be performed manually if desired. It is assumed the database systems are running as services. If this is not the case, run them using msql.server.start on MacOS or service mysql start on Ubuntu followed by redis-server.
-
-The system assumes each element runs on the default ports. If any ports must be modified, this should be altered in api/app/.env and react-app/utils/constants.js and the react app rebuilt.
-
-### cerlery.sh
-
-This script starts a celery worker to accept asynchronous tasks
+Usage scripts are given in other/start_scripts. These scripts are used to start a celery worker, Redis, MySQL and the Flask API on a Gunicorn server as well as serve the React app. These actions may be performed manually if desired.
 
 ### api.sh
 
-This script starts the API and serves it on port 3000 using Gunicorn
+This script starts the API and serves it on port 3000 using Gunicorn. A Redis in-memory database is started and MySQL also listens.
 
 ### frontend.sh
 
