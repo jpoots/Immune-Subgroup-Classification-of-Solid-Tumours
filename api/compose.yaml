@@ -9,7 +9,7 @@ services:
       - mysql
       - redis-stack
     volumes:
-      - icst_upload:/uploads
+      - icst_upload:/api/uploads
     restart: always
     
   redis-stack:
@@ -38,7 +38,7 @@ services:
       - mysql
       - redis-stack
     volumes:
-      - icst_upload:/uploads
+      - icst_upload:/api/uploads
     entrypoint: [""]
     command:
       celery -A celery_worker.celery worker --pool=threads --loglevel=INFO

@@ -8,7 +8,6 @@ import os
 from .errors.BadRequest import BadRequest
 import numpy as np
 from .models import GeneList
-from flask import current_app
 
 """
 utility functions to be used throughout the project
@@ -84,7 +83,6 @@ def parse_csv(filepath, delimiter, gene_list):
         # extract valid data
         data = data[gene_names_to_extract]
     except Exception as e:
-        raise e
         # if file could not be succesfully read
         raise BadRequest(
             body='Sample files should be valid CSV or TXT files attached as "samples" and a delimiter as "delimiter"'
@@ -225,11 +223,12 @@ def delete_file_on_failure(self, exc, task_id, args, kwargs, einfo):
 
 
 def get_gene_list():
-    """Gets the latest version of the gene list"""
+    """Gets the latest version of the gene list
+    Returns:
+        gene_list: the list of current accepted gene names
+    """
     gene_list_record = GeneList.query.order_by(GeneList.id.desc()).first()
-
     gene_list_string = gene_list_record.to_json()["geneList"]
-
     gene_list = gene_list_string.split(",")
-    gene_list = [str(gene).strip().upper() for gene in gene_list]
+
     return gene_list

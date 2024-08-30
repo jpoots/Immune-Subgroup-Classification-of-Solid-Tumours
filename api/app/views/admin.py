@@ -140,6 +140,10 @@ def edit_gene_list():
         if len(new_gene_list) == 0:
             raise exceptions.BadRequest("bad gene list")
 
+        # clean list
+        new_gene_list = [str(gene).strip().upper() for gene in new_gene_list]
+
+        # to string
         new_gene_list_string = ",".join(new_gene_list)
 
         new_gene_list_ob = GeneList(gene_list=new_gene_list_string)
