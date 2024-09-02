@@ -1,20 +1,28 @@
 # docker compose file to coordinate execution of all containers aided by  https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xix-deployment-on-docker-containers and chatGPT
-
 services:
   api:
     build: .
     ports:
       - "3000:3000"
     depends_on:
-      - mysql
-      - redis-stack
+      mysql:
+        condition: service_healthy
+      redis-stack:
+        condition: service_healthy
     volumes:
       - icst_upload:/api/uploads
+    environment:
+      - DEBUG=False
     restart: always
-    
+
   redis-stack:
     image: "redis/redis-stack:7.2.0-v12"
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   mysql:
     image: mysql:9.0.1
@@ -30,20 +38,26 @@ services:
       - mysql:/var/lib/mysql
       - ./../other/installation_scripts/database_setup.sql:/docker-entrypoint-initdb.d/init.sql
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD -e USE $$MYSQL_DATABASE;" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  
   celery_worker:
     build: .
     depends_on:
-      - mysql
-      - redis-stack
+      mysql:
+        condition: service_healthy
+      redis-stack:
+        condition: service_healthy
     volumes:
       - icst_upload:/api/uploads
-    entrypoint: [""]
-    command:
-      celery -A celery_worker.celery worker --pool=threads --loglevel=INFO
+    environment:
+      - DEBUG=False
+    entrypoint: [ "" ]
+    command: celery -A celery_worker.celery worker --pool=threads --loglevel=INFO
     restart: always
-
 
 volumes:
   mysql:

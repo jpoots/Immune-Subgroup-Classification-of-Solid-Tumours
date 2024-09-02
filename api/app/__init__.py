@@ -28,6 +28,8 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 DATABASE_URI = os.getenv("DATABASE_URI_MYSQL")
 UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 API_ROOT = os.getenv("API_ROOT")
+DEBUG = True if os.getenv("DEBUG") == "True" else False
+
 
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
@@ -117,5 +119,6 @@ def create_app():
     # register error handlers
     app.register_error_handler(exceptions.HTTPException, handle_http_exception)
     app.register_error_handler(BadRequest, handle_custom_bad_request)
-    # app.register_error_handler(Exception, handle_generic_exception)
+    if not DEBUG:
+        app.register_error_handler(Exception, handle_generic_exception)
     return app

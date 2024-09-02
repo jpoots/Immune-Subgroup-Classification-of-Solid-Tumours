@@ -272,12 +272,8 @@ const Help = () => {
             provide site functionality are open. In addition, other APIs are
             availble for conveience of development. Full Swagger documumentation
             for these can be found{" "}
-            <QueensLink
-              onClick={() => window.open(`${API_ROOT}/apidocs`, "_blank")}
-            >
-              here
-            </QueensLink>
-            . These can used to perform your own custom analysis.
+            <QueensLink href={`${API_ROOT}/apidocs`}>here</QueensLink>. These
+            can used to perform your own custom analysis.
           </div>
         </div>
 
