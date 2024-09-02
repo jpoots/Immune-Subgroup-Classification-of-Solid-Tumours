@@ -30,7 +30,6 @@ UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER")
 API_ROOT = os.getenv("API_ROOT")
 DEBUG = True if os.getenv("DEBUG") == "True" else False
 
-
 # file path to documentation
 DOCUMENTATION_PATH = "../documentation"
 

@@ -68,3 +68,4 @@ Werkzeug==3.0.3
 wrapt==1.16.0
 xgboost==2.0.3
 zipp==3.19.2
+pytest==8.3.2

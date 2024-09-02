@@ -59,6 +59,14 @@ services:
     command: celery -A celery_worker.celery worker --pool=threads --loglevel=INFO
     restart: always
 
+  tests:
+    build: .
+    environment:
+      - DEBUG=False
+    depends_on:
+      - mysql
+    command: pytest -v
+
 volumes:
   mysql:
   icst_upload:
