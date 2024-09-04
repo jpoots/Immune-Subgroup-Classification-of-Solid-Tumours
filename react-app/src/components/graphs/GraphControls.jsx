@@ -17,7 +17,7 @@ import QueensLink from "../other/QueensLink";
  * @returns - the graph controls
  */
 
-export function GraphControls({
+const GraphControls = ({
   setDimensions,
   dimension,
   setTitle,
@@ -26,7 +26,7 @@ export function GraphControls({
   tooltipMessage,
   tooltipLink,
   fullName,
-}) {
+}) => {
   // converting tooltip to static html
   const tooltipHTML = () =>
     renderToStaticMarkup(
@@ -84,4 +84,6 @@ export function GraphControls({
       />
     </>
   );
-}
+};
+
+export default GraphControls;

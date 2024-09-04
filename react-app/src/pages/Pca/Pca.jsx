@@ -1,7 +1,7 @@
 import { useRef, useMemo, useState, useContext } from "react";
 import Plot from "react-plotly.js";
 import { CSVLink } from "react-csv";
-import { GraphControls } from "../../components/graphs/GraphControls";
+import GraphControls from "../../components/graphs/GraphControls";
 import { getPlotlyData, generateGraphData } from "/utils/graphHelpers.js";
 import { ResultsContext } from "../../context/ResultsContext";
 import Box from "../../components/layout/Box";

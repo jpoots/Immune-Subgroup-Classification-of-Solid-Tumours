@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd ../../api
 
 echo "MOVING LOCATION..."
+cd ../../api
 
-echo "STARTING DOCKER..."
+echo "STARTING API..."
 docker compose up
 

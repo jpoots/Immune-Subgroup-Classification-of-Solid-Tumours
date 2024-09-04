@@ -1,4 +1,4 @@
-import { GraphControls } from "../../components/graphs/GraphControls";
+import GraphControls from "../../components/graphs/GraphControls";
 import {
   useContext,
   useEffect,
@@ -279,15 +279,13 @@ const Tsne = ({ graph2D, graph3D, graphDim }) => {
               )}
             </div>
           </div>
-          {openModal && (
-            <ErrorModal
-              modalMessage={modalMessage}
-              setOpenModal={setOpenModal}
-            />
-          )}
         </>
       ) : (
         <DataTooSmall />
+      )}
+
+      {openModal && (
+        <ErrorModal modalMessage={modalMessage} setOpenModal={setOpenModal} />
       )}
     </>
   );

@@ -34,28 +34,22 @@ Full discussion of the function of each file is contained in the accompanying re
 
 The project has been tested for the following configurations. Additional configurations may function successfully but the developer does not guarentee this.
 
-All requirements can be installed using the provided scripts. If a script fails for your system, you may manually install the requirements as below. It is assumed Python3 is already installed on the system along with the Brew package manager for MacOS and venv. The software was tested using Python 3.10.
+All requirements can be installed using the provided scripts. It is assumed Python3 and Docker are already installed on the system along with the Brew package manager for MacOS and venv. The model development software was performed using Python 3.9.6.
 
 - **OS:** Any system which supports Docker
 - **Software:**
-  - Node.js 20
   - Docker
 
 ## Installation
-This tutorial assumes you have Docker installed on your system. Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired. Scripts should be executed in the below order.
-
-### install_node_OS.sh
-
-Before installing the app, ensure the relevant version of node is installed. This can be manually installed or installed using the install_node_OS.sh for your OS.
-
+This tutorial assumes you have Docker installed on your system. Installation scripts are given in other/installation_scripts. All scripts must be made executable using the chmod +x command. All steps may be performed manually as desired. Run each file from within the containing folder in the terminal.
 
 ### setupAPI.sh
 
-This script builds the Docker contain and initalises the database with a gene list and legacy credentials of "admin" and "pass".
+This script builds the Docker container and initalises the database with a gene list and legacy credentials of "admin" and "pass".
 
 ### setupFrontend.sh
 
-This script installs the react apps requirements using NPM, builds the app and serves the build in preview mode.
+This script builds a docker image for the frontend.
 
 ## Web App Usage
 
@@ -67,11 +61,11 @@ This script starts the API and serves it on port 3000 using Gunicorn. A Redis in
 
 ### frontend.sh
 
-This script serves the react front end
+This script serves the react frontend as a build preview on port 5173. If 5173 is not available another port will be chosen.
 
 ## Model Development Usage
 
-Navigate to the model \_development folder and install the requirements.txt in your virtual environment of choice using
+Navigate to the model \_development folder and install the requirements.txt in your virtual environment of choice with Python 3.9.6 using
 
 ```bash
 pip install -r requirements.txt
@@ -82,6 +76,8 @@ Navigate to the folder containing the relevant script and run using
 ```bash
 python3 foo_bar.py
 ```
+
+All training and tuning was performed using Python 3.9.6
 
 ## Additional Folders
 
@@ -95,7 +91,7 @@ A collection of CSV and JSON files for testing and demonstrating the functionali
 
 ### other/unclassified_samples_results
 
-The results produced by the app on over 1000 previously unclassifed samples across tow sets provided by Dr Reza Rafiee.
+The results produced by the app on over 1000 previously unclassifed samples across two sets provided by Dr Reza Rafiee.
 
 ### model_development/probability_reports
 

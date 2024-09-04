@@ -73,8 +73,8 @@ const Help = () => {
                 The Immune Landscape of Cancer
               </QueensLink>
               . In addition, a 7th subgroup is defined by Dr Rafiee for samples
-              which fall between subgroups. Full class names are listed below.
-              More details about the characterists along with therapeutic
+              which fall between subgroups. Full sungroup names are listed
+              below. More details about the characterists along with therapeutic
               inights can be found in the linked paper. The tool also provides
               useful visualisation tools for the data.
             </div>
@@ -174,8 +174,7 @@ const Help = () => {
             <p className="block">
               {" "}
               Visualisation of the classification by cancer type using a stacked
-              bar chart is also avaialble on the &quot;Type&quot; where type IDs
-              have been provided.
+              bar chart is also avaialble where type IDs have been provided.
             </p>
           </div>
         </div>
@@ -221,11 +220,11 @@ const Help = () => {
           <h1 className="block has-text-weight-bold	">How good is it?</h1>
           <div className="block">
             While training and evaluation of a machine learning model is a
-            complicated process, some evaluation metrics from a holdout set of
-            stratfified test data (approximately 2000 samples) are listed below
-            for your confidence in the models output. In addition, the model has
-            underwent 10 fold cross validation prior to QC thresholding and
-            final testing.
+            complex process, some summary evaluation metrics from a holdout set
+            of stratfified test data (approximately 2000 samples) are listed
+            below for your confidence in the model&apos;s output. In addition,
+            the model has underwent 10 fold cross validation prior to QC
+            thresholding and final testing.
           </div>
 
           <div className="columns is-centered">

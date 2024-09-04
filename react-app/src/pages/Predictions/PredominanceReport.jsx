@@ -13,6 +13,10 @@ import { PaginationBar } from "../../components/tables/PaginationBar";
 import Title from "../../components/other/Title";
 import SearchByID from "../../components/tables/SearchByID";
 
+/**
+ * the entire report on predominant classification
+ * @returns a component containing the predominant report
+ */
 const PredominanceReport = () => {
   // setting state for the component
   const [sorting, setSorting] = useState([]);

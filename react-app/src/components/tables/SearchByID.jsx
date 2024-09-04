@@ -3,7 +3,6 @@
  * @param {TableInstance} table - the table to be searched
  * @returns the input box
  */
-
 const SearchByID = ({ table }) => {
   return (
     <input

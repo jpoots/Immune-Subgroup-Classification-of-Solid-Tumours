@@ -13,6 +13,10 @@ import SearchAndFilter from "../../components/tables/SearchAndFilter";
 import Title from "../../components/other/Title";
 import Box from "../../components/layout/Box";
 
+/**
+ * the entire report on prediction classification
+ * @returns a component containing the prediction report
+ */
 const PredictionReport = () => {
   // setting state for the component
   const [sorting, setSorting] = useState([]);

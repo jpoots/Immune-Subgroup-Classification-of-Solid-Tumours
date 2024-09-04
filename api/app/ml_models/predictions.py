@@ -18,7 +18,7 @@ MODEL = joblib.load(MODEL_LOCATION)
 BOOTSTRAP_MODELS = joblib.load(BOOTSTRAP_LOCATION)
 
 # the classification confident prediction limit
-QC_THRESHOLD = 0.915
+QC_THRESHOLD = 0.92
 
 
 def predict(features):

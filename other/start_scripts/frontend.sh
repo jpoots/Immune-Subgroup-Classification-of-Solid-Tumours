@@ -1,5 +1,7 @@
 #!/bin/bash
 
-
+echo "MOVING LOCATION"
 cd ../../react-app
-npm run preview
+
+echo "STARTING FRONTEND ON PORT 5173"
+sudo docker run --name react-app -p 5173:5173 --rm react-app
