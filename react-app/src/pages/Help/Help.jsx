@@ -251,10 +251,6 @@ const Help = () => {
                     <td className="has-text-centered">89.0%</td>
                   </tr>
                   <tr>
-                    <td className="has-text-centered">Precision</td>
-                    <td className="has-text-centered">89.0%</td>
-                  </tr>
-                  <tr>
                     <td className="has-text-centered">Recall</td>
                     <td className="has-text-centered">93.1%</td>
                   </tr>
