@@ -125,7 +125,6 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
    */
   const handleAllDownload = () => {
     const allDownload = [];
-    console.log(results);
     results.samples.forEach((result) => {
       // initialising result dict for each result
       let resultDict = {
