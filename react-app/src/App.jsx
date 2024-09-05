@@ -25,6 +25,7 @@ function App() {
   const [tsneGraph3D, setTsneGraph3D] = useState();
   const [tsneGraphDimensions, setTsneGraphDimensions] = useState(2);
   const [confidenceGraphData, setConfidenceGraphData] = useState();
+  const [confidenceResults, setConfidenceResults] = useState();
 
   /**
    * reset function to reset whole app state on error
@@ -53,6 +54,7 @@ function App() {
                 setTsneGraphDimensions,
               ]}
               confidenceState={[confidenceGraphData, setConfidenceGraphData]}
+              confidenceResultsState={[confidenceResults, setConfidenceResults]}
               summaryState={[summary, setSummary]}
               fileNameState={[fileName, setFileName]}
               resetApp={resetApp}

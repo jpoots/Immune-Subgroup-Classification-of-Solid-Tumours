@@ -20,9 +20,11 @@ const API_URL = `${API_ROOT}/confidence`;
 
 /**
  * generates the confidence interval box plot from the results
+ * @param {[Object, function]} resultsState - array containing confidence results and its setter
+ * @param {[Object, function]} graphState - array containing confidence graph results and its setter
  * @returns - the box plotted confidence interval
  */
-const Confidence = ({ graphState }) => {
+const Confidence = ({ graphState, resultsState }) => {
   // set up state for page
   const [download, setDownload] = useState([]);
   const [title, setTitle] = useState("Confidence Interval");
@@ -33,10 +35,10 @@ const Confidence = ({ graphState }) => {
   const [openModal, setOpenModal] = useState(false);
   const results = useContext(ResultsContext)[0];
   const [graphData, setGraphData] = graphState;
+  const [confidenceResults, setConfidenceResults] = resultsState;
 
   // set up refs
   const cancelled = useRef();
-  const confidenceResults = useRef();
   const slider = useRef();
 
   // every time interval changes and on first load if graph data exists, set the disabled button appropriately
@@ -70,7 +72,8 @@ const Confidence = ({ graphState }) => {
    */
   const handleDownload = () => {
     // for each sample map
-    let toDownload = confidenceResults.current.map((sample) => ({
+    console.log(confidenceResults);
+    let toDownload = confidenceResults.map((sample) => ({
       sampleID: sample.sampleID,
       max: sample.max,
       upper: sample.upper,
@@ -174,7 +177,7 @@ const Confidence = ({ graphState }) => {
           metadata: { interval: interval },
         })
       );
-      confidenceResults.current = confidenceAPIResults.results;
+      setConfidenceResults(confidenceAPIResults.results);
 
       // disables analyse button
       setDisabled(true);

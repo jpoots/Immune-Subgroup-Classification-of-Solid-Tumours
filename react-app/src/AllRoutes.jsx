@@ -18,6 +18,7 @@ import AuthOutlet from "@auth-kit/react-router/AuthOutlet";
  * contains all the routes for the SPA
  * @param {[Object, function]} tsneState - array containing tsneGraphData and its setter
  * @param {[Object, function]} confidenceState - array containing confidenceGraphData and its setter
+ * @param {[Object, function]} confidenceResultsState - array containing confidenceGrap results and its setter
  * @param {[Object, function]} summaryState - array containing summary object and its setter
  * @param {[string, function]} fileNameState - array containing fileName and its setter
  * @returns - the routes object
@@ -27,6 +28,7 @@ const AllRoutes = ({
   tsneGraph3DState,
   tsneGraphDimensions,
   confidenceState,
+  confidenceResultsState,
   summaryState,
   fileNameState,
   resetApp,
@@ -36,6 +38,7 @@ const AllRoutes = ({
   const [tsneGraph3D, setTsneGraph3D] = tsneGraph3DState;
   const [tsneDimensions, setTsneDimensions] = tsneGraphDimensions;
   const [confidenceGraphData, setConfidenceGraphData] = confidenceState;
+  const [confidenceResults, setConfidenceResults] = confidenceResultsState;
   const [summary, setSummary] = summaryState;
   const [fileName, setFileName] = fileNameState;
 
@@ -61,6 +64,7 @@ const AllRoutes = ({
           element={
             <Confidence
               graphState={[confidenceGraphData, setConfidenceGraphData]}
+              resultsState={[confidenceResults, setConfidenceResults]}
             />
           }
         />
