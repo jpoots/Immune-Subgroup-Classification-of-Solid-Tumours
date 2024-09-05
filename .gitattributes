@@ -1,3 +1,4 @@
 model_development/final_training_evaluation/trained_models/mice.pkl filter=lfs diff=lfs merge=lfs -text
 api/app/mice.pkl filter=lfs diff=lfs merge=lfs -text
 other/test_data/web_app/invalid/too_large.csv filter=lfs diff=lfs merge=lfs -text
+api/app/ml_models/mice.pkl filter=lfs diff=lfs merge=lfs -text

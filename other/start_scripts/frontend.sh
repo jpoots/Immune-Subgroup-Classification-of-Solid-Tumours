@@ -4,4 +4,4 @@ echo "MOVING LOCATION"
 cd ../../react-app
 
 echo "STARTING FRONTEND ON PORT 5173"
-sudo docker run --name react-app -p 5173:5173 --rm react-app
+docker run --name react-app -p 5173:5173 --rm react-app

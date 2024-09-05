@@ -36,7 +36,7 @@ This script cross validates models and valdiates on a train test split
 """
 
 # the QC threshold to use in validation evaluation
-QC_THRESHOLD = 0.915
+QC_THRESHOLD = 0.92
 
 # define sample strategy
 UNDER_SAMPLE = {

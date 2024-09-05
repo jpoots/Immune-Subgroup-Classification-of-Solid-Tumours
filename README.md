@@ -34,7 +34,7 @@ Full discussion of the function of each file is contained in the accompanying re
 
 The project has been tested for the following configurations. Additional configurations may function successfully but the developer does not guarentee this.
 
-All requirements can be installed using the provided scripts. It is assumed Python3 and Docker are already installed on the system along with the Brew package manager for MacOS and venv. The model development software was performed using Python 3.9.6.
+All requirements can be installed using the provided scripts. It is assumed Python3 and Docker are already installed on the system. Docker should configured to accept commands as non-root. The model development software was performed using Python 3.9.6.
 
 - **OS:** Any system which supports Docker
 - **Software:**
