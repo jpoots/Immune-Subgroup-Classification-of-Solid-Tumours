@@ -66,39 +66,43 @@ def parse_samples():
 
     gene_list = get_gene_list()
 
-    # parse data
-    data = parse_csv(filepath, delimiter, gene_list)
+    try:
+        # parse data
+        data = parse_csv(filepath, delimiter, gene_list)
 
-    # strucutre data for ease of surfing
-    features = pd.DataFrame(data["features"], columns=data["gene_names"])
-    features = features.T.to_dict()
+        # strucutre data for ease of surfing
+        features = pd.DataFrame(data["features"], columns=data["gene_names"])
+        features = features.T.to_dict()
 
-    # structure for return
-    returnData = []
-    for sample_id, feature_index, type_id in zip(
-        data["ids"], features, data["type_ids"]
-    ):
-        gene_values = list(features[feature_index].values())
-        returnData.append(
-            {
-                "sampleID": sample_id,
-                "genes": gene_values,
-                "typeid": type_id,
-            }
-        )
-
-    return (
-        jsonify(
-            {
-                "data": {
-                    "samples": returnData,
-                    "invalid": data["invalid"],
-                    "geneNames": data["gene_names"],
+        # structure for return
+        returnData = []
+        for sample_id, feature_index, type_id in zip(
+            data["ids"], features, data["type_ids"]
+        ):
+            gene_values = list(features[feature_index].values())
+            returnData.append(
+                {
+                    "sampleID": sample_id,
+                    "genes": gene_values,
+                    "typeid": type_id,
                 }
-            }
-        ),
-        200,
-    )
+            )
+
+        return (
+            jsonify(
+                {
+                    "data": {
+                        "samples": returnData,
+                        "invalid": data["invalid"],
+                        "geneNames": data["gene_names"],
+                    }
+                }
+            ),
+            200,
+        )
+    except Exception as e:
+        os.remove(filepath)
+        raise e
 
 
 @limiter.limit(LOW_LIMIT, error_message=LOW_LIMIT_MESSAGE)
