@@ -103,9 +103,7 @@ def train_bootstraps(x_train, y_train):
         invalid_sample = True
         while invalid_sample:
             try:
-                x_boot, y_boot = resample(
-                    x_train, y_train, stratify=y_train, random_state=RANDOM_STATE
-                )
+                x_boot, y_boot = resample(x_train, y_train, stratify=y_train)
                 pipe.fit(x_boot, y_boot)
                 invalid_sample = False
             except:
