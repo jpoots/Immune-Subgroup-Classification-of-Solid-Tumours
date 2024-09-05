@@ -13,6 +13,7 @@ const GraphTitleSetter = ({ setTitle, title }) => {
         placeholder="Title"
         value={title}
         className="input queens-textfield"
+        name="titleSetter"
         onChange={(e) => setTitle(e.target.value)}
       />
     </div>

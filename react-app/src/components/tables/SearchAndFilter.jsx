@@ -14,7 +14,7 @@ const SearchAndFilter = ({ table }) => {
       <div className="column is-half">
         <div className="select is-danger">
           <select
-            name=""
+            name="filterSelect"
             onChange={(e) => {
               table.getColumn("prediction").setFilterValue(e.target.value);
             }}

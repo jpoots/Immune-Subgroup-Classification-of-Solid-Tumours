@@ -234,7 +234,7 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
         </div>
         <div className="file has-name">
           <label className="file-label">
-            <input type="hidden" name="MAX_FILE_SIZE" value="1" />
+            <input type="hidden" name="MAX_FILE_SIZE" id="file" value="1" />
 
             <input
               type="file"
@@ -274,7 +274,10 @@ const Upload = ({ summary, setSummary, filename, setFileName, resetApp }) => {
         </div>
         <div className="block is-flex is-align-content-center">
           <div className="select is-danger">
-            <select onChange={(e) => setDelimiter(e.target.value)}>
+            <select
+              onChange={(e) => setDelimiter(e.target.value)}
+              id="delimiter"
+            >
               <option default value="">
                 Select Delimiter
               </option>

@@ -9,13 +9,14 @@ const NumEntriesSelector = ({ table }) => {
   return (
     <div className="is-flex">
       <div>
-        <label className="mr-2"> Per page:</label>
+        <span className="mr-2"> Per page:</span>
       </div>
 
       <div className="block mb-5 select is-danger is-small is-rounded ">
         <select
           onChange={(e) => table.setPageSize(e.target.value)}
           defaultValue={pageSize}
+          name="entriesSelector"
         >
           <option value="5">5</option>
           <option value="10">10</option>

@@ -7,6 +7,7 @@ const SearchByID = ({ table }) => {
   return (
     <input
       type="text"
+      name="idSearch"
       className="input queens-textfield"
       onChange={(e) => {
         let column = table.getColumn("sampleID");

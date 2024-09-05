@@ -44,6 +44,7 @@ export function PaginationBar({ table, download, handleDownload }) {
             max={table.getPageCount()}
             value={table.getState().pagination.pageIndex + 1}
             className="queens-textfield mr-5"
+            name="paginationInput"
           />
         </li>
 
