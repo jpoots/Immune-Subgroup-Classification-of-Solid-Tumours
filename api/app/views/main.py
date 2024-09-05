@@ -54,6 +54,8 @@ def parse_samples():
             },
             ]
         }
+    Raises:
+        Exception: Any error caused in the processing of the request
     """
 
     # validate csv
