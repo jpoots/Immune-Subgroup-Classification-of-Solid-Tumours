@@ -44,6 +44,6 @@ responses:
     description: Task failed due to an issue with client input
   500:
     description: An interval server error has occured
-summary: Get analysis results
+summary: Parse CSV file for 440 genes and types
 tags:
   - Parse Samples
