@@ -4,6 +4,6 @@ echo "MOVING LOCATION...."
 cd ../../react-app
 
 echo "BUILDING IMAGE..."
-docker build -t react-app .
+sudo docker build -t react-app .
 
 echo "SUCCESS"

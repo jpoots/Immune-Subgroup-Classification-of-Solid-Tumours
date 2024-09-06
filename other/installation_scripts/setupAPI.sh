@@ -4,5 +4,5 @@ echo "moving"
 cd ../../api
 
 echo "BUILDING CONTAINERS....."
-docker compose build
+sudo docker compose build
 echo "DONE"
