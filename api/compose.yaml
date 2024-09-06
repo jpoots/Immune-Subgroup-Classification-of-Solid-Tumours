@@ -40,7 +40,7 @@ services:
     restart: always
     healthcheck:
       test: [ "CMD-SHELL", "mysql -u $$MYSQL_USER -p$$MYSQL_PASSWORD -e USE $$MYSQL_DATABASE;" ]
-      interval: 5s
+      interval: 30s
       timeout: 5s
       retries: 5
 
