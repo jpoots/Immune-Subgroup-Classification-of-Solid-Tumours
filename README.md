@@ -10,7 +10,7 @@ ICST is a machine learning based web app for immune subgroup classification of s
 
 The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="http://analytics.eeecs.qub.ac.uk:8080">API </a> may be accessed at the linked location when on a wired connection to the Queen's University network. Instructions for local usage are given below.
 
-> **Note:** This repository contains large file. Make sure to use git lfs install, git lfs fetch and git lfs pull with git lfs installed to the system to pull large files.
+> **Note:** The trained models and imputer were deemed too large to store in the repository but can be trained locally and placed in the appropriate locations indicated by placeholder files.
 
 ## Table of Contents
 
