@@ -22,7 +22,7 @@ The <a href="http://analytics.eeecs.qub.ac.uk/icst">web app</a> and <a href="htt
 6. [Additional Folders](#Additional-Folders)
 7. [Contact](#Contact)
 
-## Description
+## Description
 
 Pioneering cancer research has identified six immune subgroups, clustered on tumour gene data including RNA-Seq gene expression using unsupervised machine learning clustering on over 10,000 samples taken from The Cancer Genome Atlas (TCGA) across 33 cancer types in the paper <a href="https://pubmed.ncbi.nlm.nih.gov/29628290/"> The Immune Landscape of Cancer</a>.
 
