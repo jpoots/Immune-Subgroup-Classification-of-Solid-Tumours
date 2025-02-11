@@ -238,8 +238,10 @@ def predict_with_qc_and_predom(pipe, threshold, x, y):
     for index, prob in enumerate(prediction_probs):
         max_prob = np.amax(prob)
         if max_prob < threshold:
+            second_highest = np.sort(prob)[-2]
+            sum_probs = max_prob + second_highest
 
-            if (max_prob + np.sort(prob)[-2]) > threshold and max_prob > 0.5:
+            if (sum_probs) >= threshold and max_prob > 0.5:
                 predom_indicies.append(index)
             else:
                 nc_indicies.append(index)

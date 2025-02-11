@@ -35,17 +35,17 @@ from utils import (
 
 # models to test
 MODELS = [
-    HistGradientBoostingClassifier(random_state=RANDOM_STATE),
+    # HistGradientBoostingClassifier(random_state=RANDOM_STATE),
     MLPClassifier(random_state=RANDOM_STATE),
     svm.SVC(random_state=RANDOM_STATE),
     RandomForestClassifier(n_jobs=-1, random_state=RANDOM_STATE),
-    KNeighborsClassifier(n_jobs=-1),
-    GaussianNB(),
+    # KNeighborsClassifier(n_jobs=-1),
     LogisticRegression(n_jobs=-1, random_state=RANDOM_STATE),
     XGBClassifier(n_jobs=-1, random_state=RANDOM_STATE),
+    GaussianNB(),
 ]
 # number of columns on confusion matrix
-N_COLS = 4
+N_COLS = 3
 
 # number of cross validation splits
 CV = 10
@@ -122,8 +122,15 @@ def test_models(
         pipe.fit(x_train_val, y_train_val)
         predictions = pipe.predict(x_test_val)
 
+        predictions_for_matrix = []
+        predictions_for_matrix = [f"C{prediction + 1}" for prediction in predictions]
+        labels_for_matrix = []
+        labels_for_matrix = [f"C{prediction + 1}" for prediction in y_test_val]
+
         # generate confusion matrix
-        ConfusionMatrixDisplay.from_predictions(y_test_val, predictions, ax=ax)
+        ConfusionMatrixDisplay.from_predictions(
+            labels_for_matrix, predictions_for_matrix, ax=ax, cmap="Blues"
+        )
         ax.set_title(model.__class__.__name__)
 
 

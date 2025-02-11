@@ -46,7 +46,7 @@ def predict(features):
         # if below thresh
         if max_prob < QC_THRESHOLD:
             # if top 2 probs > thresh and max_prob less than random guess mark as predom
-            if (max_prob + np.sort(prob)[-2]) > QC_THRESHOLD and max_prob > 0.5:
+            if (max_prob + np.sort(prob)[-2]) >= QC_THRESHOLD and max_prob > 0.5:
                 predom_indicies.append(index)
             else:
                 # mark as nc
@@ -73,11 +73,12 @@ def predict(features):
     return filtered_predictions, prediction_probs.tolist(), num_nc, num_predom
 
 
-def confidence_intervals(features, interval):
+def confidence_intervals(features, interval, prediction):
     """Calculates prediction confidence intervals given an interval and feature set
     Args:
         features: A 2D numpy array or list of the 440 relevant gene expression values FPKM normalised
         interval: the percentage confidence interval (e.g 95)
+        prediction: the probability to predict
 
     Returns:
         intervals: a list as [min, lower percentile, median, upper percentile, max]
@@ -89,6 +90,7 @@ def confidence_intervals(features, interval):
     lower = bound / 2
 
     all_classified = []
+
     for model in BOOTSTRAP_MODELS:
         # predict
         all_probs = model.predict_proba(features)
@@ -96,7 +98,7 @@ def confidence_intervals(features, interval):
         # extract max prob for each prediction
         classified_probs = []
         for probs in all_probs:
-            classified_prob = np.amax(probs)
+            classified_prob = probs[prediction - 1]
             classified_probs.append(classified_prob)
         all_classified.append(classified_probs)
 

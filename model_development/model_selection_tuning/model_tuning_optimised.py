@@ -76,7 +76,7 @@ MODELS = [
         ),
         "params": {
             "model__n_estimators": [100, 500, 1000, 2000],
-            "model__max_features": ["sqrt", "log2", None, 100, 220],
+            "model__max_features": ["sqrt", "log2", None, 100, 200],
             "model__max_depth": [10, 20, 50, 100, None],
         },
     },
