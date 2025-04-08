@@ -1,5 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import (
+    HistGradientBoostingClassifier,
+    RandomForestClassifier,
+)
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_validate
 from sklearn.neural_network import MLPClassifier
@@ -9,6 +15,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBClassifier
 from imblearn.under_sampling import RandomUnderSampler
+from sklearn.linear_model import LogisticRegression
+
 
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
@@ -36,68 +44,88 @@ This script cross validates models and valdiates on a train test split
 """
 
 # the QC threshold to use in validation evaluation
-QC_THRESHOLD = 0.92
-
-# define sample strategy
-UNDER_SAMPLE = {
-    0: 1000,
-    1: 1000,
-    2: 1000,
-}
-
-OVER_SAMPLE = {
-    3: 1000,
-    4: 1000,
-    5: 1000,
-}
-
-# set up samples
-RUS = RandomUnderSampler(sampling_strategy=UNDER_SAMPLE, random_state=RANDOM_STATE)
-SMT = SMOTE(sampling_strategy=OVER_SAMPLE, random_state=RANDOM_STATE)
+QC_THRESHOLD = 0.0
 
 # set up scaler
 SCALER = MinMaxScaler()
 
 # define candidate pipelines
 
-# XGBoost tuned on accuracy
-XGBOOST = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            XGBClassifier(
-                learning_rate=0.3,
-                max_depth=3,
-                min_child_weight=None,
-                n_estimators=500,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
+# set up samplers and scaler
+RUS_1000 = RandomUnderSampler(
+    sampling_strategy={
+        0: 1000,
+        1: 1000,
+        2: 1000,
+    },
+    random_state=RANDOM_STATE,
+)
+SMT_1000 = SMOTE(
+    sampling_strategy={
+        3: 1000,
+        4: 1000,
+        5: 1000,
+    },
+    random_state=RANDOM_STATE,
 )
 
-# Histogram gradient boosting tuned on accuracy
-GB_AC = ImbPipeline(
-    steps=[
-        ("rus", RUS),
-        ("smt", SMT),
-        ("scaler", SCALER),
-        (
-            "model",
-            HistGradientBoostingClassifier(
-                max_iter=500,
-                learning_rate=0.1,
-                max_depth=25,
-                random_state=RANDOM_STATE,
-            ),
-        ),
-    ]
+# set up samplers and scaler
+RUS_750 = RandomUnderSampler(
+    sampling_strategy={
+        0: 750,
+        1: 750,
+        2: 750,
+        3: 750,
+    },
+    random_state=RANDOM_STATE,
 )
+SMT_750 = SMOTE(
+    sampling_strategy={
+        4: 750,
+        5: 750,
+    },
+    random_state=RANDOM_STATE,
+)
+SCALER = MinMaxScaler()
 
-MODELS = [GB_AC, XGBOOST]
+MODELS = [
+    ImbPipeline(
+        steps=[
+            ("rus", RUS_1000),
+            ("smt", SMT_1000),
+            ("scaler", SCALER),
+            (
+                "model",
+                XGBClassifier(
+                    random_state=RANDOM_STATE,
+                    max_depth=3,
+                    min_child_weight=None,
+                    n_estimators=500,
+                    learning_rate=0.3,
+                    nthread=1,
+                ),
+            ),
+        ]
+    ),
+    ImbPipeline(
+        steps=[
+            ("rus", RUS_750),
+            ("smt", SMT_750),
+            ("scaler", SCALER),
+            (
+                "model",
+                RandomForestClassifier(
+                    random_state=RANDOM_STATE,
+                    max_depth=50,
+                    max_features="sqrt",
+                    n_estimators=2000,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
+    ),
+]
+
 
 # the number of cross validation splits to use
 CV = 10

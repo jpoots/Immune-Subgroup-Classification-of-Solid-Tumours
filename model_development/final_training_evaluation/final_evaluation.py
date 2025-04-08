@@ -50,13 +50,15 @@ def main():
     x = [(sample_id, features) for sample_id, features in zip(idx, x)]
 
     # get test set labelled
-    _x_train, x_test_labelled, _y_train, y_test_labelled = train_test_split(
+    __x_train, x_test_labelled, __y_train, y_test_labelled = train_test_split(
         x,
         y,
         test_size=TEST_SIZE,
         stratify=[label for _id, label in y],
         random_state=RANDOM_STATE,
     )
+    print(len(y_test_labelled))
+    print(len(_y_train))
 
     # load model
     loaded_model = joblib.load(MODEL_FILE_NAME)
@@ -133,12 +135,15 @@ def extract_nc_probs(pipe, threshold, x):
 
     # get nc ids
     nc_ids = [x[i][0] for i in nc_indicies]
+    actual_nc = [nc_id[-1] for nc_id in nc_ids]
     predom_ids = [x[i][0] for i in predom_indicies]
 
     # build dataframe and write to file
     nc_df = pd.DataFrame(data=nc_probabilities, index=nc_ids, columns=["max_prob"])
     nc_df.index.name = "sampleID"
     nc_df.insert(loc=1, column="prediction", value=nc_predictions)
+    nc_df.insert(loc=2, column="actual", value=actual_nc)
+
     nc_df.to_csv(f"{PROBS_FOLDER_NAME}/nc.csv")
 
     # build dataframe and write to file
@@ -178,6 +183,7 @@ def extract_missmatch_probs(pipe, x, y):
     # get data from mismatched indicies
     mismatched_probs = [max_probs[i] for i in mismatched_indicies]
     mismatched_ids = [y[i][0] for i in mismatched_indicies]
+    actual_missmatched = [mismatched_id[-1] for mismatched_id in mismatched_ids]
     mismatched_predictions = predictions[mismatched_indicies]
     mismatched_predictions = [pred + 1 for pred in mismatched_predictions]
 
@@ -185,6 +191,7 @@ def extract_missmatch_probs(pipe, x, y):
     df = pd.DataFrame(data=mismatched_probs, index=mismatched_ids, columns=["max_prob"])
     df.index.name = "sampleID"
     df.insert(loc=1, column="prediction", value=mismatched_predictions)
+    df.insert(loc=2, column="actual", value=actual_missmatched)
     df.to_csv(f"{PROBS_FOLDER_NAME}/mismatch.csv")
 
 
@@ -200,7 +207,11 @@ def evaluate_performance(true, predictions, num_removed, num_predom):
     print(f"Predominant: {num_predom}")
     print(f"QC Threshold: {QC_THRESHOLD}")
     analyse_prediction_results(predictions, true)
-    cf = ConfusionMatrixDisplay.from_predictions(true, predictions)
+
+    predictions = [f"C{pred + 1}" for pred in predictions]
+    true = [f"C{true + 1}" for true in true]
+
+    cf = ConfusionMatrixDisplay.from_predictions(true, predictions, cmap="Blues")
 
 
 if __name__ == "__main__":
