@@ -46,7 +46,7 @@ def predict(features):
         # if below thresh
         if max_prob < QC_THRESHOLD:
             # if top 2 probs > thresh and max_prob less than random guess mark as predom
-            if (max_prob + np.sort(prob)[-2]) > QC_THRESHOLD and max_prob > 0.5:
+            if (max_prob + np.sort(prob)[-2]) >= QC_THRESHOLD and max_prob > 0.5:
                 predom_indicies.append(index)
             else:
                 # mark as nc
