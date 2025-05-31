@@ -238,8 +238,7 @@ def predict_with_qc_and_predom(pipe, threshold, x, y):
     for index, prob in enumerate(prediction_probs):
         max_prob = np.amax(prob)
         if max_prob < threshold:
-
-            if (max_prob + np.sort(prob)[-2]) > threshold and max_prob > 0.5:
+            if (max_prob + np.sort(prob)[-2]) >= threshold and max_prob > 0.5:
                 predom_indicies.append(index)
             else:
                 nc_indicies.append(index)
@@ -268,7 +267,6 @@ def tune_models(x_train, y_train, models):
 
         # try except to prevent long training runs failing because of an issue
         try:
-
             # seperate pipeline and parameter grid
             pipe = model["model"]
             params = model["params"]
